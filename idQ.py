@@ -106,32 +106,8 @@ def distances2U(Q):
     
     return distances
 
-def check_necessary(Q):
-    # Check if Q has all-zero rows and remove them
-    row_sums = np.sum(Q, axis=1)
-    if np.any(row_sums == 0):
-        Q = Q[row_sums != 0]  # Keep only rows that are not all zeros
-        print("All-zero rows have been removed from Q.")
 
-    # Check if Q has all-zero or all-one columns
-    for k in range(Q.shape[1]):
-        if np.all(Q[:, k] == 0):
-            Q_bar = Q.copy()
-            Q_bar[:, k] = 1  # replace the k-th column with all ones
-            return False, "Q is not identifiable. Q contains a zero column.", Q_bar
-        if np.all(Q[:, k] == 1):
-            Q_bar = Q.copy()
-            Q_bar[:, k] = 0  # replace the k-th column with all zeros
-            return False, "Q is not identifiable. Q contains a one column.", Q_bar
 
-    # Check if Q has identical rows
-    if np.unique(Q.view([('', Q.dtype)]*Q.shape[1]), return_index=True)[1].size != Q.shape[0]:
-        return False, "Please remove identical rows of Q.", None
-
-    return True, "Q passed necessary conditions.", None
-    
-
-    
 def preserve_partial_order(Q, Q_bar, indices1, indices2):
     for index1 in indices1:
         for index2 in indices2:
@@ -160,16 +136,31 @@ def preserve_partial_order(Q, Q_bar, indices1, indices2):
     return True
 
 def local_identifiability(Q, kappa, uniout=False, check_level=1):
-    # Check if Q is valid
+    # Check if Q is a binary matrix
     if not isinstance(Q, np.ndarray) or not np.all((Q == 0) | (Q == 1)):
         raise Exception("Q must be a binary matrix.")
     
-    result, message, Q_bar = check_necessary(Q)
+    # Check if Q has all-zero rows and remove them
+    row_sums = np.sum(Q, axis=1)
+    if np.any(row_sums == 0):
+        Q = Q[row_sums != 0]  # Keep only rows that are not all zeros
+        print("All-zero rows have been removed from Q.")
 
-    
-    if not result:
-        print(message)
-        return Q_bar
+    # Check if Q has all-zero or all-one columns
+    for k in range(Q.shape[1]):
+        if np.all(Q[:, k] == 0):
+            Q_bar = Q.copy()
+            Q_bar[:, k] = 1  # replace the k-th column with all ones
+            return "Q is trivially not identifiable. Q contains a zero column.", [Q_bar]
+        if np.all(Q[:, k] == 1):
+            Q_bar = Q.copy()
+            Q_bar[:, k] = 0  # replace the k-th column with all zeros
+            return "Q is trivially not identifiable. Q contains a one column.", [Q_bar]
+
+    # Check if Q has identical rows
+    if np.unique(Q.view([('', Q.dtype)]*Q.shape[1]), return_index=True)[1].size != Q.shape[0]:
+        print("Please remove identical rows of Q.")
+        return [], []
     
     # Get the number of rows (J) and columns (K) of Q
     J, K = Q.shape
@@ -182,7 +173,7 @@ def local_identifiability(Q, kappa, uniout=False, check_level=1):
     
     if kappa > len(replaceable_rows):
         print("Q is kappa-locally identifiable because you can't replace kappa many of the rows.")
-        return True
+        return "Q is kappa-locally identifiable because you can't replace kappa many of the rows."
     
     # Calculate the distance to the universal set (d(Q[j,])) for each replaceable row
     distances = distances2U(Q)
@@ -265,13 +256,10 @@ def local_identifiability(Q, kappa, uniout=False, check_level=1):
 
         Q_bars = Q_bars_uniq
 
-    
-    # Check if Q_bars is empty
-    if not Q_bars:
-        return f"Q is {kappa}-locally identifiable."
-    
     if check_level == 1:
-        return Q_bars
+        if not Q_bars:
+            return f"Q is {kappa}-locally identifiable.", []
+        return "Q may not be identifiable, the possible Q_bars are: \n", Q_bars
     
     if check_level > 1:
         if check_level >= J:
@@ -290,4 +278,7 @@ def local_identifiability(Q, kappa, uniout=False, check_level=1):
             if preserve_order:
                 filtered_Q_bars.append(Q_bar)
                 
-    return filtered_Q_bars
+        if not filtered_Q_bars:
+            return f"Q is {kappa}-locally identifiable.", []    
+
+        return "Q may not be identifiable, the possible Q_bars are: \n", filtered_Q_bars
