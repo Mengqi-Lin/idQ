@@ -113,12 +113,12 @@ def topo_order(matrix):
     vectors = [tuple(row) for row in matrix]
 
     # Sort the row vectors using the custom comparison function
-    sorted_vectors = sorted(vectors, key=lambda x: sum((np.all(x <= y) and np.any(x < y)) for y in vectors), reverse=False)
+    sorted_vectors = sorted(vectors, key=lambda x: sum(is_strictly_less_than(x, y) for y in vectors), reverse=False)
 
     # Yield the vectors in topologically sorted order. Can change to return sorted_vectors.
     for vector in sorted_vectors:
         yield vector
-
+        
         
 def distances2U(Q, draw = 0):
     # Create a directed graph
