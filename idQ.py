@@ -173,23 +173,29 @@ def preserve_partial_order(Q, Q_bar, indices1, indices2):
         for index2 in indices2:
             q1, q2 = Q[index1], Q[index2]
             q1_bar, q2_bar = Q_bar[index1], Q_bar[index2]
+            
+            # Precompute these values
+            q1_leq_q2 = np.all(q1 <= q2)
+            q1_geq_q2 = np.all(q1 >= q2)
+            q1_bar_leq_q2_bar = np.all(q1_bar <= q2_bar)
+            q1_bar_geq_q2_bar = np.all(q1_bar >= q2_bar)
 
             # Check if q1 is parallel to q2
-            if not (np.all(q1 <= q2) or np.all(q1 >= q2)):
+            if not (q1_leq_q2 or q1_geq_q2):
                 # If q1 is parallel to q2, then q1_bar must be parallel to q2_bar
-                if not (np.all(q1_bar <= q2_bar) or np.all(q1_bar >= q2_bar)):
+                if not (q1_bar_leq_q2_bar or q1_bar_geq_q2_bar):
                     return False
 
             # Check if q1 is strictly less than q2
-            if np.all(q1 <= q2) and np.any(q1 < q2):
+            if q1_leq_q2 and np.any(q1 < q2):
                 # If q1 is strictly less than q2, then q1_bar must be strictly less than q2_bar or parallel to q2_bar
-                if not (np.all(q1_bar <= q2_bar) and np.any(q1_bar < q2_bar)) and not (np.all(q1_bar <= q2_bar) or np.all(q1_bar >= q2_bar)):
+                if not ((q1_bar_leq_q2_bar and np.any(q1_bar < q2_bar)) or q1_bar_leq_q2_bar or q1_bar_geq_q2_bar):
                     return False
 
             # Check if q1 is strictly greater than q2
             if np.all(q2 <= q1) and np.any(q2 < q1):
                 # If q1 is strictly greater than q2, then q1_bar must be strictly greater than q2_bar or parallel to q2_bar
-                if not (np.all(q2_bar <= q1_bar) and np.any(q2_bar < q1_bar)) and not (np.all(q1_bar <= q2_bar) or np.all(q1_bar >= q2_bar)):
+                if not ((np.all(q2_bar <= q1_bar) and np.any(q2_bar < q1_bar)) or q1_bar_leq_q2_bar or q1_bar_geq_q2_bar):
                     return False
 
     # If none of the conditions are violated for any of the indices, return True
@@ -326,7 +332,7 @@ def global_identifiability(Q, uniout=True, check_level=3):
         for q_bar in q_bars:
             Q_temp[index, :] = q_bar  # Replace the row in Q_temp
             # Check if the order is preserved after replacement
-            if preserve_partial_order(Q, Q_temp, set(irreplaceable_rows), [index]):
+            if preserve_partial_order(Q, Q_temp, irreplaceable_rows, index):
                 valid_q_bars.append(q_bar)  # If the order is preserved, keep this q_bar
 
         q_bars = valid_q_bars  # Replace the original q_bars with the valid ones
@@ -496,7 +502,7 @@ def incomplete_global_identifiability(Q, uniout=True, check_level=3):
         for q_bar in q_bars:
             Q_temp[index, :] = q_bar  # Replace the row in Q_temp
             # Check if the order is preserved after replacement
-            if preserve_partial_order(Q, Q_temp, set(irreplaceable_rows), [index]):
+            if preserve_partial_order(Q, Q_temp, irreplaceable_rows, index):
                 valid_q_bars.append(q_bar)  # If the order is preserved, keep this q_bar
 
         q_bars = valid_q_bars  # Replace the original q_bars with the valid ones
@@ -675,7 +681,7 @@ def local_identifiability(Q, kappa, uniout=True, check_level=1):
                 
                 fixed_rows = (set(replaceable_rows) - set(replacement_indices)) | set(irreplaceable_rows)
                 # Check if the order is preserved after replacement
-                if preserve_partial_order(Q, Q_temp, fixed_rows, [index]):
+                if preserve_partial_order(Q, Q_temp, [fixed_rows], [index]):
                     valid_q_bars.append(q_bar)  # If the order is preserved, keep this q_bar
 
             q_bars = valid_q_bars  # Replace the original q_bars with the valid ones
