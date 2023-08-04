@@ -9,6 +9,7 @@ from expr_function import random_generate_Q, test_local_identifiability, generat
 import sys
 import itertools
 import csv
+from multiprocessing import Process, Manager
 
 
 if __name__ == "__main__":
@@ -28,20 +29,50 @@ if __name__ == "__main__":
     print(f"K: {K}")
     print(f"check_level: {C}")
 
+
     try:
         with open(f'../data/enumerate_global_idQ_J{J}_K{K}_C{C}.csv', 'w', newline='') as f, \
-             open(f'../data/incomplete_global_runtime_J{J}_K{K}_C{C}.csv', 'w', newline='') as runtime_file:
+             open(f'../data/incomplete_global/all_J{J}_K{K}_C{C}.csv', 'w', newline='') as allinfo_file:
             writer = csv.writer(f)
-            runtime_writer = csv.writer(runtime_file)
+            allinfo_writer = csv.writer(allinfo_file)
             for Q in generate_canonical_matrices(J, K):
                 start_time = time.time()
-                Id,_ = incomplete_global_identifiability(Q = Q, uniout=True, check_level=C)
+                
+                # Create a Manager object to share variables between processes
+                manager = Manager()
+                return_dict = manager.dict()
+
+                # Define a new function that calls incomplete_global_identifiability and stores the result in the shared dictionary
+                def func(Q, return_dict):
+                    return_dict['result'] = incomplete_global_identifiability(Q = Q, uniout=True, check_level=C)
+
+                # Create a new Process object to run func
+                p = Process(target=func, args=(Q, return_dict))
+
+                # Start the process
+                p.start()
+
+                # Wait for 2 minutes or until the process finishes
+                p.join(120)
+
+                # If thread is still active
+                if p.is_alive():
+                    print("Function call exceeded 2 minute time limit.")
+                    p.terminate()
+                    p.join()
+                    end_time = time.time()
+                    runtime = end_time - start_time
+                    allinfo_writer.writerow([Q.flatten(), -1, runtime])
+                    continue
+                
+                Id,_ = return_dict['result']
                 end_time = time.time()
                 runtime = end_time - start_time
-                runtime_writer.writerow([Id, runtime])
+                allinfo_writer.writerow([Q.flatten(), Id, runtime])
                 if Id & (not check_for_identity(Q)):      
                     print(Q)
                     writer.writerow(Q.flatten())
+
                     
     except Exception as e:
         print(f"An error occurred: {str(e)}")

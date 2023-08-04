@@ -535,7 +535,7 @@ def incomplete_global_identifiability(Q, uniout=True, check_level=3):
 
     if check_level == 1:
         print("Q might not be identifiable for check_level = 1, the possible Q_bars are: \n")
-        return 0, [Q_bars]
+        return 0, [first_Q_bar]
     
     if check_level > 1:
         if check_level > max(distances):
