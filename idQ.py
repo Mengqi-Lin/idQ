@@ -57,6 +57,16 @@ def get_D_l(Q, l):
     
     return D_l
 
+def get_D(Q, l):
+    # Get the total number of rows
+    J = Q.shape[0]
+    D = set()
+    for l in range(1, J+1):
+        D_l = get_D(Q, l)
+        D.add(D_l)
+    
+    return D
+
 
 def generate_DAG(Q):
     # Create a directed graph
@@ -221,6 +231,21 @@ def check_for_identity(Q):
 
     return False
 
+
+def T_mat(Q):
+    J, K = Q.shape
+    pp = [seq for seq in itertools.product([0, 1], repeat=K)]
+    TT = []
+    TT.append([1]*(2**K))
+    for l in range(1, J+1):
+        Dl = get_D_l(Q, l)
+        for item in Dl:
+            TT.append((list(is_less_equal_than(item, p) for p in pp)))
+    return np.array(TT)
+
+def column_rank_T_mat(Q):
+    TT = T_mat(Q)
+    return(np.linalg.matrix_rank(TT))
 
 
 def global_identifiability(Q, uniout=True, check_level=3):
