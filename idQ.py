@@ -175,21 +175,21 @@ def preserve_partial_order(Q, Q_bar, indices1, indices2):
             q1_bar, q2_bar = Q_bar[index1], Q_bar[index2]
 
             # Check if q1 is parallel to q2
-            if is_parallel(q1, q2):
+            if not (np.all(q1 <= q2) or np.all(q1 >= q2)):
                 # If q1 is parallel to q2, then q1_bar must be parallel to q2_bar
-                if not is_parallel(q1_bar, q2_bar):
+                if not (np.all(q1_bar <= q2_bar) or np.all(q1_bar >= q2_bar)):
                     return False
 
             # Check if q1 is strictly less than q2
-            if is_strictly_less_than(q1, q2):
+            if np.all(q1 <= q2) and np.any(q1 < q2):
                 # If q1 is strictly less than q2, then q1_bar must be strictly less than q2_bar or parallel to q2_bar
-                if not is_strictly_less_than(q1_bar, q2_bar) and not is_parallel(q1_bar, q2_bar):
+                if not (np.all(q1_bar <= q2_bar) and np.any(q1_bar < q2_bar)) and not (np.all(q1_bar <= q2_bar) or np.all(q1_bar >= q2_bar)):
                     return False
 
             # Check if q1 is strictly greater than q2
-            if is_strictly_less_than(q2, q1):
+            if np.all(q2 <= q1) and np.any(q2 < q1):
                 # If q1 is strictly greater than q2, then q1_bar must be strictly greater than q2_bar or parallel to q2_bar
-                if not is_strictly_less_than(q2_bar, q1_bar) and not is_parallel(q1_bar, q2_bar):
+                if not (np.all(q2_bar <= q1_bar) and np.any(q2_bar < q1_bar)) and not (np.all(q1_bar <= q2_bar) or np.all(q1_bar >= q2_bar)):
                     return False
 
     # If none of the conditions are violated for any of the indices, return True
