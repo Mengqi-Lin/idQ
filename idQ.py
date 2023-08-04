@@ -177,7 +177,7 @@ def preserve_partial_order(Q, Q_bar, indices1, indices2):
             # Check if q1 is parallel to q2
             if not (np.all(q1 <= q2) or np.all(q1 >= q2)):
                 # If q1 is parallel to q2, then q1_bar must be parallel to q2_bar
-                if not (np.all(q1_bar <= q2_bar) or np.all(q1_bar >= q2_bar)):
+                if (np.all(q1_bar <= q2_bar) or np.all(q1_bar >= q2_bar)):
                     return False
 
             # Check if q1 is strictly less than q2
