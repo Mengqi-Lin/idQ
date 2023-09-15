@@ -1,0 +1,1298 @@
+J: 6
+K: 4
+check_level: 3
+Q is trivially not identifiable. Q contains a zero column.
+Q is trivially not identifiable. Q contains a zero column.
+Q is globally identifiable for check_level = 1.
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 1.
+Q is globally identifiable for check_level = 3.
+Q is globally identifiable for check_level = 3.
+Q is globally identifiable for check_level = 1.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 0]
+ [0 0 1 1]
+ [1 0 0 1]
+ [1 0 1 0]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 0]
+ [0 0 1 1]
+ [1 0 0 1]
+ [1 1 0 0]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 0]
+ [0 0 1 1]
+ [1 0 0 1]
+ [1 1 1 0]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 0]
+ [0 0 1 1]
+ [1 0 1 0]
+ [1 1 0 1]]
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 0]
+ [0 0 1 1]
+ [1 1 0 0]
+ [1 0 1 1]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is trivially not identifiable. Q contains a zero column.
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 0 1 1]
+ [0 1 0 1]
+ [1 0 0 1]
+ [1 1 0 0]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 0 1 1]
+ [0 1 0 1]
+ [1 0 0 1]
+ [1 1 1 0]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 0 1 1]
+ [0 1 0 1]
+ [1 0 1 0]
+ [1 1 0 0]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 0 1 1]
+ [0 1 0 1]
+ [1 1 0 0]
+ [1 0 1 1]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 0 1 1]
+ [0 1 1 0]
+ [1 0 0 1]
+ [1 1 0 0]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 0 1 1]
+ [1 1 0 0]
+ [0 1 1 1]
+ [1 0 1 1]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is trivially not identifiable. Q contains identical columns.
+Q is trivially not identifiable. Q contains identical columns.
+Q is trivially not identifiable. Q contains identical columns.
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 1.
+Q is globally identifiable for check_level = 3.
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 0]
+ [0 1 0 1]
+ [1 0 0 1]
+ [1 0 1 0]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 1.
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+Q is globally identifiable for check_level = 3.
+Q is globally identifiable for check_level = 3.
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 0]
+ [1 0 0 1]
+ [1 0 1 0]
+ [0 1 1 1]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 0]
+ [1 0 0 1]
+ [0 1 1 1]
+ [1 1 1 0]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 0]
+ [1 0 1 0]
+ [0 1 1 1]
+ [1 1 0 1]]
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 0]
+ [1 1 0 0]
+ [0 1 1 1]
+ [1 0 1 1]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 0]
+ [1 0 0 1]
+ [1 0 1 0]
+ [1 0 1 1]]
+Q is globally identifiable for check_level = 1.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 0]
+ [1 0 0 1]
+ [1 0 1 0]
+ [1 1 0 0]]
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 0]
+ [1 0 0 1]
+ [1 0 1 0]
+ [1 1 0 1]]
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 0]
+ [1 0 0 1]
+ [1 0 1 0]
+ [1 1 1 1]]
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 0]
+ [1 0 0 1]
+ [1 1 0 0]
+ [1 0 1 1]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 0]
+ [1 0 0 1]
+ [1 0 1 1]
+ [1 1 1 0]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 0]
+ [1 0 0 1]
+ [1 1 1 0]
+ [1 1 1 1]]
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 0]
+ [1 0 1 0]
+ [1 0 1 1]
+ [1 1 0 1]]
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 0]
+ [1 0 1 0]
+ [1 1 0 1]
+ [1 1 1 1]]
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 0]
+ [1 1 0 0]
+ [1 0 1 1]
+ [1 1 1 1]]
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 0]
+ [1 0 1 1]
+ [1 1 0 1]
+ [1 1 1 0]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 1]
+ [0 1 1 0]
+ [1 0 0 1]
+ [1 0 1 0]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 1]
+ [0 1 1 0]
+ [1 0 0 1]
+ [1 1 0 0]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 1]
+ [0 1 1 0]
+ [1 0 0 1]
+ [1 1 1 0]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 1]
+ [0 1 1 0]
+ [1 0 1 0]
+ [1 1 0 1]]
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 1]
+ [0 1 1 0]
+ [1 1 0 0]
+ [1 0 1 1]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 1]
+ [1 0 0 1]
+ [1 1 0 0]
+ [0 1 1 1]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 1]
+ [1 0 0 1]
+ [0 1 1 1]
+ [1 1 1 0]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 1]
+ [1 0 1 0]
+ [1 1 0 0]
+ [0 1 1 1]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 1]
+ [1 1 0 0]
+ [0 1 1 1]
+ [1 0 1 1]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 1.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 1]
+ [1 0 0 1]
+ [1 1 0 0]
+ [1 1 0 1]]
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 1]
+ [1 0 0 1]
+ [1 1 0 0]
+ [1 1 1 0]]
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 1]
+ [1 0 0 1]
+ [1 1 0 0]
+ [1 1 1 1]]
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 1]
+ [1 0 0 1]
+ [1 1 0 1]
+ [1 1 1 0]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 1]
+ [1 0 0 1]
+ [1 1 1 0]
+ [1 1 1 1]]
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 1 0]
+ [1 0 0 1]
+ [1 1 0 0]
+ [0 1 1 1]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 1]
+ [1 1 0 0]
+ [1 0 1 0]
+ [1 1 0 1]]
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 1]
+ [1 0 1 0]
+ [1 1 0 0]
+ [1 1 1 1]]
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 1]
+ [1 0 1 0]
+ [1 1 0 1]
+ [1 1 1 0]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 1]
+ [1 1 0 0]
+ [1 1 0 1]
+ [1 0 1 1]]
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 1]
+ [1 1 0 0]
+ [1 0 1 1]
+ [1 1 1 0]]
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 1]
+ [1 1 0 0]
+ [1 0 1 1]
+ [1 1 1 1]]
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 0 1]
+ [1 0 1 1]
+ [1 1 0 1]
+ [1 1 1 0]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 1 0]
+ [1 0 0 1]
+ [1 1 0 0]
+ [1 1 1 1]]
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 1 0]
+ [1 0 0 1]
+ [1 1 0 1]
+ [1 1 1 0]]
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 1 0]
+ [1 1 0 0]
+ [1 0 1 1]
+ [1 1 0 1]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [1 1 0 0]
+ [0 1 1 1]
+ [1 0 1 1]
+ [1 1 0 1]]
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [1 1 0 0]
+ [0 1 1 1]
+ [1 0 1 1]
+ [1 1 1 1]]
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 0]
+ [0 1 1 1]
+ [1 0 1 1]
+ [1 1 0 1]
+ [1 1 1 0]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is trivially not identifiable. Q contains identical columns.
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 1]
+ [0 1 0 1]
+ [0 1 1 0]
+ [1 0 0 1]
+ [1 0 1 0]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 1]
+ [0 1 0 1]
+ [0 1 1 0]
+ [1 0 0 1]
+ [1 1 1 0]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 1]
+ [0 1 0 1]
+ [0 1 1 0]
+ [1 0 1 0]
+ [1 1 0 0]]
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 1]
+ [0 1 0 1]
+ [0 1 1 0]
+ [1 0 1 0]
+ [1 1 0 1]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 1]
+ [0 1 0 1]
+ [0 1 1 0]
+ [1 1 0 0]
+ [1 0 1 1]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is trivially not identifiable. Q contains a one column.
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 1]
+ [0 1 0 1]
+ [1 0 0 1]
+ [0 1 1 1]
+ [1 1 1 0]]
+Q is trivially not identifiable. Q contains a one column.
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 1]
+ [0 1 0 1]
+ [1 0 1 0]
+ [1 1 0 0]
+ [0 1 1 1]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is trivially not identifiable. Q contains a one column.
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is trivially not identifiable. Q contains a one column.
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 1]
+ [0 1 0 1]
+ [1 0 0 1]
+ [1 1 1 0]
+ [1 1 1 1]]
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 1]
+ [0 1 1 0]
+ [1 0 0 1]
+ [1 1 0 0]
+ [0 1 1 1]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 1]
+ [0 1 0 1]
+ [1 0 1 0]
+ [1 1 0 0]
+ [1 1 1 0]]
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 1]
+ [0 1 0 1]
+ [1 0 1 0]
+ [1 1 0 0]
+ [1 1 1 1]]
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 1]
+ [0 1 0 1]
+ [1 0 1 0]
+ [1 1 0 1]
+ [1 1 1 0]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 1]
+ [0 1 0 1]
+ [1 1 0 0]
+ [1 0 1 1]
+ [1 1 1 0]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 1]
+ [0 1 0 1]
+ [1 0 1 1]
+ [1 1 0 1]
+ [1 1 1 0]]
+Q is trivially not identifiable. Q contains a one column.
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 1]
+ [0 1 1 0]
+ [1 0 1 0]
+ [1 1 0 0]
+ [0 1 1 1]]
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 1]
+ [0 1 1 0]
+ [1 0 1 0]
+ [0 1 1 1]
+ [1 1 0 1]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 1]
+ [0 1 1 0]
+ [1 1 0 0]
+ [0 1 1 1]
+ [1 0 1 1]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 1]
+ [0 1 1 0]
+ [1 0 0 1]
+ [1 1 0 0]
+ [1 1 1 0]]
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 1]
+ [0 1 1 0]
+ [1 0 0 1]
+ [1 1 0 0]
+ [1 1 1 1]]
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 1]
+ [0 1 1 0]
+ [1 0 0 1]
+ [1 1 0 1]
+ [1 1 1 0]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 1]
+ [0 1 1 0]
+ [1 0 1 0]
+ [1 1 0 0]
+ [1 1 0 1]]
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 1 1 0]
+ [1 0 1 0]
+ [1 1 0 0]
+ [0 0 1 1]
+ [1 1 1 0]]
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 1]
+ [0 1 1 0]
+ [1 0 1 0]
+ [1 1 0 0]
+ [1 1 1 1]]
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 1]
+ [0 1 1 0]
+ [1 0 1 0]
+ [1 1 1 0]
+ [1 1 0 1]]
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 1]
+ [0 1 1 0]
+ [1 0 1 0]
+ [1 1 0 1]
+ [1 1 1 1]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 1]
+ [0 1 1 0]
+ [1 1 0 0]
+ [1 0 1 1]
+ [1 1 0 1]]
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 1]
+ [0 1 1 0]
+ [1 1 0 0]
+ [1 0 1 1]
+ [1 1 1 0]]
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 1]
+ [0 1 1 0]
+ [1 1 0 0]
+ [1 0 1 1]
+ [1 1 1 1]]
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 1]
+ [0 1 1 0]
+ [1 0 1 1]
+ [1 1 0 1]
+ [1 1 1 0]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 1]
+ [1 1 0 0]
+ [0 1 1 1]
+ [1 0 1 1]
+ [1 1 1 0]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 0 1 1]
+ [0 1 1 1]
+ [1 0 1 1]
+ [1 1 0 1]
+ [1 1 1 0]]
+Q is trivially not identifiable. Q contains a one column.
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q is trivially not identifiable. Q contains identical columns.
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 1 1 0]
+ [1 0 0 1]
+ [1 0 1 0]
+ [1 1 0 0]
+ [0 1 1 1]]
+Q is globally identifiable for check_level = 3.
+[[0 0 0 1]
+ [0 1 1 0]
+ [1 0 0 1]
+ [1 0 1 0]
+ [0 1 1 1]
+ [1 1 0 1]]
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Q may not be identifiable for check_level = 3, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q is globally identifiable for check_level = 2.
+[[0 0 1 1]
+ [0 1 0 1]
+ [0 1 1 0]
+ [1 0 0 1]
+ [1 0 1 0]
+ [0 1 1 1]]
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q is globally identifiable for check_level = 2.
+[[0 0 1 1]
+ [0 1 0 1]
+ [0 1 1 0]
+ [1 0 0 1]
+ [0 1 1 1]
+ [1 1 1 0]]
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q is globally identifiable for check_level = 2.
+[[0 0 1 1]
+ [0 1 0 1]
+ [0 1 1 0]
+ [1 0 1 0]
+ [0 1 1 1]
+ [1 1 0 1]]
+Warning: Check level is larger than max(distances).
+Q is globally identifiable for check_level = 2.
+[[0 0 1 1]
+ [0 1 0 1]
+ [0 1 1 0]
+ [1 1 0 0]
+ [0 1 1 1]
+ [1 0 1 1]]
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q is globally identifiable for check_level = 2.
+[[0 0 1 1]
+ [0 1 0 1]
+ [0 1 1 0]
+ [1 0 0 1]
+ [1 0 1 0]
+ [1 1 0 0]]
+Warning: Check level is larger than max(distances).
+Q is globally identifiable for check_level = 2.
+[[0 0 1 1]
+ [0 1 0 1]
+ [0 1 1 0]
+ [1 0 0 1]
+ [1 0 1 0]
+ [1 1 0 1]]
+Warning: Check level is larger than max(distances).
+Q is globally identifiable for check_level = 2.
+[[0 0 1 1]
+ [0 1 0 1]
+ [0 1 1 0]
+ [1 0 0 1]
+ [1 0 1 0]
+ [1 1 1 1]]
+Warning: Check level is larger than max(distances).
+Q is globally identifiable for check_level = 2.
+[[0 0 1 1]
+ [0 1 0 1]
+ [0 1 1 0]
+ [1 0 0 1]
+ [1 1 0 0]
+ [1 0 1 1]]
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q is globally identifiable for check_level = 2.
+[[0 0 1 1]
+ [0 1 0 1]
+ [0 1 1 0]
+ [1 0 0 1]
+ [1 0 1 1]
+ [1 1 1 0]]
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q is globally identifiable for check_level = 2.
+[[0 0 1 1]
+ [0 1 0 1]
+ [0 1 1 0]
+ [1 0 0 1]
+ [1 1 1 0]
+ [1 1 1 1]]
+Warning: Check level is larger than max(distances).
+Q is globally identifiable for check_level = 2.
+[[0 0 1 1]
+ [0 1 0 1]
+ [0 1 1 0]
+ [1 0 1 0]
+ [1 0 1 1]
+ [1 1 0 1]]
+Warning: Check level is larger than max(distances).
+Q is globally identifiable for check_level = 2.
+[[0 0 1 1]
+ [0 1 0 1]
+ [0 1 1 0]
+ [1 0 1 0]
+ [1 1 0 1]
+ [1 1 1 1]]
+Warning: Check level is larger than max(distances).
+Q is globally identifiable for check_level = 2.
+[[0 0 1 1]
+ [0 1 0 1]
+ [0 1 1 0]
+ [1 1 0 0]
+ [1 0 1 1]
+ [1 1 1 1]]
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q is globally identifiable for check_level = 2.
+[[0 0 1 1]
+ [0 1 0 1]
+ [1 0 0 1]
+ [1 0 1 0]
+ [1 1 0 0]
+ [0 1 1 1]]
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q is globally identifiable for check_level = 2.
+[[0 0 1 1]
+ [0 1 0 1]
+ [1 0 0 1]
+ [1 0 1 0]
+ [0 1 1 1]
+ [1 1 1 0]]
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Q is trivially not identifiable. Q contains a one column.
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Q is trivially not identifiable. Q contains a one column.
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Q is trivially not identifiable. Q contains a one column.
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+
+Warning: Check level is larger than max(distances).
+Q may not be identifiable for check_level = 2, the possible Q_bars are: 
+

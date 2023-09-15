@@ -1,0 +1,11 @@
+J: 4
+K: 4
+check_level: 3
+Q is trivially not identifiable. Q contains a zero column.
+Q is trivially not identifiable. Q contains a zero column.
+Q is trivially not identifiable. Q contains a zero column.
+Q is trivially not identifiable. Q contains identical columns.
+Q is trivially not identifiable. Q contains identical columns.
+Q is trivially not identifiable. Q contains identical columns.
+Q is trivially not identifiable. Q contains a zero column.
+An error occurred: 'result'
