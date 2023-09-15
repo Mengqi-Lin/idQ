@@ -113,12 +113,12 @@ def topo_order(matrix):
     vectors = [tuple(row) for row in matrix]
 
     # Sort the row vectors using the custom comparison function
-    sorted_vectors = sorted(vectors, key=lambda x: sum((np.all(x <= y) and np.any(x < y)) for y in vectors), reverse=False)
+    sorted_vectors = sorted(vectors, key=lambda x: sum(is_strictly_less_than(x, y) for y in vectors), reverse=False)
 
     # Yield the vectors in topologically sorted order. Can change to return sorted_vectors.
     for vector in sorted_vectors:
         yield vector
-
+        
         
 def distances2U(Q, draw = 0):
     # Create a directed graph
@@ -175,26 +175,25 @@ def preserve_partial_order(Q, Q_bar, indices1, indices2):
             q1_bar, q2_bar = Q_bar[index1], Q_bar[index2]
 
             # Check if q1 is parallel to q2
-            if not (np.all(q1 <= q2) or np.all(q1 >= q2)):
+            if is_parallel(q1, q2):
                 # If q1 is parallel to q2, then q1_bar must be parallel to q2_bar
-                if (np.all(q1_bar <= q2_bar) or np.all(q1_bar >= q2_bar)):
+                if not is_parallel(q1_bar, q2_bar):
                     return False
 
             # Check if q1 is strictly less than q2
-            if np.all(q1 <= q2) and np.any(q1 < q2):
+            if is_strictly_less_than(q1, q2):
                 # If q1 is strictly less than q2, then q1_bar must be strictly less than q2_bar or parallel to q2_bar
-                if not (np.all(q1_bar <= q2_bar) and np.any(q1_bar < q2_bar)) and not (np.all(q1_bar <= q2_bar) or np.all(q1_bar >= q2_bar)):
+                if not is_strictly_less_than(q1_bar, q2_bar) and not is_parallel(q1_bar, q2_bar):
                     return False
 
             # Check if q1 is strictly greater than q2
-            if np.all(q2 <= q1) and np.any(q2 < q1):
+            if is_strictly_less_than(q2, q1):
                 # If q1 is strictly greater than q2, then q1_bar must be strictly greater than q2_bar or parallel to q2_bar
-                if not (np.all(q2_bar <= q1_bar) and np.any(q2_bar < q1_bar)) and not (np.all(q1_bar <= q2_bar) or np.all(q1_bar >= q2_bar)):
+                if not is_strictly_less_than(q2_bar, q1_bar) and not is_parallel(q1_bar, q2_bar):
                     return False
 
     # If none of the conditions are violated for any of the indices, return True
     return True
-
 
 
 def check_for_identity(Q):
@@ -327,7 +326,7 @@ def global_identifiability(Q, uniout=True, check_level=3):
         for q_bar in q_bars:
             Q_temp[index, :] = q_bar  # Replace the row in Q_temp
             # Check if the order is preserved after replacement
-            if preserve_partial_order(Q, Q_temp, irreplaceable_rows, index):
+            if preserve_partial_order(Q, Q_temp, set(irreplaceable_rows), [index]):
                 valid_q_bars.append(q_bar)  # If the order is preserved, keep this q_bar
 
         q_bars = valid_q_bars  # Replace the original q_bars with the valid ones
@@ -497,7 +496,7 @@ def incomplete_global_identifiability(Q, uniout=True, check_level=3):
         for q_bar in q_bars:
             Q_temp[index, :] = q_bar  # Replace the row in Q_temp
             # Check if the order is preserved after replacement
-            if preserve_partial_order(Q, Q_temp, [irreplaceable_rows], [index]):
+            if preserve_partial_order(Q, Q_temp, set(irreplaceable_rows), [index]):
                 valid_q_bars.append(q_bar)  # If the order is preserved, keep this q_bar
 
         q_bars = valid_q_bars  # Replace the original q_bars with the valid ones
@@ -579,7 +578,6 @@ def incomplete_global_identifiability(Q, uniout=True, check_level=3):
                     break
             if preserve_order:
                 print(f"Q may not be identifiable for check_level = {check_level}, the possible Q_bars are: \n")
-                print([Q_bar])
                 return 0, [Q_bar]
     
         print(f"Q is globally identifiable for check_level = {check_level}.")
@@ -677,7 +675,7 @@ def local_identifiability(Q, kappa, uniout=True, check_level=1):
                 
                 fixed_rows = (set(replaceable_rows) - set(replacement_indices)) | set(irreplaceable_rows)
                 # Check if the order is preserved after replacement
-                if preserve_partial_order(Q, Q_temp, [fixed_rows], [index]):
+                if preserve_partial_order(Q, Q_temp, fixed_rows, [index]):
                     valid_q_bars.append(q_bar)  # If the order is preserved, keep this q_bar
 
             q_bars = valid_q_bars  # Replace the original q_bars with the valid ones
