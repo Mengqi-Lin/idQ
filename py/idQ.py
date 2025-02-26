@@ -20,7 +20,7 @@ def T_mat(Q):
     return np.array(TT)
 
 # Compute G_matrix of Q
-def G_mat(Q):
+def Phi_mat(Q):
     J, K = Q.shape
     pp = [seq for seq in itertools.product([0, 1], repeat=K)]
     GG = []
@@ -291,6 +291,7 @@ def Any_two_columns_contain_I(Q):
 ### This function is an incomplete version of global_identifiability, if Q is not identifiable, it only returns one possible Q_bar.
 
 def incomplete_global_identifiability(Q, uniout=True, check_level=3):
+    Q = Q.copy()
     # Check if Q is a binary matrix
     if not isinstance(Q, np.ndarray) or not np.all((Q == 0) | (Q == 1)):
         raise Exception("Q must be a binary matrix.")
