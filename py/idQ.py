@@ -285,38 +285,6 @@ def Any_two_columns_contain_I(Q):
     return True
 
 
-
-
-def canonicalize(Q_bar):
-    """
-    Returns a canonical form of Q_bar by sorting its columns lexicographically.
-    This canonical form is invariant under column permutations.
-    """
-    # Convert Q_bar to a list of tuples for each column
-    cols = [tuple(col) for col in Q_bar.T]
-    # Sort the columns (this defines a canonical order)
-    cols_sorted = sorted(cols)
-    # Convert back to a numpy array (columns sorted)
-    return np.array(cols_sorted).T  # Transpose back so that shape is (J, K)
-
-def generate_unique_Q_bars(subQ_bars, Q, replacement_indices):
-    """
-    Generates candidate Q_bar matrices from subQ_bars but only yields unique ones 
-    up to permutation equivalence.
-    """
-    seen = set()
-    for subQ_bar_replacements in subQ_bars:
-        Q_bar = Q.copy()
-        Q_bar[replacement_indices, :] = np.array(subQ_bar_replacements)
-        if preserve_partial_order(Q, Q_bar, replacement_indices, replacement_indices):
-            # Canonicalize Q_bar so that two matrices that differ only by column permutation become identical.
-            can_form = canonicalize(Q_bar)
-            # Use the string representation as a simple hashable key.
-            key = can_form.tostring()  # or key = str(can_form)
-            if key not in seen:
-                seen.add(key)
-                yield Q_bar
-
                 
 
 def thmCheck(PhiQ, PhiB, tol=1e-8):
@@ -557,7 +525,6 @@ def identifiability(Q):
 
     # Calculate the distance to the universal set (d(Q[j,])) for each replaceable row
     distances = distances2U(Q)
-#     print(distances)
     # Find out which rows are irreplaceable (having exactly one 1 or all 1)
     irreplaceable_rows = np.where(np.array(distances) == K-1)[0]
     
