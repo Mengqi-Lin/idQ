@@ -19,7 +19,7 @@ def T_mat(Q):
             TT.append((list(is_less_equal_than(item, p) for p in pp)))
     return np.array(TT)
 
-# Compute G_matrix of Q
+# Compute Phi_matrix of Q
 def Phi_mat(Q):
     J, K = Q.shape
     pp = [seq for seq in itertools.product([0, 1], repeat=K)]
@@ -287,10 +287,237 @@ def Any_two_columns_contain_I(Q):
 
 
 
+def canonicalize(Q_bar):
+    """
+    Returns a canonical form of Q_bar by sorting its columns lexicographically.
+    This canonical form is invariant under column permutations.
+    """
+    # Convert Q_bar to a list of tuples for each column
+    cols = [tuple(col) for col in Q_bar.T]
+    # Sort the columns (this defines a canonical order)
+    cols_sorted = sorted(cols)
+    # Convert back to a numpy array (columns sorted)
+    return np.array(cols_sorted).T  # Transpose back so that shape is (J, K)
 
-### This function is an incomplete version of global_identifiability, if Q is not identifiable, it only returns one possible Q_bar.
+def generate_unique_Q_bars(subQ_bars, Q, replacement_indices):
+    """
+    Generates candidate Q_bar matrices from subQ_bars but only yields unique ones 
+    up to permutation equivalence.
+    """
+    seen = set()
+    for subQ_bar_replacements in subQ_bars:
+        Q_bar = Q.copy()
+        Q_bar[replacement_indices, :] = np.array(subQ_bar_replacements)
+        if preserve_partial_order(Q, Q_bar, replacement_indices, replacement_indices):
+            # Canonicalize Q_bar so that two matrices that differ only by column permutation become identical.
+            can_form = canonicalize(Q_bar)
+            # Use the string representation as a simple hashable key.
+            key = can_form.tostring()  # or key = str(can_form)
+            if key not in seen:
+                seen.add(key)
+                yield Q_bar
 
-def incomplete_global_identifiability(Q, uniout=True, check_level=3):
+                
+
+def thmCheck(PhiQ, PhiB, tol=1e-8):
+    """
+    Check whether the columns of PhiQ are a subset of the columns of PhiB.
+    
+    That is, for each column v in PhiQ, there exists a column w in PhiB such that
+    v and w are equal (within a tolerance, if necessary).
+
+    Parameters:
+        PhiQ (np.ndarray): The Phi matrix computed from Q, shape (m, n).
+        PhiB (np.ndarray): The Phi matrix computed from an alternative candidate Q,
+                           shape (m, p).
+        tol (float): Tolerance for numerical equality (default 1e-8).
+
+    Returns:
+        bool: True if every column of PhiQ is found in PhiB, False otherwise.
+    """
+    m, n = PhiQ.shape
+    m2, p = PhiB.shape
+    if m != m2:
+        raise ValueError("PhiQ and PhiB must have the same number of rows.")
+    
+    # Iterate over each column in PhiQ.
+    for i in range(n):
+        col_found = False
+        colQ = PhiQ[:, i]
+        # Check against each column in PhiB.
+        for j in range(p):
+            colB = PhiB[:, j]
+            # Use np.allclose for floating point comparison, or np.array_equal if exact equality is expected.
+            if np.allclose(colQ, colB, atol=tol):
+                col_found = True
+                break
+        if not col_found:
+            return False
+    return True
+
+
+def fix_submatrix(Q, k1, k2):
+    """
+    Check the two-column submatrix of Q (columns k1 and k2) for a permutation matrix.
+    If the submatrix does not contain at least one row (1,0) and one row (0,1), modify Q
+    according to one of the three cases and return the modified Q (denoted Q_bar).
+    If the submatrix already contains a permutation matrix, return None.
+    
+    Parameters:
+        Q (np.ndarray): Binary matrix of shape (J, K).
+        k1, k2 (int): Indices of the two columns to be checked.
+        
+    Returns:
+        np.ndarray or None: Modified Q_bar if a change is needed (indicating non-identifiability),
+                            or None if the submatrix is already valid.
+    """
+    # Extract the submatrix for columns k1 and k2.
+    S = Q[:, [k1, k2]]
+    # Get the unique rows as tuples.
+    unique_rows = {tuple(row) for row in S}
+    
+    # Define the four possible row patterns.
+    r00 = (0, 0)
+    r10 = (1, 0)
+    r01 = (0, 1)
+    r11 = (1, 1)
+    
+    # If both (1,0) and (0,1) are present, no modification is needed.
+    if r10 in unique_rows and r01 in unique_rows:
+        return None
+    
+    # Create a copy to modify.
+    Q_bar = Q.copy()
+    
+    # --- Case 1: Neither (1,0) nor (0,1) appears ---
+    if r10 not in unique_rows and r01 not in unique_rows:
+        # The only possible nonzero row is (1,1) (besides (0,0)).
+        rows_r11 = np.where(np.all(S == np.array(r11), axis=1))[0]
+        if len(rows_r11) > 0:
+            # Modify one (1,1) row to be (1,0) (or (0,1); here we choose (1,0)).
+            row_to_modify = rows_r11[0]
+            Q_bar[row_to_modify, k1] = 1
+            Q_bar[row_to_modify, k2] = 0
+            return Q_bar
+        else:
+            # If the submatrix is entirely (0,0), modify the first row to (1,0).
+            Q_bar[0, k1] = 1
+            Q_bar[0, k2] = 0
+            return Q_bar
+
+    # --- Case 2: Submatrix only has (1,0) (but not (0,1)) ---
+    if r10 in unique_rows and r01 not in unique_rows:
+        # First, try to replace all (1,1) rows with (0,1) to introduce (0,1).
+        rows_r11 = np.where(np.all(S == np.array(r11), axis=1))[0]
+        if len(rows_r11) > 0:
+            for row in rows_r11:
+                Q_bar[row, k1] = 0
+                Q_bar[row, k2] = 1
+            return Q_bar
+        else:
+            # If no (1,1) exists, then all nonzero rows are (1,0). Replace all such rows with (0,1).
+            rows_r10 = np.where(np.all(S == np.array(r10), axis=1))[0]
+            for row in rows_r10:
+                Q_bar[row, k1] = 0
+                Q_bar[row, k2] = 1
+            return Q_bar
+
+    # --- Case 3: Submatrix only has (0,1) (but not (1,0)) ---
+    if r01 in unique_rows and r10 not in unique_rows:
+        # First, try to replace all (1,1) rows with (1,0) to introduce (1,0).
+        rows_r11 = np.where(np.all(S == np.array(r11), axis=1))[0]
+        if len(rows_r11) > 0:
+            for row in rows_r11:
+                Q_bar[row, k1] = 1
+                Q_bar[row, k2] = 0
+            return Q_bar
+        else:
+            # If no (1,1) exists, then all nonzero rows are (0,1). Replace all such rows with (1,0).
+            rows_r01 = np.where(np.all(S == np.array(r01), axis=1))[0]
+            for row in rows_r01:
+                Q_bar[row, k1] = 1
+                Q_bar[row, k2] = 0
+            return Q_bar
+
+    # Fallback (should not occur)
+    return None
+
+# Two-column submatrix check:
+def check_two_column_submatrices(Q):
+    """
+    Iterate over all pairs of columns in Q and check whether each two-column submatrix contains a permutation matrix.
+    If any pair fails the check, return a candidate Q_bar (modified Q) that fixes the deficiency.
+    If all pairs are valid, return None.
+    
+    Parameters:
+        Q (np.ndarray): Binary matrix of shape (J, K).
+        
+    Returns:
+        np.ndarray or None: A candidate Q_bar that fixes at least one violating two-column submatrix,
+                            or None if every two-column submatrix satisfies the permutation condition.
+    """
+    J, K = Q.shape
+    for k1 in range(K):
+        for k2 in range(k1+1, K):
+            Q_bar_candidate = fix_submatrix(Q, k1, k2)
+            if Q_bar_candidate is not None:
+                return Q_bar_candidate
+    return None
+
+
+
+
+def canonicalize(Q_bar):
+    """
+    Returns a canonical form of Q_bar by sorting its columns lexicographically.
+    This canonical form is invariant under column permutations.
+    """
+    # Convert Q_bar to a list of tuples for each column
+    cols = [tuple(col) for col in Q_bar.T]
+    # Sort the columns (this defines a canonical order)
+    cols_sorted = sorted(cols)
+    # Convert back to a numpy array (columns sorted)
+    return np.array(cols_sorted).T  # Transpose back so that shape is (J, K)
+
+
+
+
+def generate_unique_Q_bars(subQ_bars, Q, replacement_indices):
+    """
+    Generate candidate Q_bar matrices from the Cartesian product subQ_bars,
+    yielding only one representative per permutation equivalence class.
+    The canonical form of Q is added to the 'seen' set so that any candidate
+    equivalent to Q is automatically filtered out.
+    
+    Parameters:
+        subQ_bars (iterable): Cartesian product of candidate replacement rows.
+        Q (np.ndarray): The input Q-matrix.
+        replacement_indices (list): Indices of rows in Q to be replaced.
+    
+    Yields:
+        np.ndarray: A candidate Q_bar that is not permutation equivalent to Q.
+    """
+    seen = set()
+    # Compute canonical form for Q and add it to seen.
+    canonical_Q = canonicalize(Q)
+    seen.add(canonical_Q.tostring())
+    
+    for subQ_bar_replacements in subQ_bars:
+        Q_bar = Q.copy()
+        Q_bar[replacement_indices, :] = np.array(subQ_bar_replacements)
+        if preserve_partial_order(Q, Q_bar, replacement_indices, replacement_indices):
+            can_form = canonicalize(Q_bar)
+            key = can_form.tostring()
+            if key not in seen:
+                seen.add(key)
+                yield Q_bar
+
+
+                
+                
+### This function checks if Q is identifiable, if not, it returns one possible Q_bar.
+
+def identifiability(Q):
     Q = Q.copy()
     # Check if Q is a binary matrix
     if not isinstance(Q, np.ndarray) or not np.all((Q == 0) | (Q == 1)):
@@ -321,18 +548,9 @@ def incomplete_global_identifiability(Q, uniout=True, check_level=3):
             print("Q is trivially not identifiable. Q contains a one column.")
             return 0, [Q_bar]
 
-    # Check if Q has identical columns
-    Q_T = Q.T
-    Q_unique_cols = np.unique(Q_T, axis=0)
-    if len(Q_unique_cols) != Q.shape[1]:
-        print("Q is trivially not identifiable. Q contains identical columns.")
-        # Find duplicate columns
-        _, indices = np.unique(Q_T, return_index=True, axis=0)
-        duplicate_columns = np.setdiff1d(np.arange(Q.shape[1]), indices)
-        if len(duplicate_columns) > 0:
-            Q_bar = Q.copy()
-            Q_bar[:, duplicate_columns[0]] = 0  # Replace first duplicate column with all zeros
-            return 0, [Q_bar]
+    Q_bar = check_two_column_submatrices(Q)
+    if Q_bar is not None:
+        return 0, [Q_bar]
     
     # Get the number of rows (J) and columns (K) of Q
     J, K = Q.shape
@@ -349,7 +567,6 @@ def incomplete_global_identifiability(Q, uniout=True, check_level=3):
     # Prepare the list to hold all possible Q_bar matrices
     Q_bars = []
 
-    kappa = len(replaceable_rows)
     replacement_indices = list(replaceable_rows)  # since there is only one combination
     subQ_bars = []
 
@@ -377,81 +594,29 @@ def incomplete_global_identifiability(Q, uniout=True, check_level=3):
 
     # Generate Cartesian product of subQ_bars
     subQ_bars = itertools.product(*subQ_bars)
-
-    # After obtaining subQ_bars from the cartesian product
-    def generate_Q_bars():
-        for subQ_bar_replacements in subQ_bars:
-            Q_bar = Q.copy()
-            Q_bar[replacement_indices, :] = np.array(subQ_bar_replacements)  # Replace the rows in Q with subQ_bar_replacements
-
-            # Check for preservation of partial order exactly among the rows specified by replacement_indices
-            if preserve_partial_order(Q, Q_bar, replacement_indices, replacement_indices):
-                yield Q_bar  # If the partial order is preserved, yield this Q_bar
-
-    # Now, Q_bars is a generator of all possible Q_bar matrices that satisfy the conditions
-    Q_bars = generate_Q_bars()
     
-    # Generate all permutations of Q
-    Q_perms = generate_permutations(Q)
+    # Generate unique Q_bar candidates (up to permutation equivalence).
+    Q_bar_gen = generate_unique_Q_bars(subQ_bars, Q, replacement_indices)
 
     
-    # Filter out Q_bars that match a permutation of Q
-    Q_bars = (Q_bar for Q_bar in Q_bars if not any(np.array_equal(Q_perm, Q_bar) for Q_perm in Q_perms))
-
-    
-#     if uniout:
-#         Q_bars_uniq = []
-#         seen = set()
-
-#         for Q_bar in Q_bars:
-#             # Generate all unique column permutations for each Q_bar
-#             perms_indices = list(itertools.permutations(range(Q_bar.shape[1])))
-
-#             # Rearrange columns according to the permutations, then convert to bytes
-#             perms_bytes = [Q_bar[:, p].tobytes() for p in perms_indices]
-
-#             # Check if the permutation has been seen before
-#             found = False
-#             for perm in perms_bytes:
-#                 if perm in seen:
-#                     found = True
-#                     break
-#                 seen.add(perm)
-#             if not found:
-#                 Q_bars_uniq.append(Q_bar)
-
-#         Q_bars = Q_bars_uniq
-
     try:
-        first_Q_bar = next(Q_bars)
+        first_Q_bar = next(Q_bar_gen)
     except StopIteration:
-        print(f"Q is globally identifiable for check_level = 1.")
+        print("Q is identifiable")
         return 1, []
     else:
-        # If the generator is not empty, put the first element back and continue processing
-        Q_bars = itertools.chain([first_Q_bar], Q_bars)
-
-    if check_level == 1:
-        print("Q might not be identifiable for check_level = 1, the possible Q_bars are: \n")
-        return 0, [first_Q_bar]
+        Q_bar_gen = itertools.chain([first_Q_bar], Q_bar_gen)
     
-    if check_level > 1:
-        if check_level > max(distances):
-                    print("Warning: Check level is larger than max(distances).")
-                    check_level = max(distances)
-        for Q_bar in Q_bars:
-            preserve_order = True
-            for l in range(2, check_level + 1):
-                D_l_Q = get_D_l(Q, l)
-                D_l_Q_bar = get_D_l(Q_bar, l)
-
-                JJ = D_l_Q.shape[0]
-                if not preserve_partial_order(D_l_Q, D_l_Q_bar, range(JJ), range(JJ)):
-                    preserve_order = False
-                    break
-            if preserve_order:
-                print(f"Q may not be identifiable for check_level = {check_level}, the possible Q_bars are: \n")
-                return 0, [Q_bar]
+    # Compute Phi(Q) for the original Q.
+    PhiQ = Phi_mat(Q)  # User-provided function.
     
-        print(f"Q is globally identifiable for check_level = {check_level}.")
-        return 1, []                
+    # Iterate through all candidate Q_bar matrices.
+    for Q_bar in Q_bar_gen:
+        PhiB = Phi_mat(Q_bar)
+        if thmCheck(PhiQ, PhiB, tol=1e-8):
+            print("Q is not identifiable")
+            return 0, Q_bar
+    
+    print("Q is identifiable")
+    return 1, []
+      
