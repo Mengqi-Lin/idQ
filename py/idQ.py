@@ -451,6 +451,7 @@ def canonicalize(Q_bar):
 
 
 def generate_unique_Q_bars(subQ_bars, Q, replacement_indices):
+    
     """
     Generate candidate Q_bar matrices from the Cartesian product subQ_bars,
     yielding only one representative per permutation equivalence class.
@@ -465,14 +466,23 @@ def generate_unique_Q_bars(subQ_bars, Q, replacement_indices):
     Yields:
         np.ndarray: A candidate Q_bar that is not permutation equivalent to Q.
     """
+    
     seen = set()
-    # Compute canonical form for Q and add it to seen.
     canonical_Q = canonicalize(Q)
     seen.add(canonical_Q.tostring())
     
     for subQ_bar_replacements in subQ_bars:
+        # Check if the candidate for replacements is empty:
+        if len(subQ_bar_replacements) == 0:
+            continue  # skip this candidate
+        
         Q_bar = Q.copy()
-        Q_bar[replacement_indices, :] = np.array(subQ_bar_replacements)
+        candidate = np.array(subQ_bar_replacements)
+        # Ensure candidate has the correct shape. If candidate.ndim == 1, reshape it.
+        if candidate.ndim == 1:
+            candidate = candidate.reshape(1, -1)
+        
+        Q_bar[replacement_indices, :] = candidate
         if preserve_partial_order(Q, Q_bar, replacement_indices, replacement_indices):
             can_form = canonicalize(Q_bar)
             key = can_form.tostring()
@@ -480,8 +490,7 @@ def generate_unique_Q_bars(subQ_bars, Q, replacement_indices):
                 seen.add(key)
                 yield Q_bar
 
-
-                
+                               
                 
 ### This function checks if Q is identifiable, if not, it returns one possible Q_bar.
 

@@ -109,7 +109,7 @@ def identifiability(Q):
     print("Q is identifiable.")
     return 1, [], 'none'
 
-def runtime_expr(J, K, N, output_csv='logs/runtime_expr_results.csv'):
+def runtime_expr(J, K, N, output_csv='data/runtime_expr_results.csv'):
     """
     Randomly sample N binary matrices of shape (J, K), check identifiability,
     and compute:
