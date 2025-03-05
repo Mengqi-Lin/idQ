@@ -1,0 +1,16 @@
+Identifiability determined at two-column check.
+Identifiability determined at two-column check.
+Identifiability determined at two-column check.
+Removed identical rows of Q.
+Q is not identifiable (candidate found).
+Identifiability determined at two-column check.
+Removed identical rows of Q.
+Identifiability determined at two-column check.
+Removed identical rows of Q.
+Identifiability determined at two-column check.
+Identifiability determined at two-column check.
+Removed identical rows of Q.
+Identifiability determined at two-column check.
+Identifiability determined at two-column check.
+Simulation results:
+{'J': 7, 'K': 6, 'N': 10, 'seed': 97, 'avg_runtime': 19.273775148391724, 'prop_no_candidate': 0.9, 'prop_generator_empty': 0.0, 'prop_identifiable': 0.0, 'prop_non_identifiable': 1.0, 'count_trivial': 0, 'count_two_column': 9, 'count_generator_empty': 0, 'count_candidate_found': 1}

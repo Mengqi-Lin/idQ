@@ -1,0 +1,17 @@
+Identifiability determined at two-column check.
+Identifiability determined at two-column check.
+Removed identical rows of Q.
+Identifiability determined at two-column check.
+All-zero rows have been removed from Q.
+Q is trivially not identifiable (one column).
+All-zero rows have been removed from Q.
+Q is trivially not identifiable (zero column).
+Identifiability determined at two-column check.
+Removed identical rows of Q.
+Identifiability determined at two-column check.
+Identifiability determined at two-column check.
+Identifiability determined at two-column check.
+Removed identical rows of Q.
+Identifiability determined at two-column check.
+Simulation results:
+{'J': 7, 'K': 6, 'N': 10, 'seed': 61, 'avg_runtime': 0.0002378225326538086, 'prop_no_candidate': 1.0, 'prop_generator_empty': 0.0, 'prop_identifiable': 0.0, 'prop_non_identifiable': 1.0, 'count_trivial': 2, 'count_two_column': 8, 'count_generator_empty': 0, 'count_candidate_found': 0}
