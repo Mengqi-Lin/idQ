@@ -109,7 +109,7 @@ def identifiability(Q):
     print("Q is identifiable.")
     return 1, [], 'none'
 
-def runtime_expr(J, K, N, output_csv='data/runtime_expr_results.csv'):
+def runtime_expr(J, K, N, seed, output_csv=None):
     """
     Randomly sample N binary matrices of shape (J, K), check identifiability,
     and compute:
@@ -117,11 +117,16 @@ def runtime_expr(J, K, N, output_csv='data/runtime_expr_results.csv'):
       2) Proportion of matrices determined non-identifiable by trivial or two-column check.
       3) Proportion of matrices for which candidate generation produced no alternative.
       4) Overall proportion of identifiable vs. non-identifiable matrices.
+      5) The seed used.
     
-    The results are appended to a CSV file located in a folder called 'logs'.
+    The results are appended to a single CSV file. If no output_csv filename is provided,
+    a default filename including J and K is used.
     
     Returns a dictionary with the results.
     """
+    import os
+    import csv
+    np.random.seed(seed)
     total_time = 0.0
     count_trivial = 0
     count_two_column = 0
@@ -161,8 +166,9 @@ def runtime_expr(J, K, N, output_csv='data/runtime_expr_results.csv'):
         'J': J,
         'K': K,
         'N': N,
+        'seed': seed,
         'avg_runtime': avg_runtime,
-        'prop_no_candidate': prop_no_candidate,  # trivial or two_column branch
+        'prop_no_candidate': prop_no_candidate,
         'prop_generator_empty': prop_generator_empty,
         'prop_identifiable': prop_identifiable,
         'prop_non_identifiable': prop_non_identifiable,
@@ -172,10 +178,11 @@ def runtime_expr(J, K, N, output_csv='data/runtime_expr_results.csv'):
         'count_candidate_found': count_candidate_found
     }
     
-    # Ensure the logs directory exists.
-    os.makedirs(os.path.dirname(output_csv), exist_ok=True)
+    # If no output_csv is provided, generate a default filename including J and K.
+    if output_csv is None:
+        output_csv = f"data/runtime_expr_results_J{J}_K{K}.csv"
     
-    # Append results to CSV file.
+    os.makedirs(os.path.dirname(output_csv), exist_ok=True)
     file_exists = os.path.exists(output_csv)
     with open(output_csv, mode='a', newline='') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=results.keys())
@@ -185,15 +192,17 @@ def runtime_expr(J, K, N, output_csv='data/runtime_expr_results.csv'):
     
     return results
 
+
 if __name__ == '__main__':
-    # Command-line arguments: J, K, N.
-    if len(sys.argv) != 4:
-        print("Usage: python runtime_expr.py <J> <K> <N>")
+    # Command-line arguments: J, K, N, seed.
+    if len(sys.argv) != 5:
+        print("Usage: python runtime_expr.py <J> <K> <N> <seed>")
         sys.exit(1)
     J = int(sys.argv[1])
     K = int(sys.argv[2])
     N = int(sys.argv[3])
+    seed = int(sys.argv[4])
     
-    results = runtime_expr(J, K, N)
+    results = runtime_expr(J, K, N, seed)
     print("Simulation results:")
     print(results)
