@@ -324,7 +324,7 @@ def thmCheck(PhiQ, PhiB, tol=1e-8):
     return True
 
 
-def fix_submatrix(Q, k1, k2):
+def fix_submatrix2(Q, k1, k2):
     """
     Check the two-column submatrix of Q (columns k1 and k2) for a permutation matrix.
     If the submatrix does not contain at least one row (1,0) and one row (0,1), modify Q
@@ -427,9 +427,92 @@ def check_two_column_submatrices(Q):
     J, K = Q.shape
     for k1 in range(K):
         for k2 in range(k1+1, K):
-            Q_bar_candidate = fix_submatrix(Q, k1, k2)
+            Q_bar_candidate = fix_submatrix2(Q, k1, k2)
             if Q_bar_candidate is not None:
                 return Q_bar_candidate
+    return None
+
+
+
+def valid_three_column_submatrix(S):
+    """
+    Given a three-column submatrix S (of shape (J,3)), return True if there exists 
+    a permutation of its columns so that the unique rows of S contain one of the following target sets:
+      1. The standard basis: {(1,0,0), (0,1,0), (0,0,1)}.
+      2. The set T2: {(1,1,0), (1,0,1), (0,1,1), (1,0,0)}.
+      3. The set T3: {(0,1,0), (0,0,1), (1,1,0), (1,0,1)}.
+    Otherwise, return False.
+    """
+    # Unique rows of S as tuples.
+    U = {tuple(row) for row in S}
+    T1 = {(1,0,0), (0,1,0), (0,0,1)}
+    T2 = {(1,1,0), (1,0,1), (0,1,1), (1,0,0)}
+    T3 = {(0,1,0), (0,0,1), (1,1,0), (1,0,1)}
+    
+    # Try every permutation of columns.
+    for perm in itertools.permutations(range(3)):
+        U_perm = {tuple(row[i] for i in perm) for row in S}
+        if T1.issubset(U_perm) or T2.issubset(U_perm) or T3.issubset(U_perm):
+            return True
+    return False
+
+def fix_submatrix3(Q, k1, k2, k3):
+    """
+    Check the three-column submatrix of Q (columns k1, k2, k3).
+    If the submatrix does not contain (up to a permutation of its columns)
+    one of the desired patterns, attempt to fix it by forcing in one missing 
+    standard basis vector.
+    
+    Parameters:
+        Q (np.ndarray): Binary matrix of shape (J, K).
+        k1, k2, k3 (int): Indices of the three columns to be checked.
+        
+    Returns:
+        np.ndarray or None: A candidate Q_bar (modified Q) if a fix is applied,
+                            or None if the submatrix is already valid.
+    """
+    S = Q[:, [k1, k2, k3]]
+    if valid_three_column_submatrix(S):
+        return None  # S is valid.
+    
+    # As a simple fix, enforce Condition 1: force in one missing standard basis vector.
+    basis = {(1,0,0), (0,1,0), (0,0,1)}
+    U = {tuple(row) for row in S}
+    missing = basis - U
+    Q_bar = Q.copy()
+    if missing:
+        missing_vector = list(missing)[0]
+        # Try to find a row in S that is not already one of the basis vectors.
+        for i in range(S.shape[0]):
+            if tuple(S[i]) not in basis:
+                Q_bar[i, [k1, k2, k3]] = np.array(missing_vector)
+                return Q_bar
+        # Fallback: modify the first row.
+        Q_bar[0, [k1, k2, k3]] = np.array(missing_vector)
+        return Q_bar
+    return None
+
+def check_three_column_submatrices(Q):
+    """
+    Iterate over all triples of columns in Q and check whether each 
+    three-column submatrix (of the selected columns) contains one of the valid patterns 
+    (up to a permutation of its columns). For each triple (k1, k2, k3), call fix_submatrix3(Q, k1, k2, k3).
+    
+    If any triple fails the check (i.e. fix_submatrix3 returns a candidate), return that candidate Q_bar.
+    If all triples satisfy one of the valid patterns, return None.
+    
+    Parameters:
+        Q (np.ndarray): Binary matrix of shape (J, K).
+    
+    Returns:
+        np.ndarray or None: A candidate Q_bar that fixes at least one violating three-column submatrix,
+                            or None if every triple is valid.
+    """
+    J, K = Q.shape
+    for (k1, k2, k3) in itertools.combinations(range(K), 3):
+        candidate = fix_submatrix3(Q, k1, k2, k3)
+        if candidate is not None:
+            return candidate
     return None
 
 
@@ -526,6 +609,10 @@ def identifiability(Q):
             return 0, [Q_bar]
 
     Q_bar = check_two_column_submatrices(Q)
+    if Q_bar is not None:
+        return 0, [Q_bar]
+    
+    Q_bar = check_two_three_submatrices(Q)
     if Q_bar is not None:
         return 0, [Q_bar]
     
