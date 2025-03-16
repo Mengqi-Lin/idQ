@@ -26,7 +26,55 @@ def Phi_mat(Q):
     GG = []
     for j in range(J):
         GG.append((list(is_less_equal_than(Q[j], p) for p in pp)))
-    return np.array(GG)
+    return np.array(GG, dtype=int)
+
+
+def item_node_set(Q):
+    """
+    Returns the set of row vectors of Q.
+    
+    Parameters:
+        Q (array-like): A matrix-like structure where each row represents a vector.
+        
+    Returns:
+        set: A set containing each row vector of Q as a tuple.
+    """
+    return {tuple(row) for row in Q}
+
+
+def representative_node_set(Q):
+    """
+    Compute the representative node set R(Q) from the Q-matrix.
+    
+    Here, Q is a binary numpy array of shape (J, K). For each subset S of [J],
+    we compute the bitwise OR (i.e., elementwise maximum) over the rows indexed by S.
+    
+    Formally, R(Q) = { v(⋁_{j in S} q_j) | S ⊆ [J] }.
+    
+    The function returns a set of tuples, each representing a unique vector.
+    
+    Parameters:
+        Q (np.ndarray): A binary matrix of shape (J, K).
+    
+    Returns:
+        set: A set of tuples, each tuple is a representative node.
+    """
+    J, K = Q.shape
+    node_set = set()
+    
+    # Iterate over all subsets of indices from 0 to J (including the empty subset)
+    for r in range(0, J + 1):
+        for subset in itertools.combinations(range(J), r):
+            if len(subset) == 0:
+                # Define the OR of the empty set as the all-zero vector.
+                or_vector = np.zeros(K, dtype=int)
+            else:
+                # Compute the elementwise OR of rows in the subset.
+                or_vector = np.bitwise_or.reduce(Q[list(subset), :])
+            node_set.add(tuple(or_vector))
+    
+    return node_set
+
 
 def column_rank_T_mat(Q):
     TT = T_mat(Q)
@@ -612,7 +660,7 @@ def identifiability(Q):
     if Q_bar is not None:
         return 0, [Q_bar]
     
-    Q_bar = check_two_three_submatrices(Q)
+    Q_bar = check_three_column_submatrices(Q)
     if Q_bar is not None:
         return 0, [Q_bar]
     
