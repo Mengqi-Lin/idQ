@@ -973,19 +973,66 @@ def identifiability(Q):
         Q_bar = lift_Q_zero_identical(Q_unique_bar, mapping_zero_identical)
         return 0, Q_bar
 
-    # Step 4: Direct identifiability check.
+    # Step 4: Determine identifiability of Q_reduced.
     if direct_check_id(Q_reduced):
-        print("Q_reduced is directly identifiable (by direct_check_id).")
-        return 1, []
+        print("Q_reduced is directly identifiable (by direct_check).")
+    else:
+        status, Q_reduced_bar = brute_check_id(Q_reduced)
+        if status == 0:
+            print("Q_bar found via brute_check_id on Q_reduced.")
+            Q_unique_bar = lift_Q_generated(Q_reduced_bar, mapping_generated)
+            Q_bar = lift_Q_zero_identical(Q_unique_bar, mapping_zero_identical)
+            return 0, Q_bar
+        else:
+            print("Q_reduced is identifiable (by brute_check).")
+    
+    J, K = Q.shape
+    distances = distances2U(Q)
 
-    # Step 5: Use brute_check_id on Q_reduced.
-    status, candidate = brute_check_id(Q_reduced)
-    if status == 0:
-        print("Candidate found via brute_check_id on Q_reduced.")
-        Q_reduced_bar = candidate
-        Q_unique_bar = lift_Q_generated(Q_reduced_bar, mapping_generated)
-        Q_bar = lift_Q_zero_identical(Q_unique_bar, mapping_zero_identical)
-        return 0, Q_bar
+    orig_mapping = original_indices_from_reduced(mapping_zero_identical, mapping_generated)
+    # Flatten the mapping: union of all lists gives the set of irreplaceable original rows.
+    irreplaceable_rows = set(sum(orig_mapping.values(), []))
+    replaceable_rows = set(range(J)) - set(irreplaceable_rows)
+    replacement_indices = list(replaceable_rows)
 
+    # Construct candidate set: all binary vectors of length K not in the representative set R(Q).
+    all_vecs = list(itertools.product([0,1], repeat=Q.shape[1]))
+    rep_set = representative_node_set(Q)  # Returns a set of tuples.
+    cand_bars = [np.array(vec) for vec in all_vecs if tuple(vec) not in rep_set]
+
+    subQ_bars = []
+    for i in range(len(replacement_indices)):
+        index = replacement_indices[i]
+        q_bars = []
+        norm_threshold = K - distances[index]
+        q_bars = [cand for cand in cand_bars if np.sum(cand) <= norm_threshold]
+        valid_q_bars = []
+        Q_temp = Q.copy()
+        for q_bar in q_bars:
+            Q_temp[index, :] = q_bar
+            if preserve_partial_order(Q, Q_temp, set(irreplaceable_rows), [index]):
+                valid_q_bars.append(q_bar)
+        subQ_bars.append(valid_q_bars)
+    
+    # Generate Cartesian product of candidate replacements.
+    subQ_bars = itertools.product(*subQ_bars)
+    Q_bar_gen = generate_unique_Q_bars(subQ_bars, Q, replacement_indices)
+    
+    try:
+        first_candidate = next(Q_bar_gen)
+    except StopIteration:
+        print("No candidate found in Q: Q is identifiable.")
+        return 1, None
+    else:
+        Q_bar_gen = itertools.chain([first_candidate], Q_bar_gen)
+    
+    PhiQ = Phi_mat(Q)
+    for Q_bar in Q_bar_gen:
+        PhiB = Phi_mat(Q_bar)
+        if thmCheck(PhiQ, PhiB, tol=1e-8):
+            print("Q is not identifiable (candidate found).")
+            return 0, Q_bar
+    
     print("Q is identifiable.")
-    return 1, []
+    return 1, None
+    
