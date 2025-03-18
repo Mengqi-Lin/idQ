@@ -4,7 +4,7 @@ from itertools import combinations, product, permutations
 import warnings
 import time
 from idQ import is_parallel, is_strictly_less_than, is_less_equal_than, generate_binary_vectors, generate_permutations, get_D_l, height_of_Q, distances2U, preserve_partial_order, identifiability
-from idQ import generate_DAG, generate_hasse_diagram, check_for_identity, topo_order
+from idQ import generate_DAG, generate_hasse_diagram, topo_order
 import random
 
 ## Randomly generate J times K binary matrix.
