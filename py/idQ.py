@@ -774,7 +774,68 @@ def lift_Q_generated(Q, Q_reduced_bar, mapping):
             Q_bar[i] = np.bitwise_or.reduce(Q_reduced_bar[indices], axis=0)
     return Q_bar
                         
-                
+
+    
+    
+    
+def brute_check_id(Q_reduced):
+    """
+    Perform candidate generation on the reduced matrix Q_reduced to check the identifiability.
+    
+    Q_reduced is the matrix obtained after removing all-zero, duplicate, and generated rows.
+    
+    The function generates candidate Q_reduced_bar matrices by modifying the replaceable rows of Q_reduced.
+    It returns a tuple (status, Q_reduced_bar) where:
+      - status == 0 indicates that Q_reduced is not identifiable and Q_reduced_bar is a candidate,
+      - status == 1 indicates that Q_reduced is identifiable (and no candidate is found).
+    
+    Note: Lifting Q_reduced_bar back to the full Q will be handled in the main function.
+    """
+    J_reduced, K = Q_reduced.shape
+    distances = distances2U(Q_reduced)
+    irreplaceable_rows = np.where(np.array(distances) == K - 1)[0]
+    replaceable_rows = set(range(J_reduced)) - set(irreplaceable_rows)
+    
+    replacement_indices = list(replaceable_rows)
+    subQ_bars = []
+    for i in range(len(replacement_indices)):
+        index = replacement_indices[i]
+        q_bars = []
+        for p in range(1, K - distances[index] + 1):
+            q_bars.extend(generate_binary_vectors(K, p))
+        valid_q_bars = []
+        Q_temp = Q_reduced.copy()
+        for q_bar in q_bars:
+            Q_temp[index, :] = q_bar
+            if preserve_partial_order(Q_reduced, Q_temp, set(irreplaceable_rows), [index]):
+                valid_q_bars.append(q_bar)
+        subQ_bars.append(valid_q_bars)
+    
+    # Generate Cartesian product of candidate replacements.
+    subQ_bars = itertools.product(*subQ_bars)
+    Q_bar_gen = generate_unique_Q_bars(subQ_bars, Q_reduced, replacement_indices)
+    
+    try:
+        first_candidate = next(Q_bar_gen)
+    except StopIteration:
+        print("Q_reduced is identifiable.")
+        return 1, None
+    else:
+        Q_bar_gen = itertools.chain([first_candidate], Q_bar_gen)
+    
+    PhiQ = Phi_mat(Q_reduced)
+    for Q_reduced_bar in Q_bar_gen:
+        PhiB = Phi_mat(Q_reduced_bar)
+        if thmCheck(PhiQ, PhiB, tol=1e-8):
+            print("Q_reduced is not identifiable.")
+            return 0, Q_reduced_bar
+    
+    print("Q_reduced is identifiable.")
+    return 1, None   
+    
+    
+
+
 ### This function checks if Q is identifiable, if not, it returns one possible Q_bar.
 
 def identifiability(Q):
@@ -794,6 +855,12 @@ def identifiability(Q):
     if len(Q_unique_rows) != len(Q):
         Q = Q_unique_rows
         print("Removed identical rows of Q.")
+        
+    # Remove zero and identical rows.
+    Q_unique, mapping_zero_identical = remove_zero_identical(Q)
+    
+    # Remove generated rows, obtaining Q_reduced and mapping.
+    Q_reduced, mapping_generated = remove_generated_rows(Q_unique)
         
     # Check if Q has all-zero or all-one columns
     for k in range(Q.shape[1]):
