@@ -52,36 +52,35 @@ def item_node_set(Q):
 
 def representative_node_set(Q):
     """
-    Compute the representative node set R(Q) from the Q-matrix.
-    
-    Here, Q is a binary numpy array of shape (J, K). For each subset S of [J],
-    we compute the bitwise OR (i.e., elementwise maximum) over the rows indexed by S.
-    
-    Formally, R(Q) = { v(⋁_{j in S} q_j) | S ⊆ [J] }.
-    
-    The function returns a set of tuples, each representing a unique vector.
-    
+    Build the representative node set R(Q) without enumerating all subsets.
+    Instead, iteratively build up the set of distinct bitwise-OR combinations.
+
     Parameters:
-        Q (np.ndarray): A binary matrix of shape (J, K).
-    
+        Q (np.ndarray): A J×K binary matrix.
+
     Returns:
-        set: A set of tuples, each tuple is a representative node.
+        set: A set of length-K tuples corresponding to distinct bitwise-ORs
+             of rows of Q.
     """
     J, K = Q.shape
-    node_set = set()
     
-    # Iterate over all subsets of indices from 0 to J (including the empty subset)
-    for r in range(0, J + 1):
-        for subset in itertools.combinations(range(J), r):
-            if len(subset) == 0:
-                # Define the OR of the empty set as the all-zero vector.
-                or_vector = np.zeros(K, dtype=int)
-            else:
-                # Compute the elementwise OR of rows in the subset.
-                or_vector = np.bitwise_or.reduce(Q[list(subset), :])
-            node_set.add(tuple(or_vector))
+    # Start with a set containing just the all-zero vector
+    R = {tuple([0]*K)}
     
-    return node_set
+    # For each row in Q, OR it with every pattern in R (old or newly discovered)
+    for row in Q:
+        new_patterns = []
+        for pattern in R:
+            # Convert pattern (tuple) and row (ndarray) into an OR-combination
+            or_vec = [pattern[i] | row[i] for i in range(K)]
+            new_patterns.append(tuple(or_vec))
+        
+        # Add them to R
+        for pat in new_patterns:
+            R.add(pat)
+    
+    return R
+
 
 
 def column_rank_T_mat(Q):
