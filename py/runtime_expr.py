@@ -5,180 +5,219 @@ import time
 import csv
 import itertools
 import numpy as np
-import networkx as nx
+
+from reduceQ import (
+    get_reduced, 
+    get_Qunique_from_Qreduced, 
+    get_Q_from_Qunique, 
+    get_Q_from_Qreduced
+)
+from direct_check_id import direct_check_id
 from idQ import (
     Phi_mat,
     thmCheck,
     check_two_column_submatrices,
-    fix_submatrix,
+    check_three_column_submatrices,
     canonicalize,
     generate_unique_Q_bars,
     preserve_partial_order,
     generate_binary_vectors,
-    distances2U
+    distances2U,
+    representative_node_set,
+    brute_check_id
 )
 
-def identifiability(Q):
+def identifiability_expr(Q):
     """
-    Check identifiability of Q.
-    Returns a tuple: (status, Q_bar, branch) where status==1 means Q is identifiable,
-    status==0 means not identifiable, Q_bar is a candidate matrix showing non-identifiability (if any),
-    and branch indicates which step triggered the return:
-      - 'trivial': Q contains an all-zero or all-one column.
-      - 'two_column': determined via the two-column submatrix check.
-      - 'generator_empty': candidate generation produced no alternative (Q is identifiable).
-      - 'candidate_found': a candidate Q_bar was found that satisfies the algebraic condition.
+    Check if Q is identifiable, returning:
+      (status, Q_bar, branch, runtime, direct_flag, brute_flag)
+
+    status == 1 -> Q is identifiable
+    status == 0 -> Q is not identifiable
+    Q_bar -> witness if status==0, else []
+    branch -> string describing which step concluded:
+        'trivial', 'two_column', 'three_column',
+        'direct_check', 'brute_candidate', 'brute_check',
+        'generator_empty', 'candidate_found', 'none'
+
+    runtime -> time in seconds
+
+    direct_flag == 1 if direct_check_id(Q_reduced) is True, else 0
+    brute_flag == 1 if Q_reduced is deemed identifiable by brute_check_id, else 0
     """
-    Q = Q.copy()
-    # Check if Q is a binary matrix.
-    if not isinstance(Q, np.ndarray) or not np.all((Q == 0) | (Q == 1)):
-        raise Exception("Q must be a binary matrix.")
+    start_time = time.time()
+
+    # Step 1: get Q_reduced and Q_unique
+    (Q_reduced, reduced_to_original, orig_indices_for_reduced,
+     Q_unique, unique_to_original, reduced_to_unique) = get_reduced(Q.copy())
     
-    # Remove all-zero rows.
-    row_sums = np.sum(Q, axis=1)
-    if np.any(row_sums == 0):
-        Q = Q[row_sums != 0]
-        print("All-zero rows have been removed from Q.")
+    J_reduced, K = Q_reduced.shape
+
+    direct_flag = 0
+    brute_flag = 0
+
+    # Step 2: Check trivial columns in Q_reduced
+    for k in range(K):
+        if np.all(Q_reduced[:, k] == 0):
+            Q_reduced_bar = Q_reduced.copy()
+            Q_reduced_bar[:, k] = 1
+            print("Q_reduced is trivially not identifiable (zero column).")
+            Q_bar = get_Q_from_Qreduced(Q_reduced_bar, reduced_to_original)
+            return 0, [Q_bar], 'trivial', time.time() - start_time, direct_flag, brute_flag
+        if np.all(Q_reduced[:, k] == 1):
+            Q_reduced_bar = Q_reduced.copy()
+            Q_reduced_bar[:, k] = 0
+            print("Q_reduced is trivially not identifiable (one column).")
+            Q_bar = get_Q_from_Qreduced(Q_reduced_bar, reduced_to_original)
+            return 0, [Q_bar], 'trivial', time.time() - start_time, direct_flag, brute_flag
+
+    # Step 3: two-column check
+    candidate = check_two_column_submatrices(Q_reduced)
+    if candidate is not None:
+        print("Q_reduced is not identifiable (two-column check).")
+        Q_reduced_bar = candidate
+        Q_bar = get_Q_from_Qreduced(Q_reduced_bar, reduced_to_original)
+        return 0, [Q_bar], 'two_column', time.time() - start_time, direct_flag, brute_flag
     
-    # Remove identical rows.
-    Q_unique = np.unique(Q, axis=0)
-    if len(Q_unique) != len(Q):
-        Q = Q_unique
-        print("Removed identical rows of Q.")
-    
-    # Check for trivial non-identifiability: all-zero or all-one columns.
-    for k in range(Q.shape[1]):
-        if np.all(Q[:, k] == 0):
-            Q_bar = Q.copy()
-            Q_bar[:, k] = 1  # Replace the k-th column with all ones.
-            print("Q is trivially not identifiable (zero column).")
-            return 0, [Q_bar], 'trivial'
-        if np.all(Q[:, k] == 1):
-            Q_bar = Q.copy()
-            Q_bar[:, k] = 0  # Replace the k-th column with all zeros.
-            print("Q is trivially not identifiable (one column).")
-            return 0, [Q_bar], 'trivial'
-    
-    # Step 2: Two-column submatrix check.
-    Q_bar_candidate = check_two_column_submatrices(Q)
-    if Q_bar_candidate is not None:
-        print("Identifiability determined at two-column check.")
-        return 0, [Q_bar_candidate], 'two_column'
-    
-    J, K = Q.shape
-    distances = distances2U(Q)
-    irreplaceable_rows = np.where(np.array(distances) == K - 1)[0]
-    replaceable_rows = set(range(J)) - set(irreplaceable_rows)
-    
+    # Step 4: three-column check
+    candidate = check_three_column_submatrices(Q_reduced)
+    if candidate is not None:
+        print("Q_reduced is not identifiable (three-column check).")
+        Q_reduced_bar = candidate
+        Q_bar = get_Q_from_Qreduced(Q_reduced_bar, reduced_to_original)
+        return 0, [Q_bar], 'three_column', time.time() - start_time, direct_flag, brute_flag
+
+    # Step 5: direct_check_id / brute_check_id
+    if direct_check_id(Q_reduced):
+        print("Q_reduced is identifiable (direct_check).")
+        direct_flag = 1
+        branch_reduced = 'direct_check'
+    else:
+        status_b, Q_reduced_bar = brute_check_id(Q_reduced)
+        if status_b == 0:
+            print("Q_reduced is not identifiable (brute_check_id).")
+            Q_bar = get_Q_from_Qreduced(Q_reduced_bar, reduced_to_original)
+            return 0, [Q_bar], 'brute_candidate', time.time() - start_time, direct_flag, brute_flag
+        else:
+            print("Q_reduced is identifiable (brute_check).")
+            brute_flag = 1
+            branch_reduced = 'brute_check'
+
+    # Q_reduced is identifiable => expansions on Q_unique
+    J_unique, K_uniq = Q_unique.shape
+    distances = distances2U(Q_unique)
+    non_generated_indices = [u for u, mapping in enumerate(reduced_to_unique) if len(mapping) == 1]
+    irreplaceable_rows = set(non_generated_indices)
+    replaceable_rows = set(range(J_unique)) - irreplaceable_rows
     replacement_indices = list(replaceable_rows)
-    subQ_bars = []
-    for i in range(len(replaceable_rows)):
-        index = replacement_indices[i]
-        q_bars = []
-        for p in range(1, K - distances[index] + 1):
-            q_bars.extend(generate_binary_vectors(K, p))
+
+    # Build all possible binary vectors (K_uniq bits) that are not in R(Q_unique)
+    all_vecs = list(itertools.product([0,1], repeat=K_uniq))
+    rep_set = representative_node_set(Q_unique)
+    cand_bars = [np.array(vec) for vec in all_vecs if tuple(vec) not in rep_set]
+
+    subQ_unique_bars = []
+    for index in replacement_indices:
+        norm_threshold = K_uniq - distances[index]
+        q_bars = [cand for cand in cand_bars if np.sum(cand) <= norm_threshold]
         valid_q_bars = []
-        Q_temp = Q.copy()
+        Q_temp = Q_unique.copy()
         for q_bar in q_bars:
             Q_temp[index, :] = q_bar
-            if preserve_partial_order(Q, Q_temp, set(irreplaceable_rows), [index]):
+            if preserve_partial_order(Q_unique, Q_temp, set(irreplaceable_rows), [index]):
                 valid_q_bars.append(q_bar)
-        subQ_bars.append(valid_q_bars)
+        subQ_unique_bars.append(valid_q_bars)
     
-    subQ_bars = itertools.product(*subQ_bars)
-    Q_bar_gen = generate_unique_Q_bars(subQ_bars, Q, replacement_indices)
+    # Cartesian product
+    subQ_unique_bars = itertools.product(*subQ_unique_bars)
+    Q_unique_bar_gen = generate_unique_Q_bars(subQ_unique_bars, Q_unique, replacement_indices)
     
     try:
-        first_Q_bar = next(Q_bar_gen)
+        first_candidate = next(Q_unique_bar_gen)
     except StopIteration:
+        # Means expansions gave no alternative => Q is identifiable
         print("Q is identifiable (candidate generation produced no alternative).")
-        return 1, [], 'generator_empty'
+        return 1, [], 'generator_empty', time.time() - start_time, direct_flag, brute_flag
     else:
-        Q_bar_gen = itertools.chain([first_Q_bar], Q_bar_gen)
+        Q_unique_bar_gen = itertools.chain([first_candidate], Q_unique_bar_gen)
     
-    PhiQ = Phi_mat(Q)
-    for Q_bar in Q_bar_gen:
-        # Skip candidates that are permutation equivalent to Q.
-        if np.array_equal(canonicalize(Q_bar), canonicalize(Q)):
-            continue
-        PhiB = Phi_mat(Q_bar)
+    PhiQ = Phi_mat(Q_unique)
+    for Q_unique_bar in Q_unique_bar_gen:
+        PhiB = Phi_mat(Q_unique_bar)
         if thmCheck(PhiQ, PhiB, tol=1e-8):
             print("Q is not identifiable (candidate found).")
-            return 0, Q_bar, 'candidate_found'
-    
+            return 0, Q_unique_bar, 'candidate_found', time.time() - start_time, direct_flag, brute_flag
+
     print("Q is identifiable.")
-    return 1, [], 'none'
+    return 1, [], 'none', time.time() - start_time, direct_flag, brute_flag
+
 
 def runtime_expr(J, K, N, seed, output_csv=None):
     """
-    Randomly sample N binary matrices of shape (J, K), check identifiability,
-    and compute:
-      1) Average runtime for identifiability(Q)
-      2) Proportion of matrices determined non-identifiable by trivial or two-column check.
-      3) Proportion of matrices for which candidate generation produced no alternative.
-      4) Overall proportion of identifiable vs. non-identifiable matrices.
-      5) The seed used.
+    Randomly sample N binary matrices of shape (J, K). For each, call identifiability_expr(Q),
+    which returns (status, Q_bar, branch, runtime, direct_flag, brute_flag).
     
-    The results are appended to a single CSV file. If no output_csv filename is provided,
-    a default filename including J and K is used.
-    
-    Returns a dictionary with the results.
+    We aggregate:
+      - total/average runtime
+      - how often each branch occurred
+      - proportion of identifiable vs. non-identifiable
+      - how many times direct_flag == 1
+      - how many times brute_flag == 1
+    and append the results to a CSV file.
+
+    Returns a dictionary with summarized results.
     """
-    import os
-    import csv
     np.random.seed(seed)
+    
     total_time = 0.0
-    count_trivial = 0
-    count_two_column = 0
-    count_generator_empty = 0
-    count_candidate_found = 0
     count_identifiable = 0
     count_non_identifiable = 0
+    count_direct_flag = 0
+    count_brute_flag = 0
+
+    branch_counts = {}
 
     for i in range(N):
         Q = np.random.randint(0, 2, size=(J, K))
-        start = time.time()
-        status, Q_bar, branch = identifiability(Q)
-        runtime = time.time() - start
-        total_time += runtime
+        # identifiability_expr(Q) now returns 6 items
+        status, Q_bar, branch, runtime, direct_flag, brute_flag = identifiability_expr(Q)
         
-        if branch == 'trivial':
-            count_trivial += 1
-        elif branch == 'two_column':
-            count_two_column += 1
-        elif branch == 'generator_empty':
-            count_generator_empty += 1
-        elif branch == 'candidate_found':
-            count_candidate_found += 1
+        total_time += runtime
+        branch_counts[branch] = branch_counts.get(branch, 0) + 1
         
         if status == 1:
             count_identifiable += 1
         else:
             count_non_identifiable += 1
+        
+        # Sum up direct/brute flags
+        count_direct_flag += direct_flag
+        count_brute_flag += brute_flag
 
     avg_runtime = total_time / N
-    prop_no_candidate = (count_trivial + count_two_column) / N
-    prop_generator_empty = count_generator_empty / N
     prop_identifiable = count_identifiable / N
     prop_non_identifiable = count_non_identifiable / N
-    
+
     results = {
         'J': J,
         'K': K,
         'N': N,
         'seed': seed,
         'avg_runtime': avg_runtime,
-        'prop_no_candidate': prop_no_candidate,
-        'prop_generator_empty': prop_generator_empty,
         'prop_identifiable': prop_identifiable,
         'prop_non_identifiable': prop_non_identifiable,
-        'count_trivial': count_trivial,
-        'count_two_column': count_two_column,
-        'count_generator_empty': count_generator_empty,
-        'count_candidate_found': count_candidate_found
+        'total_time': total_time,
+        'count_direct_flag': count_direct_flag,
+        'prop_direct_flag': count_direct_flag / N,
+        'count_brute_flag': count_brute_flag,
+        'prop_brute_flag': count_brute_flag / N
     }
-    
-    # If no output_csv is provided, generate a default filename including J and K.
+
+    # Add branch counts and proportions
+    for b, cnt in branch_counts.items():
+        results[f'count_{b}'] = cnt
+        results[f'prop_{b}'] = cnt / N
+
     if output_csv is None:
         output_csv = f"data/runtime_expr_results_J{J}_K{K}.csv"
     
@@ -194,15 +233,15 @@ def runtime_expr(J, K, N, seed, output_csv=None):
 
 
 if __name__ == '__main__':
-    # Command-line arguments: J, K, N, seed.
     if len(sys.argv) != 5:
         print("Usage: python runtime_expr.py <J> <K> <N> <seed>")
         sys.exit(1)
+
     J = int(sys.argv[1])
     K = int(sys.argv[2])
     N = int(sys.argv[3])
     seed = int(sys.argv[4])
-    
+
     results = runtime_expr(J, K, N, seed)
     print("Simulation results:")
     print(results)

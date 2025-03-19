@@ -560,10 +560,10 @@ def generate_unique_Q_bars(subQ_bars, Q, replacement_indices):
             candidate = candidate.reshape(1, -1)
         
         Q_bar[replacement_indices, :] = candidate
-        if preserve_partial_order(Q, Q_bar, replacement_indices, replacement_indices):
-            can_form = canonicalize(Q_bar)
-            key = can_form.tostring()
-            if key not in seen:
+        can_form = canonicalize(Q_bar)
+        key = can_form.tostring()
+        if key not in seen:
+            if preserve_partial_order(Q, Q_bar, replacement_indices, replacement_indices):
                 seen.add(key)
                 yield Q_bar
 
