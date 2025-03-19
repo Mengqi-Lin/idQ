@@ -61,19 +61,24 @@ def flatten_matrix(Q):
     """
     return "".join(map(str, Q.flatten().tolist()))
 
+
 def any_column_permutation_in_set(Q_reduced, identifiable_set):
     """
-    Check if some column permutation of Q_reduced (canonicalized) is in identifiable_set.
+    Check if some column permutation of Q_reduced (with rows sorted lexicographically)
+    is in identifiable_set.
     For small K, this iterates over all permutations.
     """
     J, K = Q_reduced.shape
     for perm in itertools.permutations(range(K)):
         Q_perm = Q_reduced[:, perm]
-        # Optionally, we can sort rows to obtain a canonical representation.
-        # For now, we simply flatten Q_perm.
-        if flatten_matrix(Q_perm) in identifiable_set:
+        # Sort the rows lexicographically to obtain a canonical representation.
+        sorted_rows = sorted(Q_perm.tolist())
+        # Flatten the sorted rows into a single string.
+        flattened = "".join("".join(map(str, row)) for row in sorted_rows)
+        if flattened in identifiable_set:
             return True
     return False
+
 
 
 def direct_check_id(Q_reduced, csv_file=None):
