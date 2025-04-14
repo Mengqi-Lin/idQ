@@ -5,7 +5,7 @@ import warnings
 import time
 from idQ import is_parallel, is_strictly_less_than, is_less_equal_than, generate_binary_vectors, generate_permutations, get_D_l, height_of_Q, distances2U, preserve_partial_order, identifiability
 from idQ import topo_order
-import random
+import networkx as nx
 
 ## Randomly generate J times K binary matrix.
 def random_generate_Q(J, K):

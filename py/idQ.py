@@ -30,10 +30,10 @@ def T_mat(Q):
 # Compute Phi_matrix of Q
 def Phi_mat(Q):
     J, K = Q.shape
-    pp = [seq for seq in itertools.product([0, 1], repeat=K)]
+    AA = [seq for seq in itertools.product([0, 1], repeat=K)]
     GG = []
     for j in range(J):
-        GG.append((list(is_less_equal_than(Q[j], p) for p in pp)))
+        GG.append((list(is_less_equal_than(Q[j], aaa) for aaa in AA)))
     return np.array(GG, dtype=int)
 
 
@@ -692,55 +692,6 @@ def identifiability(Q):
             return 0, Q_bar
         else:
             print("Q_reduced is identifiable (brute_check).")
-    
-    J_unique, K = Q_unique.shape
-    distances = distances2U(Q_unique)
-    non_generated_indices = [u for u, mapping in enumerate(reduced_to_unique) if len(mapping) == 1]
-
-    # Flatten the mapping: union of all lists gives the set of irreplaceable original rows.
-    irreplaceable_rows = set(non_generated_indices)
-    replaceable_rows = set(range(J_unique)) - irreplaceable_rows
-    replacement_indices = list(replaceable_rows)
-
-    # Construct candidate set: all binary vectors of length K not in the representative set R(Q).
-    all_vecs = list(itertools.product([0,1], repeat=K))
-    rep_set = representative_node_set(Q_unique)  # Returns a set of tuples.
-    cand_bars = [np.array(vec) for vec in all_vecs if tuple(vec) not in rep_set]
-
-    subQ_unique_bars = []
-    for i in range(len(replacement_indices)):
-        index = replacement_indices[i]
-        q_bars = []
-        norm_threshold = K - distances[index]
-        q_bars = [cand for cand in cand_bars if np.sum(cand) <= norm_threshold]
-        valid_q_bars = []
-        Q_temp = Q_unique.copy()
-        for q_bar in q_bars:
-            Q_temp[index, :] = q_bar
-            if preserve_partial_order(Q_unique, Q_temp, set(irreplaceable_rows), [index]):
-                valid_q_bars.append(q_bar)
-        subQ_unique_bars.append(valid_q_bars)
-    
-    # Generate Cartesian product of candidate replacements.
-    subQ_unique_bars = itertools.product(*subQ_unique_bars)
-    Q_unique_bar_gen = generate_unique_Q_bars(subQ_unique_bars, Q_unique, replacement_indices)
-    
-    try:
-        first_candidate = next(Q_unique_bar_gen)
-    except StopIteration:
-        print("Q is identifiable.")
-        return 1, None
-    else:
-        Q_unique_bar_gen = itertools.chain([first_candidate], Q_unique_bar_gen)
-    
-    PhiQ = Phi_mat(Q_unique)
-    for Q_unique_bar in Q_unique_bar_gen:
-        PhiB = Phi_mat(Q_unique_bar)
-        if thmCheck(PhiQ, PhiB, tol=1e-8):
-            print("Q is not identifiable (Enumerated all Q_bars).")
-            Q_bar = get_Q_from_Qunique(Q_unique_bar, unique_to_original)
-            return 0, Q_bar
-    
-    print("Q is identifiable.")
-    return 1, None
+            print("Q is identifiable.")
+            return 1, None
     
