@@ -2,21 +2,21 @@
 import numpy as np
 from collections import defaultdict
 
-def get_reduced(Q):
+def get_basis(Q):
     """
     Takes a binary matrix Q (list of lists or a 2D NumPy array of 0/1) and returns:
 
-      1) Q_reduced:
-         Final reduced set of distinct, non-zero rows from Q (as a NumPy array),
+      1) Q_basis:
+         Final basis set of distinct, non-zero rows from Q (as a NumPy array),
          in lexicographic order, where any row that can be formed by OR of
          previously included rows is excluded.
 
-      2) reduced_to_original:
+      2) basis_to_original:
          A list (length = number of rows in original Q). For each row i in the original Q,
-         reduced_to_original[i] is a list of indices in Q_reduced whose bitwise OR yields Q[i].
+         basis_to_original[i] is a list of indices in Q_basis whose bitwise OR yields Q[i].
 
-      3) original_indices_for_reduced:
-         For each row j in Q_reduced, a list of the original Q row indices that exactly equal Q_reduced[j].
+      3) original_indices_for_basis:
+         For each row j in Q_basis, a list of the original Q row indices that exactly equal Q_basis[j].
 
       4) Q_unique:
          All distinct, non-zero rows in Q, sorted lexicographically, returned as a NumPy array.
@@ -26,8 +26,8 @@ def get_reduced(Q):
          A list (length = number of rows in original Q) where unique_to_original[i] is the index in Q_unique
          that matches Q[i] exactly (or -1 if Q[i] is a zero row).
 
-      6) reduced_to_unique:
-         A list (length = number of rows in Q_unique) where reduced_to_unique[u] is a list of indices in Q_reduced
+      6) basis_to_unique:
+         A list (length = number of rows in Q_unique) where basis_to_unique[u] is a list of indices in Q_basis
          whose bitwise OR equals Q_unique[u].
     """
     # Ensure Q is a list of lists (if passed as a NumPy array, convert to list-of-lists)
@@ -64,25 +64,25 @@ def get_reduced(Q):
         else:
             unique_to_original[i] = -1
 
-    # 3) Build Q_reduced from Q_unique using OR-based elimination.
-    # or_dict maps any row (as a tuple) that can be formed by OR-ing Q_reduced rows
-    # to the list of indices (into Q_reduced) used to form it.
+    # 3) Build Q_basis from Q_unique using OR-based elimination.
+    # or_dict maps any row (as a tuple) that can be formed by OR-ing Q_basis rows
+    # to the list of indices (into Q_basis) used to form it.
     or_dict = {}
     if zero_tuple in row_to_indices:
         or_dict[zero_tuple] = []
     
-    Q_reduced_tuples = []
-    original_indices_for_reduced = []
+    Q_basis_tuples = []
+    original_indices_for_basis = []
 
     def bitwise_or(a, b):
         return tuple(x or y for x, y in zip(a, b))
 
     for r in unique_tuples:
         if r not in or_dict:
-            # r is not yet OR-generated, so we add it to Q_reduced.
-            Q_reduced_tuples.append(r)
-            new_idx = len(Q_reduced_tuples) - 1
-            original_indices_for_reduced.append(row_to_indices[r])
+            # r is not yet OR-generated, so we add it to Q_basis.
+            Q_basis_tuples.append(r)
+            new_idx = len(Q_basis_tuples) - 1
+            original_indices_for_basis.append(row_to_indices[r])
             # Immediately add r to or_dict.
             or_dict[r] = [new_idx]
             # Now update or_dict with combinations including r.
@@ -92,47 +92,47 @@ def get_reduced(Q):
                 if new_or not in or_dict:
                     or_dict[new_or] = or_dict[x] + [new_idx]
 
-    Q_reduced_list = [list(t) for t in Q_reduced_tuples]
+    Q_basis_list = [list(t) for t in Q_basis_tuples]
 
-    # 4) Build reduced_to_original: for each original row, indices in Q_reduced whose OR yields it.
-    reduced_to_original = [or_dict[r] for r in rows]
+    # 4) Build basis_to_original: for each original row, indices in Q_basis whose OR yields it.
+    basis_to_original = [or_dict[r] for r in rows]
 
-    # 5) Build reduced_to_unique:
-    # For each row u in Q_unique, a list of Q_reduced indices that OR together yield Q_unique[u].
-    reduced_to_unique = []
+    # 5) Build basis_to_unique:
+    # For each row u in Q_unique, a list of Q_basis indices that OR together yield Q_unique[u].
+    basis_to_unique = []
     for r in unique_tuples:
-        reduced_to_unique.append(or_dict[r])
+        basis_to_unique.append(or_dict[r])
 
-    # Convert Q_reduced_list and Q_unique_list to NumPy arrays.
-    Q_reduced = np.array(Q_reduced_list, dtype=int)
+    # Convert Q_basis_list and Q_unique_list to NumPy arrays.
+    Q_basis = np.array(Q_basis_list, dtype=int)
     Q_unique = np.array(Q_unique_list, dtype=int)
 
     return (
-        Q_reduced,                    # as a NumPy array
-        reduced_to_original,          # list of lists
-        original_indices_for_reduced, # list of lists
+        Q_basis,                    # as a NumPy array
+        basis_to_original,          # list of lists
+        original_indices_for_basis, # list of lists
         Q_unique,                     # as a NumPy array
         unique_to_original,           # list
-        reduced_to_unique             # list of lists
+        basis_to_unique             # list of lists
     )
 
-def get_Qunique_from_Qreduced(Q_reduced, reduced_to_unique):
+def get_Qunique_from_Qbasis(Q_basis, basis_to_unique):
     """
-    Reconstruct Q_unique from Q_reduced using reduced_to_unique.
+    Reconstruct Q_unique from Q_basis using basis_to_unique.
 
-    :param Q_reduced: A NumPy array of rows (each row a list of 0/1).
-    :param reduced_to_unique: List of lists, where each element is a list of indices in Q_reduced 
+    :param Q_basis: A NumPy array of rows (each row a list of 0/1).
+    :param basis_to_unique: List of lists, where each element is a list of indices in Q_basis 
                               whose bitwise OR yields a row in Q_unique.
     :return: Q_unique as a NumPy array.
     """
-    if Q_reduced.size == 0:
+    if Q_basis.size == 0:
         return np.array([[]], dtype=int)
-    n_cols = Q_reduced.shape[1]
+    n_cols = Q_basis.shape[1]
     Q_unique_list = []
-    for subset in reduced_to_unique:
+    for subset in basis_to_unique:
         row = [0] * n_cols
         for ridx in subset:
-            row = [row[c] | Q_reduced[ridx, c] for c in range(n_cols)]
+            row = [row[c] | Q_basis[ridx, c] for c in range(n_cols)]
         Q_unique_list.append(row)
     return np.array(Q_unique_list, dtype=int)
 
@@ -159,23 +159,23 @@ def get_Q_from_Qunique(Q_unique, unique_to_original):
         Q_reconstructed.append(row)
     return np.array(Q_reconstructed, dtype=int)
 
-def get_Q_from_Qreduced(Q_reduced, reduced_to_original):
+def get_Q_from_Qbasis(Q_basis, basis_to_original):
     """
-    Reconstruct the original Q from Q_reduced using reduced_to_original.
+    Reconstruct the original Q from Q_basis using basis_to_original.
 
-    :param Q_reduced: A NumPy array of rows (each row a list of 0/1).
-    :param reduced_to_original: List (length = number of rows in original Q) where reduced_to_original[i]
-                                is a list of indices in Q_reduced whose OR yields Q[i].
+    :param Q_basis: A NumPy array of rows (each row a list of 0/1).
+    :param basis_to_original: List (length = number of rows in original Q) where basis_to_original[i]
+                                is a list of indices in Q_basis whose OR yields Q[i].
     :return: The original Q as a NumPy array.
     """
-    n = len(reduced_to_original)
-    if Q_reduced.size == 0:
+    n = len(basis_to_original)
+    if Q_basis.size == 0:
         return np.array([[]], dtype=int)
-    n_cols = Q_reduced.shape[1]
+    n_cols = Q_basis.shape[1]
     Q_reconstructed = []
-    for subset in reduced_to_original:
+    for subset in basis_to_original:
         row = [0] * n_cols
         for ridx in subset:
-            row = [row[c] | Q_reduced[ridx, c] for c in range(n_cols)]
+            row = [row[c] | Q_basis[ridx, c] for c in range(n_cols)]
         Q_reconstructed.append(row)
     return np.array(Q_reconstructed, dtype=int)
