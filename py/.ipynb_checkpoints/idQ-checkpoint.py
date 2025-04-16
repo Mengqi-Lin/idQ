@@ -307,42 +307,6 @@ def contains_identity_submatrix(Q):
     return False
                 
 
-def thmCheck(PhiQ, PhiB, tol=1e-8):
-    """
-    Check whether the columns of PhiQ are a subset of the columns of PhiB.
-    
-    That is, for each column v in PhiQ, there exists a column w in PhiB such that
-    v and w are equal (within a tolerance, if necessary).
-
-    Parameters:
-        PhiQ (np.ndarray): The Phi matrix computed from Q, shape (m, n).
-        PhiB (np.ndarray): The Phi matrix computed from an alternative candidate Q,
-                           shape (m, p).
-        tol (float): Tolerance for numerical equality (default 1e-8).
-
-    Returns:
-        bool: True if every column of PhiQ is found in PhiB, False otherwise.
-    """
-    m, n = PhiQ.shape
-    m2, p = PhiB.shape
-    if m != m2:
-        raise ValueError("PhiQ and PhiB must have the same number of rows.")
-    
-    # Iterate over each column in PhiQ.
-    for i in range(n):
-        col_found = False
-        colQ = PhiQ[:, i]
-        # Check against each column in PhiB.
-        for j in range(p):
-            colB = PhiB[:, j]
-            # Use np.allclose for floating point comparison, or np.array_equal if exact equality is expected.
-            if np.allclose(colQ, colB, atol=tol):
-                col_found = True
-                break
-        if not col_found:
-            return False
-    return True
-
 
 def fix_submatrix2(Q, k1, k2):
     """
