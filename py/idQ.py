@@ -553,50 +553,36 @@ def generate_unique_Q_bars(subQ_bars, Q, replacement_indices):
         can_form = canonicalize(Q_bar)
         key = can_form.tostring()
         if key not in seen:
-            if preserve_partial_order(Q, Q_bar, replacement_indices, replacement_indices):
-                seen.add(key)
-                yield Q_bar
+            seen.add(key)
+            yield Q_bar
 
 
 def thmCheck(Q_basis, Q_bar_gen):
     """
-    Check candidate matrices from Q_bar_gen against Q_basis using the theorem check.
+    For a given Q_basis and a candidate generator Q_bar_gen, verify for each candidate Q_basis_bar
+    whether every unique response column S from Phi(Q_basis) is "matched" in Q_basis_bar.
     
-    For each candidate Q_basis_bar generated from Q_bar_gen, for every unique response
-    column S from Q_basis (via unique_response_columns(Q_basis)), compute:
-      
-      1. The active indices (where S has a 1).
-      2. The candidate response vector h_a as the logical OR of the rows of Q_basis_bar 
-         at those active indices (or a zero vector if S is all zeros).
-      3. Verify that for every row index j not in the active set,
-         Q_basis_bar[j] is not "covered" by h_a (i.e. np.all(Q_basis_bar[j] <= h_a) must fail).
-    
-    If a candidate Q_basis_bar passes for all S in unique_response_columns(Q_basis),
-    return (0, Q_basis_bar). If no candidate passes, return (1, None).
-    
-    Parameters:
-      Q_basis (np.ndarray): A binary matrix of shape (J_basis, K).
-      Q_bar_gen (generator): A generator yielding candidate matrices Q_basis_bar 
-                             of the same shape as Q_basis.
+    The check is as follows:
+      For each S in unique_response_columns(Q_basis):
+        - Let idx_active be the indices where S is 1.
+        - Compute h_a as the logical OR of the rows Q_basis_bar[idx_active].
+        - For each row j not in idx_active, check that Q_basis_bar[j] is not covered by h_a.
     
     Returns:
-      tuple: (status, candidate)
-             - status == 0: a candidate was found (Q is not identifiable) and candidate is Q_basis_bar.
-             - status == 1: no candidate was found (Q is identifiable); candidate is None.
+        (status, candidate)
+          - status == 0 and candidate == Q_basis_bar if a candidate is found,
+          - (1, None) if no candidate passes the check.
     """
     J_basis, K = Q_basis.shape
-    # Compute unique response columns for Q_basis:
     cols_phiQ = unique_response_columns(Q_basis)
     
-    # Iterate over candidate matrices Q_basis_bar from the generator
     for Q_basis_bar in Q_bar_gen:
-        candidate_valid = True  # assume the candidate is valid until proven otherwise
+        candidate_valid = True
         for S in cols_phiQ:
             S_arr = np.array(S, dtype=int)
-            # Get the indices where S is active (i.e. equals 1)
             idx_active = [j for j in range(J_basis) if S_arr[j] == 1]
-
-            # Compute h_a: the logical OR of the rows of Q_basis_bar for j in idx_active.
+            
+            # Compute h_a as the logical OR of rows Q_basis_bar for indices in idx_active.
             if idx_active:
                 h_a = Q_basis_bar[idx_active[0]].copy()
                 for j in idx_active[1:]:
@@ -604,23 +590,19 @@ def thmCheck(Q_basis, Q_bar_gen):
             else:
                 h_a = np.zeros(K, dtype=int)
             
-            # Now verify: for any row j not in idx_active, Q_basis_bar[j] should not be "covered" by h_a.
+            # For any row j not in idx_active, check if Q_basis_bar[j] is "covered" by h_a.
             for j in range(J_basis):
                 if j in idx_active:
-                    continue  # These rows contribute to h_a by construction.
+                    continue
                 if np.all(Q_basis_bar[j] <= h_a):
-                    # Found an extra match not corresponding to S; candidate fails.
                     candidate_valid = False
-                    break  # Exit inner loop for S.
-            
+                    break  # No need to check further S for this candidate.
             if not candidate_valid:
-                break  # Exit loop over S to try next candidate.
+                break  # Move to next candidate Q_basis_bar.
         
         if candidate_valid:
-            return 0, Q_basis_bar  # Found a valid candidate.
-    
-    return 1, None  # No valid candidate was found; Q is identifiable.
-
+            return 0, Q_basis_bar
+    return 1, None
                 
     
 def brute_check_id(Q_basis):
@@ -660,39 +642,7 @@ def brute_check_id(Q_basis):
     subQ_bars = itertools.product(*subQ_bars)
     Q_bar_gen = generate_unique_Q_bars(subQ_bars, Q_basis, replacement_indices)
 
-
-    cols_phiQ = unique_response_columns(Q_basis)
-    for Q_basis_bar in Q_bar_gen:
-        candidate_valid = True  
-        for S in cols_phiQ:
-            S_arr = np.array(S, dtype=int)
-            idx_active = [j for j in range(J_basis) if S_arr[j] == 1]
-
-            # Compute h_a: the logical OR of the rows of Q_basis_bar indexed by idx_active.
-            if idx_active:
-                h_a = Q_basis_bar[idx_active[0]].copy()
-                for j in idx_active[1:]:
-                    h_a = np.logical_or(h_a, Q_basis_bar[j]).astype(int)
-            else:
-                h_a = np.zeros(K, dtype=int)
-
-            # Now check if there is any row j not in idx_active such that Q_basis_bar[j] <= h_a.
-            # If so, then the response computed from h_a would have an extra 1, differing from S.
-            for j in range(J_basis):
-                if j in idx_active:
-                    continue  # These rows are by construction "covered"
-                if np.all(Q_basis_bar[j] <= h_a):
-                    # Found an extra match not corresponding to S.
-                    candidate_valid = False
-                    break  # No need to check further S for this candidate.
-
-            if not candidate_valid:
-                # One S failed, so break out immediately to try the next Q_basis_bar.
-                break
-
-        if candidate_valid:
-            return 0, Q_basis_bar
-    return 1, None 
+    return thmCheck(Q_basis, Q_bar_gen)
 
     
 
