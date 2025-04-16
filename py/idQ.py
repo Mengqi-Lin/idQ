@@ -36,6 +36,32 @@ def Phi_mat(Q):
         GG.append((list(is_less_equal_than(Q[j], aaa) for aaa in AA)))
     return np.array(GG, dtype=int)
 
+def unique_response_columns(Q):
+    """
+    Computes the unique columns (response patterns) that would be in Phi_mat(Q) directly from Q.
+    
+    For each latent vector a in {0,1}^K, the response column is computed as:
+        col = [ is_less_equal_than(Q[j], a) for j in range(J) ]
+    where, for a binary Q and a, is_less_equal_than(Q[j], a) is True if 
+    every 1 in Q[j] has the corresponding entry in a equal to 1.
+    
+    This function returns the set of unique columns as tuples of 0's and 1's.
+    
+    Parameters:
+        Q (np.ndarray): A binary matrix of shape (J, K).
+    
+    Returns:
+        set: A set of tuples, each representing a unique response column.
+    """
+    J, K = Q.shape
+    unique_cols = set()
+    # Iterate over all latent vectors a in {0,1}^K.
+    for a in itertools.product([0, 1], repeat=K):
+        # Convert a to a numpy array for vectorized comparisons.
+        a_arr = np.array(a)
+        response = np.all(Q <= a_arr, axis=1).astype(int)  # converts booleans to 0/1
+        unique_cols.add(tuple(response))
+    return unique_cols
 
 def item_node_set(Q):
     """
@@ -568,6 +594,70 @@ def generate_unique_Q_bars(subQ_bars, Q, replacement_indices):
                 yield Q_bar
 
 
+def thmCheck(Q_basis, Q_bar_gen):
+    """
+    Check candidate matrices from Q_bar_gen against Q_basis using the theorem check.
+    
+    For each candidate Q_basis_bar generated from Q_bar_gen, for every unique response
+    column S from Q_basis (via unique_response_columns(Q_basis)), compute:
+      
+      1. The active indices (where S has a 1).
+      2. The candidate response vector h_a as the logical OR of the rows of Q_basis_bar 
+         at those active indices (or a zero vector if S is all zeros).
+      3. Verify that for every row index j not in the active set,
+         Q_basis_bar[j] is not "covered" by h_a (i.e. np.all(Q_basis_bar[j] <= h_a) must fail).
+    
+    If a candidate Q_basis_bar passes for all S in unique_response_columns(Q_basis),
+    return (0, Q_basis_bar). If no candidate passes, return (1, None).
+    
+    Parameters:
+      Q_basis (np.ndarray): A binary matrix of shape (J_basis, K).
+      Q_bar_gen (generator): A generator yielding candidate matrices Q_basis_bar 
+                             of the same shape as Q_basis.
+    
+    Returns:
+      tuple: (status, candidate)
+             - status == 0: a candidate was found (Q is not identifiable) and candidate is Q_basis_bar.
+             - status == 1: no candidate was found (Q is identifiable); candidate is None.
+    """
+    J_basis, K = Q_basis.shape
+    # Compute unique response columns for Q_basis:
+    cols_phiQ = unique_response_columns(Q_basis)
+    
+    # Iterate over candidate matrices Q_basis_bar from the generator
+    for Q_basis_bar in Q_bar_gen:
+        candidate_valid = True  # assume the candidate is valid until proven otherwise
+        for S in cols_phiQ:
+            S_arr = np.array(S, dtype=int)
+            # Get the indices where S is active (i.e. equals 1)
+            idx_active = [j for j in range(J_basis) if S_arr[j] == 1]
+
+            # Compute h_a: the logical OR of the rows of Q_basis_bar for j in idx_active.
+            if idx_active:
+                h_a = Q_basis_bar[idx_active[0]].copy()
+                for j in idx_active[1:]:
+                    h_a = np.logical_or(h_a, Q_basis_bar[j]).astype(int)
+            else:
+                h_a = np.zeros(K, dtype=int)
+            
+            # Now verify: for any row j not in idx_active, Q_basis_bar[j] should not be "covered" by h_a.
+            for j in range(J_basis):
+                if j in idx_active:
+                    continue  # These rows contribute to h_a by construction.
+                if np.all(Q_basis_bar[j] <= h_a):
+                    # Found an extra match not corresponding to S; candidate fails.
+                    candidate_valid = False
+                    break  # Exit inner loop for S.
+            
+            if not candidate_valid:
+                break  # Exit loop over S to try next candidate.
+        
+        if candidate_valid:
+            return 0, Q_basis_bar  # Found a valid candidate.
+    
+    return 1, None  # No valid candidate was found; Q is identifiable.
+
+                
     
 def brute_check_id(Q_basis):
     """
@@ -605,25 +695,41 @@ def brute_check_id(Q_basis):
     # Generate Cartesian product of candidate replacements.
     subQ_bars = itertools.product(*subQ_bars)
     Q_bar_gen = generate_unique_Q_bars(subQ_bars, Q_basis, replacement_indices)
-    
-    try:
-        first_candidate = next(Q_bar_gen)
-    except StopIteration:
-        print("Q_basis is identifiable.")
-        return 1, None
-    else:
-        Q_bar_gen = itertools.chain([first_candidate], Q_bar_gen)
-    
-    PhiQ = Phi_mat(Q_basis)
+
+
+    cols_phiQ = unique_response_columns(Q_basis)
     for Q_basis_bar in Q_bar_gen:
-        PhiB = Phi_mat(Q_basis_bar)
-        if thmCheck(PhiQ, PhiB, tol=1e-8):
-            print("Q_basis is not identifiable.")
+        candidate_valid = True  
+        for S in cols_phiQ:
+            S_arr = np.array(S, dtype=int)
+            idx_active = [j for j in range(J_basis) if S_arr[j] == 1]
+
+            # Compute h_a: the logical OR of the rows of Q_basis_bar indexed by idx_active.
+            if idx_active:
+                h_a = Q_basis_bar[idx_active[0]].copy()
+                for j in idx_active[1:]:
+                    h_a = np.logical_or(h_a, Q_basis_bar[j]).astype(int)
+            else:
+                h_a = np.zeros(K, dtype=int)
+
+            # Now check if there is any row j not in idx_active such that Q_basis_bar[j] <= h_a.
+            # If so, then the response computed from h_a would have an extra 1, differing from S.
+            for j in range(J_basis):
+                if j in idx_active:
+                    continue  # These rows are by construction "covered"
+                if np.all(Q_basis_bar[j] <= h_a):
+                    # Found an extra match not corresponding to S.
+                    candidate_valid = False
+                    break  # No need to check further S for this candidate.
+
+            if not candidate_valid:
+                # One S failed, so break out immediately to try the next Q_basis_bar.
+                break
+
+        if candidate_valid:
             return 0, Q_basis_bar
-    
-    print("Q_basis is identifiable.")
-    return 1, None   
-    
+    return 1, None 
+
     
 
 
@@ -651,47 +757,53 @@ def identifiability(Q):
          Q_unique, unique_to_original, basis_to_unique) = get_basis(Q)
     
     J_basis, K = Q_basis.shape
+    
+    if J_basis < K:
+        Q_basis_bar = np.eye(K, dtype=int)[:J_basis]
+        Q_bar = get_Q_from_Qbasis(Q_basis_bar, basis_to_original)
+        print("Q_basis with dimensions J < K, thus not identifiable.")
+        return 0, Q_bar
     # All subsequent candidate generation is performed on Q_basis.
     # Step 3: Check for trivial non-identifiability on Q_basis.
     for k in range(K):
         if np.all(Q_basis[:, k] == 0):
             Q_basis_bar = Q_basis.copy()
             Q_basis_bar[:, k] = 1
-            print("Q_basis is trivially not identifiable (zero column).")
+            print("Q is trivially not identifiable (all zero column).")
             Q_bar = get_Q_from_Qbasis(Q_basis_bar, basis_to_original)
             return 0, Q_bar
         if np.all(Q_basis[:, k] == 1):
             Q_basis_bar = Q_basis.copy()
             Q_basis_bar[:, k] = 0
-            print("Q_basis is trivially not identifiable (one column).")
+            print("Q is trivially not identifiable (all one column).")
             Q_bar = get_Q_from_Qbasis(Q_basis_bar, basis_to_original)
             return 0, Q_bar
 
     candidate = check_two_column_submatrices(Q_basis)
     if candidate is not None:
-        print("Q_basis is not identifiable (two-column check).")
+        print("Q is not identifiable (two-column submatrix not identifiable).")
         Q_basis_bar = candidate
         Q_bar = get_Q_from_Qbasis(Q_basis_bar, basis_to_original)
         return 0, Q_bar
 
     candidate = check_three_column_submatrices(Q_basis)
     if candidate is not None:
-        print("Q_basis is not identifiable (three-column check).")
+        print("Q is not identifiable (three-column submatrix not identifiable).")
         Q_basis_bar = candidate
         Q_bar = get_Q_from_Qbasis(Q_basis_bar, basis_to_original)
         return 0, Q_bar
 
     # Step 4: Determine identifiability of Q_basis.
     if direct_check_id(Q_basis):
-        print("Q_basis is identifiable (direct_check).")
+        print("Q is identifiable (direct_check).")
+        return 1, None
     else:
         status, Q_basis_bar = brute_check_id(Q_basis)
         if status == 0:
-            print("Q_basis is not identifiable (brute_check_id).")
+            print("Q is not identifiable (brute_check_id).")
             Q_bar = get_Q_from_Qbasis(Q_basis_bar, basis_to_original)
             return 0, Q_bar
         else:
-            print("Q_basis is identifiable (brute_check).")
-            print("Q is identifiable.")
+            print("Q is identifiable (brute_check).")
             return 1, None
     
