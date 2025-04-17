@@ -6,7 +6,7 @@ import csv
 import itertools
 import numpy as np
 
-from basisQ import (
+from Qbasis import (
     get_basis, 
     get_Qunique_from_Qbasis, 
     get_Q_from_Qunique, 
@@ -160,7 +160,7 @@ def runtime_expr(J, K, N, p, seed, output_csv=None):
     }
 
     if output_csv is None:
-        output_csv = f"data/idQ_expr_J{J}_K{K}_p{p}.csv"
+        output_csv = f"../data/idQ_expr_J{J}_K{K}_p{p}.csv"
     
     os.makedirs(os.path.dirname(output_csv), exist_ok=True)
     file_exists = os.path.exists(output_csv)

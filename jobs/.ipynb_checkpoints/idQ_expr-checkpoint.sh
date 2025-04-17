@@ -2,7 +2,7 @@
 #SBATCH --job-name=idQ_expr
 #SBATCH --output=logs/idQ_expr_%j.out
 #SBATCH --time=48:00:00
-#SBATCH --mem=8G
+#SBATCH --mem=16G
 
 # Usage: ./run_runtime_expr.sh <J> <K> <N> <seed>
 if [ "$#" -ne 5 ]; then
