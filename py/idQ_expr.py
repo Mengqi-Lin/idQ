@@ -5,6 +5,8 @@ import time
 import csv
 import itertools
 import numpy as np
+import gurobipy as gp
+from gurobipy import GRB
 
 from Qbasis import (
     get_basis, 
@@ -69,20 +71,58 @@ def identifiability_expr(Q):
         Q_basis_bar = candidate
         Q_bar = get_Q_from_Qbasis(Q_basis_bar, basis_to_original)
         return 0, Q_bar, 3
-
+        
+        
     # Step 4: Determine identifiability of Q_basis.
     if direct_check_id(Q_basis):
         print("Q is identifiable (direct_check).")
         return 1, None, 4
     else:
-        status, Q_basis_bar = brute_check_id(Q_basis)
-        if status == 0:
-            print("Q is not identifiable (brute_check_id).")
+        # Step 1: Generate constraints Phi_h based on Q
+        Phi = list(unique_response_columns(Q_basis))
+        H = len(Phi)
+
+        # Step 2: Set up the integer program
+        model = gp.Model('Q_identifiability')
+        model.setParam('OutputFlag', 0)
+
+        # Decision variables
+        x = model.addVars(J_basis, K, vtype=GRB.BINARY, name="x")
+        a = model.addVars(H, K, vtype=GRB.BINARY, name="a")
+
+        # Feasibility constraints
+        for j in range(J_basis):
+            for k in range(K):
+                model.addConstr(x[j, k] <= Q_basis[j, k])
+
+        # Non-equality constraint to ensure x != Q
+        model.addConstr(gp.quicksum(Q_basis[j, k] - x[j, k] for j in range(J_basis) for k in range(K)) >= 1)
+
+        # Logical constraints to define a[h,k]
+        for h, phi_h in enumerate(Phi):
+            S_h = [j for j in range(J_basis) if phi_h[j] == 1]
+            for k in range(K):
+                for j in S_h:
+                    model.addConstr(a[h, k] >= x[j, k])
+                model.addConstr(a[h, k] <= gp.quicksum(x[j, k] for j in S_h))
+
+        # Non-domination constraints
+        for h, phi_h in enumerate(Phi):
+            not_S_h = [j for j in range(J_basis) if phi_h[j] == 0]
+            for j in not_S_h:
+                model.addConstr(gp.quicksum((1 - a[h, k]) * x[j, k] for k in range(K)) >= 1)
+
+        # Solve the integer program
+        model.optimize()
+
+        # Return results
+        if model.status == GRB.OPTIMAL:
+            Q_basis_bar = np.array([[int(x[j, k].X) for k in range(K)] for j in range(J_basis)])
             Q_bar = get_Q_from_Qbasis(Q_basis_bar, basis_to_original)
             return 0, Q_bar, 5
         else:
-            print("Q is identifiable (brute_check).")
-            return 1, None, 6
+            return True, None, 6  # No solution exists
+        
 
 def runtime_expr(J, K, N, p, seed, output_csv=None):
     """
