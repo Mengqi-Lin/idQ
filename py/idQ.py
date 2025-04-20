@@ -628,8 +628,15 @@ def brute_check_id(Q_basis):
     for i in range(len(replacement_indices)):
         index = replacement_indices[i]
         q_bars = []
-        for p in range(1, K - distances[index] + 1):
-            q_bars.extend(generate_binary_vectors(K, p))
+        # for p in range(1, K - distances[index] + 1):
+        #     q_bars.extend(generate_binary_vectors(K, p))
+        support = np.where(Q_basis[index, :] == 1)[0]
+        for r in range(1, len(support) + 1):         # r = size of the subset, from 1 up to full support
+            for combo in itertools.combinations(support, r):
+                q = np.zeros(K, dtype=int)
+                q[list(combo)] = 1
+                q_bars.append(q)
+        
         valid_q_bars = []
         Q_temp = Q_basis.copy()
         for q_bar in q_bars:
