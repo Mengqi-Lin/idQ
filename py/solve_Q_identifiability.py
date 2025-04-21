@@ -54,7 +54,7 @@ def solve_Q_identifiability(Q):
     # Return results
     if model.status == GRB.OPTIMAL:
         solution = np.array([[int(x[j, k].X) for k in range(K)] for j in range(J)])
-        return False, solution  # A solution exists
+        return solution  # A solution exists
     else:
-        return True, None  # No solution exists
+        return None  # No solution exists
 

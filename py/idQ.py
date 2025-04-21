@@ -8,6 +8,8 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import gurobipy as gp
 from gurobipy import GRB
+from functools import lru_cache
+from solve_Q_identifiability import solve_Q_identifiability
 
 from Qbasis import (
     get_basis, 
@@ -178,6 +180,38 @@ def get_D(Q, l):
     
     return D
 
+
+
+# mask is just the integer version of a binary vector — optimized for speed and simplicity.
+def row_masks(Q):
+    """Return integer bit‑masks for each row of Q."""
+    J, K = Q.shape
+    masks = []
+    for j in range(J):
+        mask = 0
+        for k in range(K):
+            if Q[j, k]:
+                mask |= 1 << k
+        masks.append(mask)
+    return masks, (1 << K) - 1  # list, full‑ones mask
+
+def distances(Q):
+    masks, full = row_masks(Q)
+    J = len(masks)
+    
+    # lru_cache memoises the depth function, ensuring each reachable pattern is explored only once.
+    @lru_cache(maxsize=None)
+    def depth(mask):
+        if mask == full:
+            return 0
+        best = 0
+        for m in masks:
+            new = mask | m
+            if new != mask:                     # strict cover
+                best = max(best, 1 + depth(new))
+        return best
+
+    return np.array([depth(m) for m in masks])
 
 
 def preserve_partial_order(Q, Q_bar, indices1, indices2):
@@ -658,46 +692,9 @@ def identifiability(Q):
         print("Q is identifiable (direct_check).")
         return 1, None
     else:
-        # Step 1: Generate constraints Phi_h based on Q
-        Phi = list(unique_response_columns(Q_basis))
-        H = len(Phi)
-
-        # Step 2: Set up the integer program
-        model = gp.Model('Q_identifiability')
-        model.setParam('OutputFlag', 0)
-
-        # Decision variables
-        x = model.addVars(J_basis, K, vtype=GRB.BINARY, name="x")
-        a = model.addVars(H, K, vtype=GRB.BINARY, name="a")
-
-        # Feasibility constraints
-        for j in range(J_basis):
-            for k in range(K):
-                model.addConstr(x[j, k] <= Q_basis[j, k])
-
-        # Non-equality constraint to ensure x != Q
-        model.addConstr(gp.quicksum(Q_basis[j, k] - x[j, k] for j in range(J_basis) for k in range(K)) >= 1)
-
-        # Logical constraints to define a[h,k]
-        for h, phi_h in enumerate(Phi):
-            S_h = [j for j in range(J_basis) if phi_h[j] == 1]
-            for k in range(K):
-                for j in S_h:
-                    model.addConstr(a[h, k] >= x[j, k])
-                model.addConstr(a[h, k] <= gp.quicksum(x[j, k] for j in S_h))
-
-        # Non-domination constraints
-        for h, phi_h in enumerate(Phi):
-            not_S_h = [j for j in range(J_basis) if phi_h[j] == 0]
-            for j in not_S_h:
-                model.addConstr(gp.quicksum((1 - a[h, k]) * x[j, k] for k in range(K)) >= 1)
-
-        # Solve the integer program
-        model.optimize()
-
-        # Return results
-        if model.status == GRB.OPTIMAL:
-            Q_basis_bar = np.array([[int(x[j, k].X) for k in range(K)] for j in range(J_basis)])
+        solution = solve_Q_identifiability(Q_basis)
+        if solution is not None:
+            Q_basis_bar = solution
             Q_bar = get_Q_from_Qbasis(Q_basis_bar, basis_to_original)
             return 0, Q_bar
         else:
