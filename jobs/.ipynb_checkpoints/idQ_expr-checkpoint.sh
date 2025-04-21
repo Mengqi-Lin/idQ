@@ -3,12 +3,16 @@
 #SBATCH --output=logs/idQ_expr_%j.out
 #SBATCH --time=48:00:00
 #SBATCH --mem=16G
+#SBATCH --licenses=gurobi@slurmdb:1
+
 
 # Usage: ./run_runtime_expr.sh <J> <K> <N> <seed>
 if [ "$#" -ne 5 ]; then
     echo "Usage: $0 <J> <K> <N> <p> <seed>"
     exit 1
 fi
+
+module load gurobi/10.0.2
 
 J=$1
 K=$2

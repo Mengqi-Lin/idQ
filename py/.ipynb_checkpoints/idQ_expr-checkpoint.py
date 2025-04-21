@@ -25,7 +25,8 @@ from idQ import (
     generate_binary_vectors,
     distances2U,
     representative_node_set,
-    brute_check_id
+    brute_check_id,
+    unique_response_columns
 )
 
 def identifiability_expr(Q):
@@ -150,6 +151,7 @@ def runtime_expr(J, K, N, p, seed, output_csv=None):
     
     np.random.seed(seed)
     for i in range(N):
+        print(i)
         # Generate Q with Bernoulli(p): each entry is 1 with probability p, else 0.
         Q = np.random.binomial(1, p, size=(J, K))
         start_time = time.perf_counter()
