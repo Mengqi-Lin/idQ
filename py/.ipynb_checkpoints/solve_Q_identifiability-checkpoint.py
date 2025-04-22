@@ -99,7 +99,7 @@ def classify_row_pairs(Q):
 
 
 
-def solve_Q_identifiability_fast(Q):
+def local_solve_Q_identifiability(Q):
     J, K = Q.shape
 
     # Step 1: Generate constraints Phi_a based on Q
