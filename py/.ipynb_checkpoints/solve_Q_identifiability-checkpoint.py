@@ -4,18 +4,19 @@ import gurobipy as gp
 from gurobipy import GRB
 
 
-def row_masks(Q: np.ndarray):
-    """Return list of integer bit‑masks, one per row of Q."""
+# mask is just the integer version of a binary vector — optimized for speed and simplicity.
+def row_masks(Q):
+    """Return integer bit‑masks for each row of Q."""
     J, K = Q.shape
-    # Pack each row into a Python int: bit k = Q[j,k]
     masks = []
     for j in range(J):
-        bits = 0
+        mask = 0
         for k in range(K):
             if Q[j, k]:
-                bits |= 1 << k            # set k‑th bit
-        masks.append(bits)
-    return masks
+                mask |= 1 << k
+        masks.append(mask)
+    return masks, (1 << K) - 1  # list, full‑ones mask
+
 
 def classify_row_pairs(Q):
     """
@@ -25,7 +26,7 @@ def classify_row_pairs(Q):
       * strict_pairs_back   : q_j' < q_j
     Returns three Python lists of tuples (j, j').
     """
-    masks = row_masks(Q)
+    masks, _ = row_masks(Q)
     J = len(masks)
 
     parallel_pairs      = []
@@ -110,7 +111,16 @@ def solve_Q_identifiability(Q):
     for (j, jp) in backward:
         model.addConstr(gp.quicksum(x[j,  k] - x[jp, k] for k in range(K)) >= 1)
 
-            
+    # --- column lex‑ordering constraints ------------------------------
+    pow2 = [1 << (J - 1 - j) for j in range(J)]   # 2^{J-j-1}
+
+    def column_code(k):
+        return gp.quicksum(pow2[j] * x[j, k] for j in range(J))
+
+    for k in range(K - 1):
+        model.addConstr(column_code(k) >= column_code(k + 1),
+                        name=f"lex_col_{k}")
+        
     # Solve the integer program
     model.optimize()
 

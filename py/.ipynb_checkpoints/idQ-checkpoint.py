@@ -442,27 +442,50 @@ def check_three_column_submatrices(Q):
 
 
 
-
-def canonicalize(Q: np.ndarray):
+def canonicalize(Q):
     """
-    Return Q with columns sorted in non‑increasing lexicographic order
-    (row‑0 is the most‑significant bit), and the column permutation used.
+    Returns a canonical form of Q_bar by sorting its columns lexicographically.
+    This canonical form is invariant under column permutations.
+    """
+    # Convert Q_bar to a list of tuples for each column
+    cols = [tuple(col) for col in Q.T]
+    # Sort the columns (this defines a canonical order)
+    cols_sorted = sorted(cols)
+    # Convert back to a numpy array (columns sorted)
+    return np.array(cols_sorted).T  # Transpose back so that shape is (J, K)
+
+
+
+
+
+def lex_sort_columns(Q: np.ndarray):
+    """
+    Return:
+      - Q_sorted: Q with columns sorted in non-increasing lexicographic order
+                  (row 0 is most-significant bit),
+      - inv_perm: the mapping from Q_sorted's columns back to Q's columns,
+                  i.e., Q[:, inv_perm] == Q_original.
     """
     J, K = Q.shape
-    # Bit‑mask code identical to MILP weights 2^{J-1-j}
     codes = []
     for k in range(K):
         col_bits = 0
         for j in range(J):
             if Q[j, k]:
-                col_bits |= 1 << (J - 1 - j)   # same weighting as pow2
-        codes.append((col_bits, k))
-    # sort by code descending, then by original index to break ties stably
-    codes.sort(key=lambda t: (-t[0], t[1]))
-    perm = [idx for (_, idx) in codes]
-    Q_sorted = Q[:, perm]
-    return Q_sorted, perm
+                col_bits |= 1 << (J - 1 - j)
+        codes.append((col_bits, k))  # (column code, original index)
 
+    # Sort descending by column code, breaking ties by original index
+    codes.sort(key=lambda t: (-t[0], t[1]))
+    perm = [idx for (_, idx) in codes]  # new order
+    Q_sorted = Q[:, perm]
+
+    # Compute inverse permutation
+    inv_perm = [0] * K
+    for i, p in enumerate(perm):
+        inv_perm[p] = i
+
+    return Q_sorted, inv_perm
 
 
 def generate_unique_Q_bars(subQ_bars, Q, replacement_indices):
@@ -668,9 +691,10 @@ def identifiability(Q):
         print("Q is identifiable (direct_check).")
         return 1, None
     else:
-        solution = solve_Q_identifiability(Q_basis)
+        Q_sorted, sorted_to_original = lex_sort_columns(Q_basis)
+        solution = solve_Q_identifiability(Q_sorted)
         if solution is not None:
-            Q_basis_bar = solution
+            Q_basis_bar = solution[:, sorted_to_original]
             Q_bar = get_Q_from_Qbasis(Q_basis_bar, basis_to_original)
             return 0, Q_bar
         else:
