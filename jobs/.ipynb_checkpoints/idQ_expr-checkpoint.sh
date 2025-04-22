@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=idQ_expr
-#SBATCH --output=logs/idQ_expr_%j.out
+#SBATCH --output=../logs/idQ_expr_%j.out
 #SBATCH --time=48:00:00
 #SBATCH --mem=16G
 #SBATCH --licenses=gurobi@slurmdb:1

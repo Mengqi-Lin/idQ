@@ -149,37 +149,6 @@ def generate_permutations(Q):
         Q_perm = Q[:, perm]  # apply permutation to columns of Q
         Q_perms.append(Q_perm)
     return Q_perms
-    
-def get_D_l(Q, l):
-    # Get the total number of rows
-    J = Q.shape[0]
-    
-    # Create an empty list to store the resulting vectors
-    D_l = []
-    
-    # Generate all combinations of l rows
-    for row_indices in combinations(range(J), l):
-        # Select the rows specified by the current combination
-        rows = Q[row_indices, :]
-        
-        # Perform the bitwise OR operation on the selected rows and add the result to D_l
-        D_l.append(np.bitwise_or.reduce(rows, axis=0))
-    
-    # Convert D_l to a NumPy array
-    D_l = np.array(D_l)
-    
-    return D_l
-
-def get_D(Q, l):
-    # Get the total number of rows
-    J = Q.shape[0]
-    D = set()
-    for l in range(1, J+1):
-        D_l = get_D(Q, l)
-        D.add(D_l)
-    
-    return D
-
 
 
 # mask is just the integer version of a binary vector — optimized for speed and simplicity.
@@ -474,18 +443,25 @@ def check_three_column_submatrices(Q):
 
 
 
-def canonicalize(Q_bar):
+def canonicalize(Q: np.ndarray):
     """
-    Returns a canonical form of Q_bar by sorting its columns lexicographically.
-    This canonical form is invariant under column permutations.
+    Return Q with columns sorted in non‑increasing lexicographic order
+    (row‑0 is the most‑significant bit), and the column permutation used.
     """
-    # Convert Q_bar to a list of tuples for each column
-    cols = [tuple(col) for col in Q_bar.T]
-    # Sort the columns (this defines a canonical order)
-    cols_sorted = sorted(cols)
-    # Convert back to a numpy array (columns sorted)
-    return np.array(cols_sorted).T  # Transpose back so that shape is (J, K)
-
+    J, K = Q.shape
+    # Bit‑mask code identical to MILP weights 2^{J-1-j}
+    codes = []
+    for k in range(K):
+        col_bits = 0
+        for j in range(J):
+            if Q[j, k]:
+                col_bits |= 1 << (J - 1 - j)   # same weighting as pow2
+        codes.append((col_bits, k))
+    # sort by code descending, then by original index to break ties stably
+    codes.sort(key=lambda t: (-t[0], t[1]))
+    perm = [idx for (_, idx) in codes]
+    Q_sorted = Q[:, perm]
+    return Q_sorted, perm
 
 
 

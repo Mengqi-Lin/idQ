@@ -20,15 +20,7 @@ from solve_Q_identifiability import solve_Q_identifiability
 from idQ import (
     thmCheck,
     check_two_column_submatrices,
-    check_three_column_submatrices,
-    canonicalize,
-    generate_unique_Q_bars,
-    preserve_partial_order,
-    generate_binary_vectors,
-    distances2U,
-    representative_node_set,
-    brute_check_id,
-    unique_response_columns
+    check_three_column_submatrices
 )
 
 def identifiability_expr(Q):
