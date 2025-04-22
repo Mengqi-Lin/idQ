@@ -110,16 +110,6 @@ def solve_Q_identifiability(Q):
 
     for (j, jp) in backward:
         model.addConstr(gp.quicksum(x[j,  k] - x[jp, k] for k in range(K)) >= 1)
-
-    # --- column lex‑ordering constraints ------------------------------
-    pow2 = [1 << (J - 1 - j) for j in range(J)]   # 2^{J-j-1}
-
-    def column_code(k):
-        return gp.quicksum(pow2[j] * x[j, k] for j in range(J))
-
-    for k in range(K - 1):
-        model.addConstr(column_code(k) >= column_code(k + 1),
-                        name=f"lex_col_{k}")
         
     # Solve the integer program
     model.optimize()
@@ -131,3 +121,5 @@ def solve_Q_identifiability(Q):
     else:
         return None  # No solution exists
 
+
+    
