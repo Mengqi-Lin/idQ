@@ -8,7 +8,6 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import gurobipy as gp
 from gurobipy import GRB
-from functools import lru_cache
 from solve_Q_identifiability import solve_Q_identifiability
 
 from Qbasis import (
@@ -151,36 +150,6 @@ def generate_permutations(Q):
     return Q_perms
 
 
-# mask is just the integer version of a binary vector — optimized for speed and simplicity.
-def row_masks(Q):
-    """Return integer bit‑masks for each row of Q."""
-    J, K = Q.shape
-    masks = []
-    for j in range(J):
-        mask = 0
-        for k in range(K):
-            if Q[j, k]:
-                mask |= 1 << k
-        masks.append(mask)
-    return masks, (1 << K) - 1  # list, full‑ones mask
-
-def distances(Q):
-    masks, full = row_masks(Q)
-    J = len(masks)
-    
-    # lru_cache memoises the depth function, ensuring each reachable pattern is explored only once.
-    @lru_cache(maxsize=None)
-    def depth(mask):
-        if mask == full:
-            return 0
-        best = 0
-        for m in masks:
-            new = mask | m
-            if new != mask:                     # strict cover
-                best = max(best, 1 + depth(new))
-        return best
-
-    return np.array([depth(m) for m in masks])
 
 
 def preserve_partial_order(Q, Q_bar, indices1, indices2):
