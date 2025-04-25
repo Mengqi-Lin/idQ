@@ -99,7 +99,7 @@ def classify_row_pairs(Q):
 
 
 
-def local_solve_Q_identifiability(Q):
+def solve_Q_identifiability_fast(Q):
     J, K = Q.shape
 
     # Step 1: Generate constraints Phi_a based on Q
@@ -143,33 +143,6 @@ def local_solve_Q_identifiability(Q):
                 name=f"non_dom_a{a}_j{j}"
             )
 
-    # Partial order constraints between rows
-    parallel, forward, backward = classify_row_pairs(Q)
-
-    for (j, jp) in parallel:
-        # bq_j  not <=  bq_jp
-        model.addConstr(
-            gp.quicksum((1 - x[jp, k]) * x[j, k] for k in range(K)) >= 1,
-            name=f"parallel_{j}_{jp}_a"
-        )
-        # bq_jp not <=  bq_j
-        model.addConstr(
-            gp.quicksum((1 - x[j,  k]) * x[jp, k] for k in range(K)) >= 1,
-            name=f"parallel_{j}_{jp}_b"
-        )
-
-    for (j, jp) in forward:   #  qq_j < qq_jp  ⇒  forbid  bq_jp <= bq_j
-        model.addConstr(
-            gp.quicksum((1 - x[j, k]) * x[jp, k] for k in range(K)) >= 1,
-            name=f"forward_{j}_{jp}"
-        )
-
-    for (j, jp) in backward:  #  qq_jp < qq_j  ⇒  forbid  bq_j  <= bq_jp
-        model.addConstr(
-            gp.quicksum((1 - x[jp, k]) * x[j, k] for k in range(K)) >= 1,
-            name=f"backward_{j}_{jp}"
-        )
-
     # Solve the integer program
     model.optimize()
     status = model.Status
@@ -208,7 +181,7 @@ def solve_Q_identifiability(Q):
     h = model.addVars(A, K, vtype=GRB.BINARY, name="h")     # for h(a)
 
     # Norm constraints, together with the column ordering constraint. Slower than the unproved version "\bqq_j \preceq \qq_j".
-    
+        
     # --- norm constraints ------------------------------
     dist = distances(Q)
     for j in range(J):
@@ -221,7 +194,6 @@ def solve_Q_identifiability(Q):
     for k in range(K - 1):
         model.addConstr(column_code(k) >= column_code(k + 1),
                         name=f"lex_col_{k}") 
-        
         
     # Non-equality constraint to ensure \bQQ ≠ \QQ
     model.addConstr(
@@ -248,37 +220,6 @@ def solve_Q_identifiability(Q):
                 gp.quicksum((1 - h[a, k]) * x[j, k] for k in range(K)) >= 1,
                 name=f"non_dom_a{a}_j{j}"
             )
-
-    # Partial order constraints between rows
-    parallel, forward, backward = classify_row_pairs(Q)
-
-        
-    # ------------------------------------------------------------------
-    # product‑sum non‑domination constraints
-    # ------------------------------------------------------------------
-    for (j, jp) in parallel:
-        # bq_j  not <=  bq_jp
-        model.addConstr(
-            gp.quicksum((1 - x[jp, k]) * x[j, k] for k in range(K)) >= 1,
-            name=f"parallel_{j}_{jp}_a"
-        )
-        # bq_jp not <=  bq_j
-        model.addConstr(
-            gp.quicksum((1 - x[j,  k]) * x[jp, k] for k in range(K)) >= 1,
-            name=f"parallel_{j}_{jp}_b"
-        )
-
-    for (j, jp) in forward:   #  qq_j < qq_jp  ⇒  forbid  bq_jp <= bq_j
-        model.addConstr(
-            gp.quicksum((1 - x[j, k]) * x[jp, k] for k in range(K)) >= 1,
-            name=f"forward_{j}_{jp}"
-        )
-
-    for (j, jp) in backward:  #  qq_jp < qq_j  ⇒  forbid  bq_j  <= bq_jp
-        model.addConstr(
-            gp.quicksum((1 - x[jp, k]) * x[j, k] for k in range(K)) >= 1,
-            name=f"backward_{j}_{jp}"
-        )
 
         
     # Solve the integer program

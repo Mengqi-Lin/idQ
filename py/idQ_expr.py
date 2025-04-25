@@ -23,7 +23,7 @@ from idQ import (
     check_three_column_submatrices
 )
 
-def identifiability_expr(Q):
+def identifiability_expr(Q, fast = False):
     Q = Q.copy()
     
     # Step 1: get Q_basis
@@ -73,16 +73,26 @@ def identifiability_expr(Q):
         print("Q is identifiable (direct_check).")
         return 1, None, 4
     else:
-        solution = solve_Q_identifiability(Q_basis)
-        if solution is not None:
-            Q_basis_bar = solution
-            Q_bar = get_Q_from_Qbasis(Q_basis_bar, basis_to_original)
-            return 0, Q_bar, 5
-        else:
-            return True, None, 6  # No solution exists
         
-
-def runtime_expr(J, K, N, p, seed, output_csv=None):
+        if fast:
+            solution = solve_Q_identifiability_fast(Q_basis)
+            if solution is not None:
+                Q_basis_bar = solution
+                Q_bar = get_Q_from_Qbasis(Q_basis_bar, basis_to_original)
+                return 0, Q_bar, 5
+            else:
+                return True, None, 6  # No solution exists
+        else:
+            Q_sorted, sorted_to_original = lex_sort_columns(Q_basis)
+            solution = solve_Q_identifiability(Q_sorted)
+            if solution is not None:
+                Q_basis_bar = solution[:, sorted_to_original]
+                Q_bar = get_Q_from_Qbasis(Q_basis_bar, basis_to_original)
+                return 0, Q_bar, 5
+            else:
+                return True, None, 6  # No solution exists
+            
+def runtime_expr(J, K, N, p, seed, fast = False, output_csv=None):
     """
     Randomly sample N binary matrices of shape (J, K) with entries drawn from Bernoulli(p).
     For each matrix, call identifiability_expr(Q) and measure its runtime.
@@ -111,11 +121,19 @@ def runtime_expr(J, K, N, p, seed, output_csv=None):
         print(i)
         # Generate Q with Bernoulli(p): each entry is 1 with probability p, else 0.
         Q = np.random.binomial(1, p, size=(J, K))
+        print(f"Q: {Q}")
         start_time = time.perf_counter()
-        status, Q_bar, branch = identifiability_expr(Q)
+        status, Q_bar, branch = identifiability_expr(Q, fast)
+        if status:
+            print(f"Q is identifiable")
+        else:
+            print(f"Q is not identifiable, and Q_bar is {Q_bar}")
+        
+        print(f"branch at {branch}")
         runtime = time.perf_counter() - start_time
         total_time += runtime
         
+        print(f"runtime for solving id of Q is {total_time}")
         # Update branch counts.
         if branch == -1:
             branch_minus1 += 1

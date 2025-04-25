@@ -8,7 +8,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import gurobipy as gp
 from gurobipy import GRB
-from solve_Q_identifiability import solve_Q_identifiability
+from solve_Q_identifiability import solve_Q_identifiability, solve_Q_identifiability_fast
 
 from Qbasis import (
     get_basis, 
@@ -595,7 +595,7 @@ def brute_check_id(Q_basis):
 
 
 ### This function checks if Q is identifiable, if not, it returns one possible Q_bar.
-def identifiability(Q):
+def identifiability(Q, fast = False):
     """
     Check if Q is identifiable. If not, return one possible candidate Q_bar.
     
@@ -660,14 +660,22 @@ def identifiability(Q):
         print("Q is identifiable (direct_check).")
         return 1, None
     else:
-        Q_sorted, sorted_to_original = lex_sort_columns(Q_basis)
-        solution = solve_Q_identifiability(Q_sorted)
-        if solution is not None:
-            Q_basis_bar = solution[:, sorted_to_original]
-            Q_bar = get_Q_from_Qbasis(Q_basis_bar, basis_to_original)
-            return 0, Q_bar
+        if fast:
+            solution = solve_Q_identifiability_fast(Q_basis)
+            if solution is not None:
+                Q_basis_bar = solution
+                Q_bar = get_Q_from_Qbasis(Q_basis_bar, basis_to_original)
+                return 0, Q_bar
+            else:
+                return True, None  # No solution exists
         else:
-            return True, None  # No solution exists
+            Q_sorted, sorted_to_original = lex_sort_columns(Q_basis)
+            solution = solve_Q_identifiability(Q_sorted)
+            if solution is not None:
+                Q_basis_bar = solution[:, sorted_to_original]
+                Q_bar = get_Q_from_Qbasis(Q_basis_bar, basis_to_original)
+                return 0, Q_bar
+            else:
+                return True, None  # No solution exists
         
         
-    

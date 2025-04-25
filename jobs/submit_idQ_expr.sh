@@ -18,7 +18,7 @@ J=$1
 K=$2
 p=$3
 NSEEDS=$4
-N=10  # fixed number of matrices per job
+N=1  # fixed number of simulations per job
 
 for (( seed=0; seed<NSEEDS; seed++ ))
 do
