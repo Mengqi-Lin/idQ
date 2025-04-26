@@ -15,12 +15,13 @@ from Qbasis import (
     get_Q_from_Qbasis
 )
 from direct_check_id import direct_check_id
-from solve_Q_identifiability import solve_Q_identifiability
+from solve_Q_identifiability import solve_Q_identifiability, solve_Q_identifiability_fast
 
 from idQ import (
     thmCheck,
     check_two_column_submatrices,
-    check_three_column_submatrices
+    check_three_column_submatrices,
+    lex_sort_columns
 )
 
 def identifiability_expr(Q, fast = False):
@@ -177,7 +178,7 @@ def runtime_expr(J, K, N, p, seed, fast = False, output_csv=None):
     }
 
     if output_csv is None:
-        output_csv = f"../data/idQ_expr_J{J}_K{K}_p{p}.csv"
+        output_csv = f"../data/fast{fast}_J{J}_K{K}_p{p}_columnC.csv"
     
     os.makedirs(os.path.dirname(output_csv), exist_ok=True)
     file_exists = os.path.exists(output_csv)
@@ -201,6 +202,6 @@ if __name__ == '__main__':
     p = float(sys.argv[4])
     seed = int(sys.argv[5])
 
-    results = runtime_expr(J, K, N, p, seed)
+    results = runtime_expr(J, K, N, p, seed, False)
     print("Simulation results:")
     print(results)

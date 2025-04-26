@@ -3,6 +3,32 @@ import itertools
 import gurobipy as gp
 from gurobipy import GRB
 from functools import lru_cache
+import itertools
+from itertools import product
+
+def unique_pattern_supports(Q):
+    """
+    Returns all nontrivial supports S = {j | \aaa ⪰ q_j}, for each representative \aaa.
+    *excluding* the empty set and the full set {0,…,J-1}.
+    """
+    J, K = Q.shape
+    R = {tuple([0]*K)}
+    for j in range(J):
+        row = Q[j]
+        new = []
+        for aaa in R:
+            merged = tuple(aaa[k] | row[k] for k in range(K))
+            if merged not in R:
+                new.append(merged)
+        R.update(new)
+    # Build and filter supports
+    full = frozenset(range(J))
+    supports = []
+    for aaa in R:
+        S = frozenset(j for j in range(J) if all(aaa[k] >= Q[j][k] for k in range(K)))
+        if S and S is not full:
+            supports.append(set(S))
+    return supports
 
 def unique_response_columns(Q):
     """
@@ -103,8 +129,9 @@ def solve_Q_identifiability_fast(Q):
     J, K = Q.shape
 
     # Step 1: Generate constraints Phi_a based on Q
-    Phi = list(unique_response_columns(Q))
-    A = len(Phi)  # number of unique response vectors
+    supports = unique_pattern_supports(Q)
+    A = len(supports)
+
 
     # Step 2: Set up the integer program
     model = gp.Model('Q_identifiability')
@@ -127,21 +154,20 @@ def solve_Q_identifiability_fast(Q):
     )
 
     # Constraints to define h[a,k] = ⋁_{j in S_a} x[j,k]
-    for a, phi_a in enumerate(Phi):
-        S_a = [j for j in range(J) if phi_a[j] == 1]
+    for a, S_a in enumerate(supports):
         for k in range(K):
             for j in S_a:
                 model.addConstr(h[a, k] >= x[j, k], name=f"h_lb_a{a}_j{j}_k{k}")
             model.addConstr(h[a, k] <= gp.quicksum(x[j, k] for j in S_a), name=f"h_ub_a{a}_k{k}")
 
     # Non-domination constraint: h(a) ≰ \bqq_j for all j not in S_a
-    for a, phi_a in enumerate(Phi):
-        not_S_a = [j for j in range(J) if phi_a[j] == 0]
-        for j in not_S_a:
-            model.addConstr(
-                gp.quicksum((1 - h[a, k]) * x[j, k] for k in range(K)) >= 1,
-                name=f"non_dom_a{a}_j{j}"
-            )
+    for a, S_a in enumerate(supports):
+        for j in range(J):
+            if j not in S_a:
+                model.addConstr(
+                    gp.quicksum((1 - h[a, k]) * x[j, k] for k in range(K)) >= 1,
+                    name=f"non_dom_a{a}_j{j}"
+                )
 
     # Solve the integer program
     model.optimize()
@@ -168,8 +194,8 @@ def solve_Q_identifiability(Q):
     J, K = Q.shape
 
     # Step 1: Generate constraints Phi_a based on Q
-    Phi = list(unique_response_columns(Q))
-    A = len(Phi)  # number of unique response vectors
+    supports = unique_pattern_supports(Q)
+    A = len(supports)
 
     # Step 2: Set up the integer program
     model = gp.Model('Q_identifiability')
@@ -205,22 +231,26 @@ def solve_Q_identifiability(Q):
         ) >= 1,name="Q != Q_bar")
 
     # Constraints to define h[a,k] = ⋁_{j in S_a} x[j,k]
-    for a, phi_a in enumerate(Phi):
-        S_a = [j for j in range(J) if phi_a[j] == 1]
+    for a, S_a in enumerate(supports):
         for k in range(K):
             for j in S_a:
                 model.addConstr(h[a, k] >= x[j, k], name=f"h_lb_a{a}_j{j}_k{k}")
             model.addConstr(h[a, k] <= gp.quicksum(x[j, k] for j in S_a), name=f"h_ub_a{a}_k{k}")
 
     # Non-domination constraint: h(a) ≰ \bqq_j for all j not in S_a
-    for a, phi_a in enumerate(Phi):
-        not_S_a = [j for j in range(J) if phi_a[j] == 0]
-        for j in not_S_a:
-            model.addConstr(
-                gp.quicksum((1 - h[a, k]) * x[j, k] for k in range(K)) >= 1,
-                name=f"non_dom_a{a}_j{j}"
-            )
+    for a, S_a in enumerate(supports):
+        for j in range(J):
+            if j not in S_a:
+                model.addConstr(
+                    gp.quicksum((1 - h[a, k]) * x[j, k] for k in range(K)) >= 1,
+                    name=f"non_dom_a{a}_j{j}"
+                )
 
+
+    # Pairwise constraints (each pair of columns must have both (0,1) and (1,0))
+    for p, q in itertools.combinations(range(K), 2):
+        model.addConstr(gp.quicksum(x[j, p] * (1 - x[j, q]) for j in range(J)) >= 1)
+        model.addConstr(gp.quicksum((1 - x[j, p]) * x[j, q] for j in range(J)) >= 1)
         
     # Solve the integer program
     model.optimize()
