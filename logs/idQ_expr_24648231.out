@@ -1,0 +1,69 @@
+
+The Gurobi software has a limited number of licenses. To request a license or
+licenses, add this line
+
+    #SBATCH --licenses=gurobi@slurmdb:1
+
+to your SBATCH script, replacing N with the number of licenses you need. Gurobi
+will need one license per process.
+
+
+
+Starting CP-SAT solver v9.12.4544
+Parameters: log_search_progress: true
+Setting number of workers to 36
+
+Initial satisfaction model '': (model_fingerprint: 0xa75e6932583e4173)
+#Variables: 5'025'103
+  - 5'025'103 Booleans in [0,1]
+#kBoolAnd: 4'694'235 (#enforced: 4'694'235) (#literals: 14'082'705)
+#kBoolOr: 1 (#literals: 345)
+#kLinear1: 9'388'649 (#enforced: 9'388'635)
+#kLinear2: 2'895'230 (#enforced: 1'926)
+#kLinear3: 4'087 (#enforced: 3'765)
+#kLinearN: 637'970 (#enforced: 324'975) (#terms: 7'574'205)
+
+Starting presolve at 3.03s
+  3.96e+00s  0.00e+00d  [DetectDominanceRelations] 
+  3.66e+01s  0.00e+00d  [PresolveToFixPoint] #num_loops=3 #num_dual_strengthening=2 
+  2.04e-01s  0.00e+00d  [ExtractEncodingFromLinear] #potential_supersets=11 
+  6.78e-01s  0.00e+00d  [DetectDuplicateColumns] 
+  3.14e+00s  0.00e+00d  [DetectDuplicateConstraints] 
+[Symmetry] Problem too large. Skipping. You can use symmetry_level:3 or more to force it.
+[SAT presolve] num removable Booleans: 5024579 / 5024924
+[SAT presolve] num trivial clauses: 0
+[SAT presolve] [0s] clauses:12926200 literals:32486078 vars:5024924 one_side_vars:0 simple_definition:4694264 singleton_clauses:0
+[SAT presolve] [6.47628s] clauses:12926186 literals:32485984 vars:5024924 one_side_vars:0 simple_definition:4694264 singleton_clauses:0
+[SAT presolve] [9.14551s] clauses:12924467 literals:32481944 vars:5024496 one_side_vars:0 simple_definition:4694235 singleton_clauses:0
+  4.62e-01s  0.00e+00d  [DetectDuplicateConstraintsWithDifferentEnforcements] #without_enforcements=11 
+  1.02e+01s  1.04e+00d *[Probe] #probed=16 #fixed_bools=3'177'638 #new_binary_clauses=85'640 
+  6.35e+01s  2.66e+01d *[MaxClique] Merged 12'280'702(24'561'547 literals) into 12'280'688(24'561'533 literals) at_most_ones. 
+  3.43e+00s  0.00e+00d  [DetectDominanceRelations] 
+  2.02e+01s  0.00e+00d  [PresolveToFixPoint] #num_loops=19 #num_dual_strengthening=10 
+  1.48e+00s  0.00e+00d  [ProcessAtMostOneAndLinear] 
+  1.59e+00s  0.00e+00d  [DetectDuplicateConstraints] 
+  1.65e+00s  0.00e+00d  [DetectDuplicateConstraintsWithDifferentEnforcements] 
+  3.51e-01s  2.79e-07d  [DetectDominatedLinearConstraints] #relevant_constraints=12 
+  3.18e-01s  0.00e+00d  [DetectDifferentVariables] 
+  4.26e+00s  4.05e-02d  [ProcessSetPPC] #relevant_constraints=4'350'115 #num_inclusions=695'220 
+  4.35e-01s  0.00e+00d  [FindAlmostIdenticalLinearConstraints] 
+  1.18e+00s  1.89e-01d  [FindBigAtMostOneAndLinearOverlap] 
+  3.55e-01s  5.25e-02d  [FindBigVerticalLinearOverlap] 
+  3.13e-01s  4.65e-07d  [FindBigHorizontalLinearOverlap] #linears=12 
+  1.21e+00s  1.27e-02d  [MergeClauses] #num_collisions=6 #num_merges=6 #num_saved_literals=30 
+  3.63e+00s  0.00e+00d  [DetectDominanceRelations] 
+  1.04e+01s  0.00e+00d  [PresolveToFixPoint] #num_loops=2 #num_dual_strengthening=2 
+  3.22e+00s  0.00e+00d  [DetectDominanceRelations] 
+  5.98e+00s  0.00e+00d  [PresolveToFixPoint] #num_loops=1 #num_dual_strengthening=1 
+  4.41e-01s  0.00e+00d  [DetectDuplicateColumns] 
+  6.34e-01s  0.00e+00d  [DetectDuplicateConstraints] #duplicates=3'804 
+[Symmetry] Problem too large. Skipping. You can use symmetry_level:3 or more to force it.
+[SAT presolve] num removable Booleans: 1722640 / 1722782
+[SAT presolve] num trivial clauses: 0
+[SAT presolve] [0s] clauses:4222300 literals:10212192 vars:1722782 one_side_vars:0 simple_definition:1578656 singleton_clauses:0
+[SAT presolve] [1.9597s] clauses:4222279 literals:10211888 vars:1722782 one_side_vars:0 simple_definition:1578656 singleton_clauses:0
+[SAT presolve] [3.80963s] clauses:4071594 literals:10603194 vars:1580080 one_side_vars:0 simple_definition:580567 singleton_clauses:0
+  9.37e-01s  0.00e+00d  [DetectDuplicateConstraintsWithDifferentEnforcements] #without_enforcements=9'292 
+  1.03e+01s  1.03e+00d *[Probe] #probed=83 #fixed_bools=383'473 #equiv=7'956 #new_binary_clauses=138'134 
+/var/spool/slurmd.spool/job24648231/slurm_script: line 28: 1639490 Killed                  /sw/pkgs/arc/python3.10-anaconda/2023.03/bin/python /home/lemonkey/idQ/py/idQ_expr.py "$J" "$K" "$N" "$p" "$SEED" "$solver"
+slurmstepd: error: Detected 1 oom_kill event in StepId=24648231.batch. Some of the step tasks have been OOM Killed.

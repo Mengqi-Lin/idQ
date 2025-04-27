@@ -310,119 +310,118 @@ def solve_Q_identifiability_IP(Q):
 
     
 
-def solve_identifiability_Q_cpsat(Q):
-    """
-    CP-SAT feasibility check for Q-matrix identifiability.
+# def solve_identifiability_Q_cpsat(Q):
+#     """
+#     CP-SAT feasibility check for Q-matrix identifiability.
 
-    Arguments:
-      Q:        A J×K binary matrix (list of lists or numpy array).
+#     Arguments:
+#       Q:        A J×K binary matrix (list of lists or numpy array).
 
-    Returns:
-      (identifiable, Qbar_candidate)
-      - identifiable = True  if no alternate Qbar exists (so Q IS identifiable),
-                       False if we find a Qbar ≉ Q that explains all patterns.
-      - Qbar = the found J×K matrix (list of lists) when identifiable=False,
-                         otherwise None.
-    """
-    J, K = Q.shape
+#     Returns:
+#       (identifiable, Qbar_candidate)
+#       - identifiable = True  if no alternate Qbar exists (so Q IS identifiable),
+#                        False if we find a Qbar ≉ Q that explains all patterns.
+#       - Qbar = the found J×K matrix (list of lists) when identifiable=False,
+#                          otherwise None.
+#     """
+#     J, K = Q.shape
 
-    # 1) Compute unique response patterns Phi
-    supports = unique_pattern_supports(Q)
-    A = len(supports)
+#     # 1) Compute unique response patterns Phi
+#     supports = unique_pattern_supports(Q)
+#     A = len(supports)
 
-    model = cp_model.CpModel()
+#     model = cp_model.CpModel()
 
-    # 2) Decision variables
-    x = [[model.NewBoolVar(f"x_{j}_{k}") for k in range(K)] for j in range(J)]
-    h = [[model.NewBoolVar(f"h_{a}_{k}") for k in range(K)] for a in range(A)]
+#     # 2) Decision variables
+#     x = [[model.NewBoolVar(f"x_{j}_{k}") for k in range(K)] for j in range(J)]
+#     h = [[model.NewBoolVar(f"h_{a}_{k}") for k in range(K)] for a in range(A)]
 
-    # --- norm constraints ------------------------------
-    # compute dist[j] = d(q_j) from your existing distances(Q) function
-    dist = distances(Q)  # array of length J
+#     # --- norm constraints ------------------------------
+#     # compute dist[j] = d(q_j) from your existing distances(Q) function
+#     dist = distances(Q)  # array of length J
 
-    for j in range(J):
-        # at least one skill per item
-        model.Add( sum(x[j][k] for k in range(K)) >= 1 )
-        # at most K - dist[j] skills per item
-        model.Add( sum(x[j][k] for k in range(K)) <= K - dist[j] )
+#     for j in range(J):
+#         # at least one skill per item
+#         model.Add( sum(x[j][k] for k in range(K)) >= 1 )
+#         # at most K - dist[j] skills per item
+#         model.Add( sum(x[j][k] for k in range(K)) <= K - dist[j] )
 
     
-    # 3) OR-constraint: for each pattern a and each skill k,
-    #    h[a][k] == OR_{j in S_a} x[j][k],  where S_a = { j | Phi[a][j] == 1 }
-    for a, S_a in enumerate(supports):
-        for k in range(K):
-            if S_a:
-                # If any x[j,k] is 1 for j∈S, then h[a][k] must be 1:
-                for j in S_a:
-                    model.AddImplication(x[j][k], h[a][k])
-                # If all x[j,k]==0 for j∈S, then h[a][k] must be 0:
-                #   (¬x[j1,k] ∧ ¬x[j2,k] ∧ …) ⇒ ¬h[a][k]
-                clause = [x[j][k].Not() for j in S_a] + [h[a][k].Not()]
-                model.AddBoolOr(clause)
-            else:
-                # If pattern a has no correct items at all, it can never have any skill:
-                model.Add(h[a][k] == 0)
+#     # 3) OR-constraint: for each pattern a and each skill k,
+#     #    h[a][k] == OR_{j in S_a} x[j][k],  where S_a = { j | Phi[a][j] == 1 }
+#     for a, S_a in enumerate(supports):
+#         for k in range(K):
+#             if S_a:
+#                 # If any x[j,k] is 1 for j∈S, then h[a][k] must be 1:
+#                 for j in S_a:
+#                     model.AddImplication(x[j][k], h[a][k])
+#                 # If all x[j,k]==0 for j∈S, then h[a][k] must be 0:
+#                 #   (¬x[j1,k] ∧ ¬x[j2,k] ∧ …) ⇒ ¬h[a][k]
+#                 clause = [x[j][k].Not() for j in S_a] + [h[a][k].Not()]
+#                 model.AddBoolOr(clause)
+#             else:
+#                 # If pattern a has no correct items at all, it can never have any skill:
+#                 model.Add(h[a][k] == 0)
 
-    # 4) Non-covering constraint: for each pattern a and each item j NOT in S_a,
-    #    ∃k s.t. x[j][k]==1 ∧ h[a][k]==0
-    for a, S_a in enumerate(supports):
-        for j in range(J):
-            if j not in S_a:
-                # Build a small auxiliary b_{a,j,k} for each k:
-                b_vars = []
-                for k in range(K):
-                    b = model.NewBoolVar(f"b_{a}_{j}_{k}")
-                    b_vars.append(b)
-                    # b=1 ⇒ x[j,k]=1
-                    model.AddImplication(b, x[j][k])
-                    # b=1 ⇒ h[a,k]=0
-                    model.AddImplication(b, h[a][k].Not())
-                # Now require at least one b[a,j,k] = 1
-                model.AddBoolOr(b_vars)
+#     # 4) Non-covering constraint: for each pattern a and each item j NOT in S_a,
+#     #    ∃k s.t. x[j][k]==1 ∧ h[a][k]==0
+#     for a, S_a in enumerate(supports):
+#         for j in range(J):
+#             if j not in S_a:
+#                 # Build a small auxiliary b_{a,j,k} for each k:
+#                 b_vars = []
+#                 for k in range(K):
+#                     b = model.NewBoolVar(f"b_{a}_{j}_{k}")
+#                     b_vars.append(b)
+#                     # b=1 ⇒ x[j,k]=1
+#                     model.AddImplication(b, x[j][k])
+#                     # b=1 ⇒ h[a,k]=0
+#                     model.AddImplication(b, h[a][k].Not())
+#                 # Now require at least one b[a,j,k] = 1
+#                 model.AddBoolOr(b_vars)
 
-    # 5) Forbid the trivial solution x==Q: enforce at least one entry differs
-    diff_clause = []
-    for j in range(J):
-        for k in range(K):
-            if Q[j][k] == 1:
-                diff_clause.append(x[j][k].Not())
-            else:
-                diff_clause.append(x[j][k])
-    # This one big OR says "there is at least one (j,k) where x[j,k] ≠ Q[j][k]"
-    model.AddBoolOr(diff_clause)
+#     # 5) Forbid the trivial solution x==Q: enforce at least one entry differs
+#     diff_clause = []
+#     for j in range(J):
+#         for k in range(K):
+#             if Q[j][k] == 1:
+#                 diff_clause.append(x[j][k].Not())
+#             else:
+#                 diff_clause.append(x[j][k])
+#     # This one big OR says "there is at least one (j,k) where x[j,k] ≠ Q[j][k]"
+#     model.AddBoolOr(diff_clause)
 
-    # 6) Lexicographic non-increasing ordering on columns of x:
-    #    For each adjacent pair k, k+1, introduce diff[k][i] for i=0..J
-    #    i in [0..J-1] means first difference at row i; i=J means no difference.
-    for k in range(K-1):
-        diff = [model.NewBoolVar(f"diff_{k}_{i}") for i in range(J+1)]
-        # exactly one position
-        model.Add(sum(diff) == 1)
-        # if first diff at row i < J:
-        for i in range(J):
-            # equality above i
-            for t in range(i):
-                model.Add(x[t][k] == x[t][k+1]).OnlyEnforceIf(diff[i])
-            # at i: x[i,k]=1, x[i,k+1]=0
-            model.Add(x[i][k] == 1).OnlyEnforceIf(diff[i])
-            model.Add(x[i][k+1] == 0).OnlyEnforceIf(diff[i])
-        # if no difference at all (diff[J]):
-        for t in range(J):
-            model.Add(x[t][k] == x[t][k+1]).OnlyEnforceIf(diff[J])
+#     # 6) Lexicographic non-increasing ordering on columns of x:
+#     #    For each adjacent pair k, k+1, introduce diff[k][i] for i=0..J
+#     #    i in [0..J-1] means first difference at row i; i=J means no difference.
+#     for k in range(K-1):
+#         diff = [model.NewBoolVar(f"diff_{k}_{i}") for i in range(J+1)]
+#         # exactly one position
+#         model.Add(sum(diff) == 1)
+#         # if first diff at row i < J:
+#         for i in range(J):
+#             # equality above i
+#             for t in range(i):
+#                 model.Add(x[t][k] == x[t][k+1]).OnlyEnforceIf(diff[i])
+#             # at i: x[i,k]=1, x[i,k+1]=0
+#             model.Add(x[i][k] == 1).OnlyEnforceIf(diff[i])
+#             model.Add(x[i][k+1] == 0).OnlyEnforceIf(diff[i])
+#         # if no difference at all (diff[J]):
+#         for t in range(J):
+#             model.Add(x[t][k] == x[t][k+1]).OnlyEnforceIf(diff[J])
             
             
-    # 7) Solve
-    solver = cp_model.CpSolver()
-    solver.parameters.num_search_workers = 8
-    status = solver.Solve(model)
+#     # 7) Solve
+#     solver = cp_model.CpSolver()
+#     status = solver.Solve(model)
 
-    if status in (cp_model.OPTIMAL, cp_model.FEASIBLE):
-        # Found an alternate Qbar ⇒ original Q is NOT identifiable
-        Qbar = [[solver.Value(x[j][k]) for k in range(K)] for j in range(J)]
-        return Qbar
-    else:
-        # No alternate found within time ⇒ Q is identifiable
-        return None
+#     if status in (cp_model.OPTIMAL, cp_model.FEASIBLE):
+#         # Found an alternate Qbar ⇒ original Q is NOT identifiable
+#         Qbar = [[solver.Value(x[j][k]) for k in range(K)] for j in range(J)]
+#         return Qbar
+#     else:
+#         # No alternate found within time ⇒ Q is identifiable
+#         return None
 
     
     
@@ -522,7 +521,6 @@ def solve_identifiability_Q_cpsat(Q):
     # Solve the CP-SAT model
     solver = cp_model.CpSolver()
     solver.parameters.log_search_progress = True
-    solver.parameters.num_search_workers = 8      # optional: parallel threads for solving
 
     result_status = solver.Solve(model)
     if result_status in (cp_model.OPTIMAL, cp_model.FEASIBLE):

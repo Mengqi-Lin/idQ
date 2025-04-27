@@ -1,0 +1,60 @@
+
+The Gurobi software has a limited number of licenses. To request a license or
+licenses, add this line
+
+    #SBATCH --licenses=gurobi@slurmdb:1
+
+to your SBATCH script, replacing N with the number of licenses you need. Gurobi
+will need one license per process.
+
+
+
+Starting CP-SAT solver v9.12.4544
+Parameters: log_search_progress: true
+Setting number of workers to 36
+
+Initial satisfaction model '': (model_fingerprint: 0x295c7e106e9aae9e)
+#Variables: 6'585'999
+  - 6'585'999 Booleans in [0,1]
+#kBoolAnd: 6'198'945 (#enforced: 6'198'945) (#literals: 18'596'835)
+#kBoolOr: 1 (#literals: 375)
+#kLinear1: 12'398'099 (#enforced: 12'398'085)
+#kLinear2: 3'453'115 (#enforced: 2'235)
+#kLinear3: 4'880 (#enforced: 4'530)
+#kLinearN: 793'368 (#enforced: 380'055) (#terms: 9'633'720)
+
+Starting presolve at 3.75s
+  3.61e+00s  0.00e+00d  [DetectDominanceRelations] 
+  4.33e+01s  0.00e+00d  [PresolveToFixPoint] #num_loops=3 #num_dual_strengthening=2 
+  2.11e-01s  0.00e+00d  [ExtractEncodingFromLinear] #potential_supersets=11 
+  9.13e-01s  0.00e+00d  [DetectDuplicateColumns] 
+  3.74e+00s  0.00e+00d  [DetectDuplicateConstraints] 
+[Symmetry] Problem too large. Skipping. You can use symmetry_level:3 or more to force it.
+[SAT presolve] num removable Booleans: 6585415 / 6585790
+[SAT presolve] num trivial clauses: 0
+[SAT presolve] [0s] clauses:16649720 literals:41738844 vars:6585790 one_side_vars:0 simple_definition:6198974 singleton_clauses:0
+[SAT presolve] [7.22566s] clauses:16649706 literals:41738750 vars:6585790 one_side_vars:0 simple_definition:6198974 singleton_clauses:0
+[SAT presolve] [10.3815s] clauses:16648021 literals:41735056 vars:6585355 one_side_vars:0 simple_definition:6198945 singleton_clauses:0
+  4.75e-01s  0.00e+00d  [DetectDuplicateConstraintsWithDifferentEnforcements] #without_enforcements=3'783 
+  1.14e+01s  1.06e+00d *[Probe] #probed=15 #fixed_bools=1'665'760 #equiv=29'933 #new_binary_clauses=80'370 
+  5.85e+01s  3.34e+01d *[MaxClique] Merged 15'847'666(31'695'475 literals) into 15'842'791(31'685'725 literals) at_most_ones. 
+  5.94e+00s  0.00e+00d  [DetectDominanceRelations] 
+  4.54e+01s  0.00e+00d  [PresolveToFixPoint] #num_loops=17 #num_dual_strengthening=16 
+  2.48e+00s  0.00e+00d  [ProcessAtMostOneAndLinear] 
+  3.28e+00s  0.00e+00d  [DetectDuplicateConstraints] #duplicates=29'391 
+  3.16e+00s  0.00e+00d  [DetectDuplicateConstraintsWithDifferentEnforcements] 
+  5.62e-01s  5.22e-07d  [DetectDominatedLinearConstraints] #relevant_constraints=13 
+  3.65e-01s  0.00e+00d  [DetectDifferentVariables] 
+  9.07e+00s  1.00e-01d  [ProcessSetPPC] #relevant_constraints=12'020'801 #num_inclusions=1'853'911 
+  4.17e-01s  0.00e+00d  [FindAlmostIdenticalLinearConstraints] 
+  2.78e+00s  5.35e-01d  [FindBigAtMostOneAndLinearOverlap] 
+  7.53e-01s  1.49e-01d  [FindBigVerticalLinearOverlap] 
+  3.84e-01s  8.70e-07d  [FindBigHorizontalLinearOverlap] #linears=13 
+  1.93e+00s  3.56e-02d  [MergeClauses] #num_collisions=29 #num_merges=29 #num_saved_literals=140 
+  5.02e+00s  0.00e+00d  [DetectDominanceRelations] 
+  1.55e+01s  0.00e+00d  [PresolveToFixPoint] #num_loops=2 #num_dual_strengthening=2 
+  4.84e+00s  0.00e+00d  [DetectDominanceRelations] 
+  9.63e+00s  0.00e+00d  [PresolveToFixPoint] #num_loops=1 #num_dual_strengthening=1 
+  7.10e-01s  0.00e+00d  [DetectDuplicateColumns] 
+  9.42e-01s  0.00e+00d  [DetectDuplicateConstraints] #duplicates=116 
+[Symmetry] Problem too large. Skipping. You can use symmetry_level:3 or more to force it.

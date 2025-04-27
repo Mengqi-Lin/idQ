@@ -1,0 +1,29 @@
+
+The Gurobi software has a limited number of licenses. To request a license or
+licenses, add this line
+
+    #SBATCH --licenses=gurobi@slurmdb:1
+
+to your SBATCH script, replacing N with the number of licenses you need. Gurobi
+will need one license per process.
+
+
+
+Starting CP-SAT solver v9.12.4544
+Parameters: log_search_progress: true
+Setting number of workers to 36
+
+Initial satisfaction model '': (model_fingerprint: 0x4a459f20827d4854)
+#Variables: 3'601'239
+  - 3'601'239 Booleans in [0,1]
+#kBoolAnd: 3'392'025 (#enforced: 3'392'025) (#literals: 10'176'075)
+#kBoolOr: 1 (#literals: 375)
+#kLinear1: 6'784'229 (#enforced: 6'784'215)
+#kLinear2: 1'813'750 (#enforced: 1'950)
+#kLinear3: 3'500 (#enforced: 3'150)
+#kLinearN: 430'095 (#enforced: 203'910) (#terms: 5'192'460)
+
+Starting presolve at 2.07s
+  1.86e+00s  0.00e+00d  [DetectDominanceRelations] 
+  2.29e+01s  0.00e+00d  [PresolveToFixPoint] #num_loops=3 #num_dual_strengthening=2 
+  1.15e-01s  0.00e+00d  [ExtractEncodingFromLinear] #potential_supersets=10 

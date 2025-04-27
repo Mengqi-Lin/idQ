@@ -2,9 +2,12 @@
 #SBATCH --job-name=idQ_expr
 #SBATCH --output=../logs/idQ_expr_%j.out
 #SBATCH --time=48:00:00
-#SBATCH --mem=24G
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=8       # match your 8-thread MacBook default
+#SBATCH --mem-per-cpu=7G        # 56 GB total
+#SBATCH -p largemem,standard     # try largemem first, then standard
 #SBATCH --licenses=gurobi@slurmdb:1
-#SBATCH --mem-per-cpu=2G  # with 8 CPUs → 16 GB total (bump to 3G if you need ~24 GB)
+
 
 
 # Usage: ./run_runtime_expr.sh <J> <K> <N> <seed> <solver>

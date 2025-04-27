@@ -1,0 +1,184 @@
+
+The Gurobi software has a limited number of licenses. To request a license or
+licenses, add this line
+
+    #SBATCH --licenses=gurobi@slurmdb:1
+
+to your SBATCH script, replacing N with the number of licenses you need. Gurobi
+will need one license per process.
+
+
+
+Starting CP-SAT solver v9.12.4544
+Parameters: log_search_progress: true
+Setting number of workers to 36
+
+Initial satisfaction model '': (model_fingerprint: 0xcdd5b9797f5e7a2a)
+#Variables: 3'245'411
+  - 3'245'411 Booleans in [0,1]
+#kBoolAnd: 3'039'960 (#enforced: 3'039'960) (#literals: 9'119'880)
+#kBoolOr: 1 (#literals: 360)
+#kLinear1: 6'080'069 (#enforced: 6'080'055)
+#kLinear2: 1'868'145 (#enforced: 1'713)
+#kLinear3: 2'811 (#enforced: 2'475)
+#kLinearN: 403'802 (#enforced: 201'090) (#terms: 4'897'470)
+
+Starting presolve at 5.34s
+  2.46e+00s  0.00e+00d  [DetectDominanceRelations] 
+  2.50e+01s  0.00e+00d  [PresolveToFixPoint] #num_loops=3 #num_dual_strengthening=2 
+  1.26e-01s  0.00e+00d  [ExtractEncodingFromLinear] #potential_supersets=9 
+  4.38e-01s  0.00e+00d  [DetectDuplicateColumns] 
+  2.00e+00s  0.00e+00d  [DetectDuplicateConstraints] 
+[Symmetry] Problem too large. Skipping. You can use symmetry_level:3 or more to force it.
+[SAT presolve] num removable Booleans: 3244902 / 3245262
+[SAT presolve] num trivial clauses: 0
+[SAT presolve] [0s] clauses:8355178 literals:21009001 vars:3245262 one_side_vars:0 simple_definition:3039989 singleton_clauses:0
+[SAT presolve] [4.0435s] clauses:8355164 literals:21008909 vars:3245262 one_side_vars:0 simple_definition:3039989 singleton_clauses:0
+[SAT presolve] [5.6015s] clauses:8353485 literals:21004911 vars:3244825 one_side_vars:0 simple_definition:3039960 singleton_clauses:0
+  4.46e-01s  0.00e+00d  [DetectDuplicateConstraintsWithDifferentEnforcements] #without_enforcements=4'332 
+  7.31e+00s  1.10e+00d *[Probe] #probed=29 #fixed_bools=1'481'063 #equiv=57'063 #new_binary_clauses=63'431 
+  3.02e+01s  1.64e+01d *[MaxClique] Merged 7'945'312(15'890'741 literals) into 7'910'801(15'821'719 literals) at_most_ones. 
+  2.36e+00s  0.00e+00d  [DetectDominanceRelations] 
+  2.03e+01s  0.00e+00d  [PresolveToFixPoint] #num_loops=22 #num_dual_strengthening=16 
+  8.42e-01s  0.00e+00d  [ProcessAtMostOneAndLinear] 
+  1.14e+00s  0.00e+00d  [DetectDuplicateConstraints] #duplicates=22'190 
+  1.15e+00s  0.00e+00d  [DetectDuplicateConstraintsWithDifferentEnforcements] 
+  2.34e-01s  4.59e-07d  [DetectDominatedLinearConstraints] #relevant_constraints=14 
+  2.56e-01s  0.00e+00d  [DetectDifferentVariables] 
+  3.18e+00s  4.04e-02d  [ProcessSetPPC] #relevant_constraints=4'070'276 #num_inclusions=737'110 
+  4.07e-01s  0.00e+00d  [FindAlmostIdenticalLinearConstraints] 
+  9.36e-01s  1.75e-01d  [FindBigAtMostOneAndLinearOverlap] 
+  2.87e-01s  4.98e-02d  [FindBigVerticalLinearOverlap] 
+  3.42e-01s  7.65e-07d  [FindBigHorizontalLinearOverlap] #linears=14 
+  8.49e-01s  1.19e-02d  [MergeClauses] #num_collisions=26 #num_merges=26 #num_saved_literals=120 
+  2.88e+00s  0.00e+00d  [DetectDominanceRelations] 
+  7.30e+00s  0.00e+00d  [PresolveToFixPoint] #num_loops=2 #num_dual_strengthening=2 
+  4.19e+00s  0.00e+00d  [DetectDominanceRelations] 
+  7.75e+00s  0.00e+00d  [PresolveToFixPoint] #num_loops=1 #num_dual_strengthening=1 
+  5.09e-01s  0.00e+00d  [DetectDuplicateColumns] 
+  5.37e-01s  0.00e+00d  [DetectDuplicateConstraints] #duplicates=447 
+[Symmetry] Problem too large. Skipping. You can use symmetry_level:3 or more to force it.
+[SAT presolve] num removable Booleans: 1618728 / 1618911
+[SAT presolve] num trivial clauses: 0
+[SAT presolve] [0s] clauses:3985731 literals:9781335 vars:1618911 one_side_vars:0 simple_definition:1495930 singleton_clauses:0
+[SAT presolve] [2.82762s] clauses:3975859 literals:9743306 vars:1618911 one_side_vars:6145 simple_definition:1489890 singleton_clauses:5873
+[SAT presolve] [3.93102s] clauses:3962806 literals:9727557 vars:1606782 one_side_vars:1 simple_definition:1483943 singleton_clauses:1
+  8.00e-01s  0.00e+00d  [DetectDuplicateConstraintsWithDifferentEnforcements] #without_enforcements=6 
+  1.02e+01s  1.04e+00d *[Probe] #probed=95 #fixed_bools=107'044 #equiv=1'616 #new_binary_clauses=63'512 
+  1.86e+01s  7.46e+00d *[MaxClique] Merged 3'671'108(7'342'216 literals) into 3'670'722(7'341'822 literals) at_most_ones. 
+  2.64e+00s  0.00e+00d  [DetectDominanceRelations] 
+  1.05e+01s  0.00e+00d  [PresolveToFixPoint] #num_loops=2 #num_dual_strengthening=2 
+  1.34e+00s  0.00e+00d  [ProcessAtMostOneAndLinear] 
+  1.45e+00s  0.00e+00d  [DetectDuplicateConstraints] #duplicates=262 
+  1.18e+00s  0.00e+00d  [DetectDuplicateConstraintsWithDifferentEnforcements] 
+  2.94e-01s  4.23e-07d  [DetectDominatedLinearConstraints] #relevant_constraints=14 
+  2.37e-01s  0.00e+00d  [DetectDifferentVariables] 
+  3.74e+00s  3.66e-02d  [ProcessSetPPC] #relevant_constraints=3'700'925 #num_inclusions=668'425 
+  2.20e-01s  0.00e+00d  [FindAlmostIdenticalLinearConstraints] 
+  8.68e-01s  1.57e-01d  [FindBigAtMostOneAndLinearOverlap] 
+  2.64e-01s  4.53e-02d  [FindBigVerticalLinearOverlap] 
+  2.39e-01s  7.05e-07d  [FindBigHorizontalLinearOverlap] #linears=14 
+  9.75e-01s  1.11e-02d  [MergeClauses] #num_collisions=2'024 #num_merges=2'024 #num_saved_literals=4'584 
+  2.28e+00s  0.00e+00d  [DetectDominanceRelations] 
+  6.97e+00s  0.00e+00d  [PresolveToFixPoint] #num_loops=3 #num_dual_strengthening=2 
+  2.40e+00s  0.00e+00d  [DetectDominanceRelations] 
+  4.79e+00s  0.00e+00d  [PresolveToFixPoint] #num_loops=1 #num_dual_strengthening=1 
+  3.99e-01s  0.00e+00d  [DetectDuplicateColumns] 
+  4.93e-01s  0.00e+00d  [DetectDuplicateConstraints] #duplicates=869 
+[Symmetry] Problem too large. Skipping. You can use symmetry_level:3 or more to force it.
+[SAT presolve] num removable Booleans: 1453635 / 1454527
+[SAT presolve] num trivial clauses: 0
+[SAT presolve] [0s] clauses:3586128 literals:8772637 vars:1454527 one_side_vars:0 simple_definition:1336768 singleton_clauses:0
+[SAT presolve] [1.98232s] clauses:3583549 literals:8751017 vars:1454527 one_side_vars:2 simple_definition:1336781 singleton_clauses:0
+[SAT presolve] [3.01335s] clauses:3567039 literals:8774659 vars:1438117 one_side_vars:0 simple_definition:1254993 singleton_clauses:0
+  6.01e-01s  0.00e+00d  [DetectDuplicateConstraintsWithDifferentEnforcements] #without_enforcements=134 
+  7.99e+00s  1.02e+00d *[Probe] #probed=109 #fixed_bools=54'667 #equiv=7'229 #new_binary_clauses=63'411 
+  1.36e+01s  6.59e+00d *[MaxClique] Merged 3'271'583(6'543'544 literals) into 3'259'668(6'519'870 literals) at_most_ones. 
+  2.86e+00s  0.00e+00d  [DetectDominanceRelations] 
+  8.70e+00s  0.00e+00d  [PresolveToFixPoint] #num_loops=3 #num_dual_strengthening=2 
+  1.21e+00s  0.00e+00d  [ProcessAtMostOneAndLinear] 
+  1.33e+00s  0.00e+00d  [DetectDuplicateConstraints] #duplicates=1'287 
+  1.19e+00s  0.00e+00d  [DetectDuplicateConstraintsWithDifferentEnforcements] 
+  3.57e-01s  4.23e-07d  [DetectDominatedLinearConstraints] #relevant_constraints=14 
+  2.83e-01s  0.00e+00d  [DetectDifferentVariables] 
+  3.56e+00s  3.31e-02d  [ProcessSetPPC] #relevant_constraints=3'390'278 #num_inclusions=593'443 
+  2.85e-01s  0.00e+00d  [FindAlmostIdenticalLinearConstraints] 
+  8.25e-01s  1.42e-01d  [FindBigAtMostOneAndLinearOverlap] 
+  2.53e-01s  4.17e-02d  [FindBigVerticalLinearOverlap] 
+  2.67e-01s  7.05e-07d  [FindBigHorizontalLinearOverlap] #linears=14 
+  1.10e+00s  1.06e-02d  [MergeClauses] #num_collisions=14'819 #num_merges=14'819 #num_saved_literals=61'155 
+  2.66e+00s  0.00e+00d  [DetectDominanceRelations] 
+  6.82e+00s  0.00e+00d  [PresolveToFixPoint] #num_loops=2 #num_dual_strengthening=2 
+
+Presolve summary:
+  - 178874 affine relations were detected.
+  - rule 'TODO dual: only one blocking constraint?' was applied 47'432'224 times.
+  - rule 'TODO dual: tighten at most one' was applied 1'358'440 times.
+  - rule 'TODO linear2: contains a Boolean.' was applied 3'734'948 times.
+  - rule 'affine: new relation' was applied 178'874 times.
+  - rule 'at_most_one: empty or all false' was applied 527'961 times.
+  - rule 'at_most_one: removed literals' was applied 2'277'509 times.
+  - rule 'at_most_one: satisfied' was applied 2'159'669 times.
+  - rule 'at_most_one: singleton' was applied 80 times.
+  - rule 'at_most_one: size one' was applied 1'749'398 times.
+  - rule 'at_most_one: transformed into max clique.' was applied 3 times.
+  - rule 'at_most_one: x and not(x)' was applied 42 times.
+  - rule 'bool_and: fixed literals' was applied 38'550 times.
+  - rule 'bool_and: non-reified.' was applied 650 times.
+  - rule 'bool_and: removed duplicate literal' was applied 1'970 times.
+  - rule 'bool_and: setting unused literal in rhs to true' was applied 3 times.
+  - rule 'bool_and: x => x' was applied 118'579 times.
+  - rule 'bool_or: always true' was applied 115'564 times.
+  - rule 'bool_or: fixed literals' was applied 425'005 times.
+  - rule 'bool_or: implications' was applied 1'879'841 times.
+  - rule 'bool_or: only one literal' was applied 644 times.
+  - rule 'bool_or: removed enforcement literal' was applied 205'936 times.
+  - rule 'bool_or: singleton' was applied 68 times.
+  - rule 'deductions: 6080055 stored' was applied 1 time.
+  - rule 'dual: enforced equivalence' was applied 112'966 times.
+  - rule 'dual: fix variable' was applied 73 times.
+  - rule 'duplicate: removed constraint' was applied 25'055 times.
+  - rule 'duplicate: removed enforced constraint' was applied 4'472 times.
+  - rule 'enforcement: false literal' was applied 651 times.
+  - rule 'enforcement: literal not used' was applied 5 times.
+  - rule 'enforcement: true literal' was applied 652 times.
+  - rule 'exactly_one: removed literals' was applied 4 times.
+  - rule 'linear1: x in domain' was applied 14 times.
+  - rule 'linear: always true' was applied 14 times.
+  - rule 'linear: fixed or dup variables' was applied 20 times.
+  - rule 'linear: negative clause' was applied 1'866'419 times.
+  - rule 'linear: positive at most one' was applied 9 times.
+  - rule 'linear: positive clause' was applied 407'630 times.
+  - rule 'linear: remapped using affine relations' was applied 1 time.
+  - rule 'linear: simplified rhs' was applied 1 time.
+  - rule 'linear: small Boolean expression' was applied 672 times.
+  - rule 'presolve: 1695236 unused variables removed.' was applied 1 time.
+  - rule 'presolve: iteration' was applied 3 times.
+  - rule 'probing: bool_or reduced to implication' was applied 11'372 times.
+  - rule 'probing: simplified clauses.' was applied 56'315 times.
+  - rule 'setppc: bool_or in at_most_one.' was applied 6 times.
+  - rule 'setppc: fixed variables' was applied 6 times.
+  - rule 'setppc: removed dominated constraints' was applied 174 times.
+
+Presolved satisfaction model '': (model_fingerprint: 0x2fb49660023d29af)
+#Variables: 1'371'301
+  - 1'371'301 Booleans in [0,1]
+#kAtMostOne: 370 (#literals: 1'112)
+#kBoolAnd: 239'703 (#enforced: 239'703 #multi: 14'819) (#literals: 3'409'725)
+#kBoolOr: 261'573 (#literals: 1'975'968)
+#kExactlyOne: 3 (#literals: 21)
+#kLinearN: 14 (#terms: 141)
+[Symmetry] Graph for symmetry has 4'390'593 nodes and 10'998'601 arcs.
+[Symmetry] Graph too large. Skipping. You can use symmetry_level:3 or more to force it.
+
+Preloading model.
+#Model 303.42s var:1371301/1371301 constraints:501663/501663
+
+Starting search at 303.87s with 36 workers.
+8 full problem subsolvers: [default_lp, max_lp, no_lp, probing, probing_max_lp, probing_no_lp, quick_restart, quick_restart_no_lp]
+28 first solution subsolvers: [fj(8), fj_lin(4), fs_random(4), fs_random_no_lp(4), fs_random_quick_restart(4), fs_random_quick_restart_no_lp(4)]
+2 interleaved subsolvers: [feasibility_pump, rins/rens]
+2 helper subsolvers: [neighborhood_helper, synchronization_agent]
+
+/var/spool/slurmd.spool/job24648230/slurm_script: line 28: 1857019 Killed                  /sw/pkgs/arc/python3.10-anaconda/2023.03/bin/python /home/lemonkey/idQ/py/idQ_expr.py "$J" "$K" "$N" "$p" "$SEED" "$solver"
+slurmstepd: error: Detected 1 oom_kill event in StepId=24648230.batch. Some of the step tasks have been OOM Killed.

@@ -1,0 +1,47 @@
+
+The Gurobi software has a limited number of licenses. To request a license or
+licenses, add this line
+
+    #SBATCH --licenses=gurobi@slurmdb:1
+
+to your SBATCH script, replacing N with the number of licenses you need. Gurobi
+will need one license per process.
+
+
+
+Starting CP-SAT solver v9.12.4544
+Parameters: log_search_progress: true
+Setting number of workers to 36
+
+Initial satisfaction model '': (model_fingerprint: 0xaa69fe9bb055d086)
+#Variables: 5'035'843
+  - 5'035'843 Booleans in [0,1]
+#kBoolAnd: 4'706'055 (#enforced: 4'706'055) (#literals: 14'118'165)
+#kBoolOr: 1 (#literals: 345)
+#kLinear1: 9'412'319 (#enforced: 9'412'305)
+#kLinear2: 2'858'795 (#enforced: 2'151)
+#kLinear3: 4'822 (#enforced: 4'500)
+#kLinearN: 636'688 (#enforced: 322'905) (#terms: 7'546'680)
+
+Starting presolve at 2.88s
+  3.89e+00s  0.00e+00d  [DetectDominanceRelations] 
+  3.47e+01s  0.00e+00d  [PresolveToFixPoint] #num_loops=3 #num_dual_strengthening=2 
+  1.60e-01s  0.00e+00d  [ExtractEncodingFromLinear] #potential_supersets=11 
+  6.08e-01s  0.00e+00d  [DetectDuplicateColumns] 
+  2.87e+00s  0.00e+00d  [DetectDuplicateConstraints] 
+[Symmetry] Problem too large. Skipping. You can use symmetry_level:3 or more to force it.
+[SAT presolve] num removable Booleans: 5035289 / 5035634
+[SAT presolve] num trivial clauses: 0
+[SAT presolve] [0s] clauses:12912828 literals:32433998 vars:5035634 one_side_vars:0 simple_definition:4706084 singleton_clauses:0
+[SAT presolve] [5.40662s] clauses:12912814 literals:32433904 vars:5035634 one_side_vars:0 simple_definition:4706084 singleton_clauses:0
+[SAT presolve] [7.79134s] clauses:12911132 literals:32429974 vars:5035205 one_side_vars:0 simple_definition:4706055 singleton_clauses:0
+  4.12e-01s  0.00e+00d  [DetectDuplicateConstraintsWithDifferentEnforcements] #without_enforcements=8'661 
+  9.12e+00s  1.07e+00d *[Probe] #probed=21 #fixed_bools=2'095'474 #equiv=28'556 #new_binary_clauses=90'628 
+  4.24e+01s  2.56e+01d *[MaxClique] Merged 12'267'669(24'535'481 literals) into 12'252'212(24'504'567 literals) at_most_ones. 
+  3.39e+00s  0.00e+00d  [DetectDominanceRelations] 
+  2.04e+01s  0.00e+00d  [PresolveToFixPoint] #num_loops=20 #num_dual_strengthening=10 
+  1.23e+00s  0.00e+00d  [ProcessAtMostOneAndLinear] 
+  1.79e+00s  0.00e+00d  [DetectDuplicateConstraints] #duplicates=19'578 
+  1.69e+00s  0.00e+00d  [DetectDuplicateConstraintsWithDifferentEnforcements] 
+  2.64e-01s  3.84e-07d  [DetectDominatedLinearConstraints] #relevant_constraints=11 
+  2.55e-01s  0.00e+00d  [DetectDifferentVariables] 
