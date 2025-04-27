@@ -8,7 +8,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import gurobipy as gp
 from gurobipy import GRB
-from solve_Q_identifiability import solve_Q_identifiability, solve_Q_identifiability_fast
+from solve_Q_identifiability import solve_Q_identifiability_IP, solve_Q_identifiability_IPfast
 
 from Qbasis import (
     get_basis, 

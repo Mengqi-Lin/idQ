@@ -1,0 +1,40 @@
+
+The Gurobi software has a limited number of licenses. To request a license or
+licenses, add this line
+
+    #SBATCH --licenses=gurobi@slurmdb:1
+
+to your SBATCH script, replacing N with the number of licenses you need. Gurobi
+will need one license per process.
+
+
+
+Starting CP-SAT solver v9.12.4544
+Parameters: log_search_progress: true num_search_workers: 8
+
+Initial satisfaction model '': (model_fingerprint: 0x6da5f2083916b833)
+#Variables: 3'559'851
+  - 3'559'851 Booleans in [0,1]
+#kBoolAnd: 3'259'515 (#enforced: 3'259'515) (#literals: 9'778'545)
+#kBoolOr: 1 (#literals: 285)
+#kLinear1: 6'519'224 (#enforced: 6'519'210)
+#kLinear2: 2'433'475 (#enforced: 1'863)
+#kLinear3: 4'346 (#enforced: 4'080)
+#kLinearN: 511'519 (#enforced: 294'180) (#terms: 5'676'615)
+
+Starting presolve at 2.28s
+  2.90e+00s  0.00e+00d  [DetectDominanceRelations] 
+  2.72e+01s  0.00e+00d  [PresolveToFixPoint] #num_loops=3 #num_dual_strengthening=2 
+  1.70e-01s  0.00e+00d  [ExtractEncodingFromLinear] #potential_supersets=12 
+  5.73e-01s  0.00e+00d  [DetectDuplicateColumns] 
+  2.34e+00s  0.00e+00d  [DetectDuplicateConstraints] 
+[Symmetry] Problem too large. Skipping. You can use symmetry_level:3 or more to force it.
+[SAT presolve] num removable Booleans: 3559372 / 3559657
+[SAT presolve] num trivial clauses: 0
+[SAT presolve] [0s] clauses:9468690 literals:23895966 vars:3559657 one_side_vars:0 simple_definition:3259544 singleton_clauses:0
+[SAT presolve] [4.74915s] clauses:9468676 literals:23895871 vars:3559657 one_side_vars:0 simple_definition:3259544 singleton_clauses:0
+[SAT presolve] [6.76493s] clauses:9467238 literals:23892286 vars:3559274 one_side_vars:0 simple_definition:3259515 singleton_clauses:0
+  4.60e-01s  0.00e+00d  [DetectDuplicateConstraintsWithDifferentEnforcements] #without_enforcements=5'644 
+  9.06e+00s  1.06e+00d *[Probe] #probed=33 #fixed_bools=1'816'374 #equiv=47'813 #new_binary_clauses=102'988 
+/var/spool/slurmd.spool/job24647125/slurm_script: line 24: 1384839 Killed                  /sw/pkgs/arc/python3.10-anaconda/2023.03/bin/python /home/lemonkey/idQ/py/idQ_expr.py "$J" "$K" "$N" "$p" "$SEED" "$solver"
+slurmstepd: error: Detected 1 oom_kill event in StepId=24647125.batch. Some of the step tasks have been OOM Killed.

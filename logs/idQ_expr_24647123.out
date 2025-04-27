@@ -1,0 +1,27 @@
+
+The Gurobi software has a limited number of licenses. To request a license or
+licenses, add this line
+
+    #SBATCH --licenses=gurobi@slurmdb:1
+
+to your SBATCH script, replacing N with the number of licenses you need. Gurobi
+will need one license per process.
+
+
+
+Starting CP-SAT solver v9.12.4544
+Parameters: log_search_progress: true num_search_workers: 8
+
+Initial satisfaction model '': (model_fingerprint: 0xc95df4f54441a874)
+#Variables: 5'498'083
+  - 5'498'083 Booleans in [0,1]
+#kBoolAnd: 5'135'175 (#enforced: 5'135'175) (#literals: 15'405'525)
+#kBoolOr: 1 (#literals: 345)
+#kLinear1: 10'270'559 (#enforced: 10'270'545)
+#kLinear2: 3'191'450 (#enforced: 2'166)
+#kLinear3: 4'957 (#enforced: 4'635)
+#kLinearN: 698'266 (#enforced: 355'875) (#terms: 8'308'005)
+
+Starting presolve at 3.29s
+/var/spool/slurmd.spool/job24647123/slurm_script: line 24: 343353 Killed                  /sw/pkgs/arc/python3.10-anaconda/2023.03/bin/python /home/lemonkey/idQ/py/idQ_expr.py "$J" "$K" "$N" "$p" "$SEED" "$solver"
+slurmstepd: error: Detected 1 oom_kill event in StepId=24647123.batch. Some of the step tasks have been OOM Killed.

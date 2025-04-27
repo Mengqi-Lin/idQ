@@ -1,0 +1,67 @@
+
+The Gurobi software has a limited number of licenses. To request a license or
+licenses, add this line
+
+    #SBATCH --licenses=gurobi@slurmdb:1
+
+to your SBATCH script, replacing N with the number of licenses you need. Gurobi
+will need one license per process.
+
+
+0
+Q: [[0 0 0 1 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 1 1 0]
+ [0 0 0 0 0 0 0 0 0 1]
+ [0 0 0 1 0 0 1 0 0 0]
+ [0 0 0 0 0 0 1 0 0 0]
+ [0 0 1 1 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 1]
+ [1 0 0 0 0 0 0 1 0 0]
+ [0 0 0 0 0 0 0 0 0 0]
+ [1 0 0 0 0 0 0 0 1 1]
+ [0 0 0 0 0 0 0 1 0 0]
+ [0 0 0 1 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 1 0 1 0 0 0 0]
+ [1 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 1 0 0 0 0 0]
+ [0 1 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 1 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 1 0 0]
+ [0 1 1 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 1 0 0]
+ [0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 1 0 0 0 0 1]
+ [0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 1 0]
+ [1 1 0 0 0 0 0 0 0 0]
+ [0 1 0 0 0 0 0 0 0 0]
+ [0 1 0 0 1 1 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 1 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 1 0 0 0 1]
+ [0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 1 0 0 0 1]
+ [0 1 0 0 0 0 0 0 0 0]
+ [1 0 0 1 0 0 0 0 0 0]
+ [0 0 1 0 0 0 0 0 0 0]
+ [0 0 0 0 1 0 0 0 0 0]
+ [0 0 0 0 0 1 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0]
+ [0 0 1 1 0 1 0 0 0 0]]
+Q is identifiable (direct_check).
+Q is identifiable
+branch at 4
+runtime for solving id of Q is 0.006498129980172962
+Simulation results:
+{'J': 50, 'K': 10, 'N': 1, 'p': 0.1, 'seed': 5, 'avg_runtime': 0.006498129980172962, 'prop_identifiable': 1.0, 'branch_-1': 0, 'branch_0': 0, 'branch_1': 0, 'branch_2': 0, 'branch_3': 0, 'branch_4': 1, 'branch_5': 0, 'branch_6': 0}

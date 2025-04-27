@@ -15,7 +15,7 @@ from Qbasis import (
     get_Q_from_Qbasis
 )
 from direct_check_id import direct_check_id
-from solve_Q_identifiability import solve_Q_identifiability, solve_Q_identifiability_fast
+from solve_Q_identifiability import solve_Q_identifiability_IP, solve_Q_identifiability_IPfast, solve_identifiability_Q_cpsat
 
 from idQ import (
     thmCheck,
@@ -24,7 +24,7 @@ from idQ import (
     lex_sort_columns
 )
 
-def identifiability_expr(Q, fast = False):
+def identifiability_expr(Q, solver):
     Q = Q.copy()
     
     # Step 1: get Q_basis
@@ -75,17 +75,26 @@ def identifiability_expr(Q, fast = False):
         return 1, None, 4
     else:
         
-        if fast:
-            solution = solve_Q_identifiability_fast(Q_basis)
+        if solver == -1:
+            solution = solve_Q_identifiability_IPfast(Q_basis)
             if solution is not None:
                 Q_basis_bar = solution
                 Q_bar = get_Q_from_Qbasis(Q_basis_bar, basis_to_original)
                 return 0, Q_bar, 5
             else:
                 return True, None, 6  # No solution exists
-        else:
+        elif solver == 2:
             Q_sorted, sorted_to_original = lex_sort_columns(Q_basis)
-            solution = solve_Q_identifiability(Q_sorted)
+            solution = solve_Q_identifiability_IP(Q_sorted)
+            if solution is not None:
+                Q_basis_bar = solution[:, sorted_to_original]
+                Q_bar = get_Q_from_Qbasis(Q_basis_bar, basis_to_original)
+                return 0, Q_bar, 5
+            else:
+                return True, None, 6  # No solution exists
+        elif solver == 1:
+            Q_sorted, sorted_to_original = lex_sort_columns(Q_basis)
+            solution = solve_identifiability_Q_cpsat(Q_sorted)
             if solution is not None:
                 Q_basis_bar = solution[:, sorted_to_original]
                 Q_bar = get_Q_from_Qbasis(Q_basis_bar, basis_to_original)
@@ -93,7 +102,9 @@ def identifiability_expr(Q, fast = False):
             else:
                 return True, None, 6  # No solution exists
             
-def runtime_expr(J, K, N, p, seed, fast = False, output_csv=None):
+            
+            
+def runtime_expr(J, K, N, p, seed, solver = -1, output_csv=None):
     """
     Randomly sample N binary matrices of shape (J, K) with entries drawn from Bernoulli(p).
     For each matrix, call identifiability_expr(Q) and measure its runtime.
@@ -124,7 +135,7 @@ def runtime_expr(J, K, N, p, seed, fast = False, output_csv=None):
         Q = np.random.binomial(1, p, size=(J, K))
         print(f"Q: {Q}")
         start_time = time.perf_counter()
-        status, Q_bar, branch = identifiability_expr(Q, fast)
+        status, Q_bar, branch = identifiability_expr(Q, solver)
         if status:
             print(f"Q is identifiable")
         else:
@@ -178,7 +189,7 @@ def runtime_expr(J, K, N, p, seed, fast = False, output_csv=None):
     }
 
     if output_csv is None:
-        output_csv = f"../data/fast{fast}_J{J}_K{K}_p{p}_columnC.csv"
+        output_csv = f"../data/solver{solver}_J{J}_K{K}_p{p}.csv"
     
     os.makedirs(os.path.dirname(output_csv), exist_ok=True)
     file_exists = os.path.exists(output_csv)
@@ -192,8 +203,8 @@ def runtime_expr(J, K, N, p, seed, fast = False, output_csv=None):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 6:
-        print("Usage: python runtime_expr.py <J> <K> <N> <p> <seed>")
+    if len(sys.argv) != 7:
+        print("Usage: python runtime_expr.py <J> <K> <N> <p> <seed> <solver>")
         sys.exit(1)
 
     J = int(sys.argv[1])
@@ -201,7 +212,8 @@ if __name__ == '__main__':
     N = int(sys.argv[3])
     p = float(sys.argv[4])
     seed = int(sys.argv[5])
-
-    results = runtime_expr(J, K, N, p, seed, False)
+    solver = int(sys.argv[6])
+    
+    results = runtime_expr(J, K, N, p, seed, solver)
     print("Simulation results:")
     print(results)
