@@ -6,6 +6,9 @@ from functools import lru_cache
 import itertools
 from itertools import product
 from ortools.sat.python import cp_model
+from pysat.formula import CNF, IDPool
+from pysat.card import CardEnc, EncType
+from pysat.solvers import Cadical195, Solver
 
 def unique_pattern_supports(Q):
     """
@@ -531,3 +534,60 @@ def solve_identifiability_Q_cpsat(Q):
         return None  # No alternative Q found (Q might be identifiable)
 
     
+    
+    
+    
+
+
+def solve_SAT(Q, Cardbound=None, solver_name='cadical195'):
+    Q = np.asarray(Q, dtype=int)
+    J, K = Q.shape
+    # default Cardbound is the original row‐sums
+    if Cardbound is None:
+        Cardbound = Q.sum(axis=1).tolist()
+
+    pool = IDPool()
+    cnf   = CNF()
+
+    # --- 1) build X as a J×K matrix of fresh vars: X[j][k] = x_{j,k} ---
+    X = [[ pool.id(('x', j, k)) for k in range(K)] for j in range(J)]
+
+    # --- 2) lex‐decreasing columns:  
+        # for each k: compare column k vs k+1
+    for k in range(K - 1):
+        col_k   = [X[j][k]   for j in range(J)]
+        col_k1  = [X[j][k+1] for j in range(J)]
+        add_lex_gt(cnf, col_k, col_k1, pool)
+
+    # --- 3) row‐bounds: 1 ≤ sum_k X[j][k] ≤ Cardbound[j] ---
+    for j in range(J):
+        row_lits = X[j]
+        # at most
+        cnf.extend(
+            CardEnc.atmost(lits=row_lits,
+                           bound=Cardbound[j],
+                           encoding=EncType.seqcounter).clauses
+        )
+        # at least one
+        cnf.append(row_lits)
+
+    # --- 4) X ≠ Q: one entry must differ ---
+    diff_clause = []
+    for j in range(J):
+        for k in range(K):
+            lit = X[j][k] if Q[j, k] == 0 else -X[j][k]
+            diff_clause.append(lit)
+    cnf.append(diff_clause)
+
+    # --- 5) solve ---
+    with Solver(name=solver_name, bootstrap_with=cnf.clauses) as s:
+        if not s.solve():
+            return None
+
+        model = set(s.get_model())
+        X_mat = np.zeros_like(Q)
+        for j in range(J):
+            for k in range(K):
+                if X[j][k] in model:
+                    X_mat[j, k] = 1
+        return X_mat

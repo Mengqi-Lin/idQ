@@ -15,7 +15,7 @@ from Qbasis import (
     get_Q_from_Qbasis
 )
 from direct_check_id import direct_check_id
-from solve_Q_identifiability import solve_Q_identifiability_IP, solve_Q_identifiability_IPfast, solve_identifiability_Q_cpsat
+from solve_Q_identifiability import solve_Q_identifiability_IP, solve_Q_identifiability_IPfast, solve_identifiability_Q_cpsat, solve_SAT
 
 from idQ import (
     thmCheck,
@@ -79,6 +79,15 @@ def identifiability_expr(Q, solver):
             solution = solve_Q_identifiability_IPfast(Q_basis)
             if solution is not None:
                 Q_basis_bar = solution
+                Q_bar = get_Q_from_Qbasis(Q_basis_bar, basis_to_original)
+                return 0, Q_bar, 5
+            else:
+                return True, None, 6  # No solution exists
+        elif solver == 0:
+            Q_sorted, sorted_to_original = lex_sort_columns(Q_basis)
+            solution = solve_SAT(Q_sorted)
+            if solution is not None:
+                Q_basis_bar = solution[:, sorted_to_original]
                 Q_bar = get_Q_from_Qbasis(Q_basis_bar, basis_to_original)
                 return 0, Q_bar, 5
             else:
