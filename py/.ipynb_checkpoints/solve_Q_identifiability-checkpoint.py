@@ -9,6 +9,7 @@ from ortools.sat.python import cp_model
 from pysat.formula import CNF, IDPool
 from pysat.card import CardEnc, EncType
 from pysat.solvers import Cadical195, Solver
+import time
 
 def unique_pattern_supports(Q):
     """
@@ -630,6 +631,7 @@ def solve_SAT(Q, solver_name='cadical195'):
 
     with Solver(name=solver_name, bootstrap_with=cnf.clauses) as s:
         found = s.solve()
+        print(s.accum_stats())
         if not found:
             return None
         model = set(s.get_model())
@@ -641,9 +643,8 @@ def solve_SAT(Q, solver_name='cadical195'):
         return X_mat
     
     
-encoding=EncType.native and running 
 
-def solve_SAT_minicard(Q, solver_name='minicard'):
+def solve_SAT_g4(Q, solver_name='Gluecard4'):
     J, K = Q.shape
     Cardbound = K - distances(Q)
     U = unique_pattern_supports(Q)
