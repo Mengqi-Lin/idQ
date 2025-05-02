@@ -539,55 +539,131 @@ def solve_identifiability_Q_cpsat(Q):
     
 
 
-def solve_SAT(Q, Cardbound=None, solver_name='cadical195'):
-    Q = np.asarray(Q, dtype=int)
-    J, K = Q.shape
-    # default Cardbound is the original row‐sums
-    if Cardbound is None:
-        Cardbound = Q.sum(axis=1).tolist()
 
-    pool = IDPool()
-    cnf   = CNF()
+# ----------------------------------------------------------------------
+#  helper 1 :  strictly lexicographically decreasing columns
+# ----------------------------------------------------------------------
+def add_lex_decreasing(cnf, pool, x_var, J, K):
+    """column k >_lex column k+1  for all k"""
+    for k in range(K-1):
+        diff_lits = []
+        for i in range(J):
+            v = pool.id(('v', k, i))          # witness "first difference at row i"
+            diff_lits.append(v)
+            # v -> x[i,k]=1  and  x[i,k+1]=0
+            cnf.append([-v,  x_var[i][k]])
+            cnf.append([-v, -x_var[i][k+1]])
+            # v -> rows r<i equal
+            for r in range(i):
+                cnf.append([-v, -x_var[r][k],   x_var[r][k+1]])
+                cnf.append([-v,  x_var[r][k],  -x_var[r][k+1]])
+        # need some first difference
+        cnf.append(diff_lits)
 
-    # --- 1) build X as a J×K matrix of fresh vars: X[j][k] = x_{j,k} ---
-    X = [[ pool.id(('x', j, k)) for k in range(K)] for j in range(J)]
 
-    # --- 2) lex‐decreasing columns:  
-        # for each k: compare column k vs k+1
-    for k in range(K - 1):
-        col_k   = [X[j][k]   for j in range(J)]
-        col_k1  = [X[j][k+1] for j in range(J)]
-        add_lex_gt(cnf, col_k, col_k1, pool)
-
-    # --- 3) row‐bounds: 1 ≤ sum_k X[j][k] ≤ Cardbound[j] ---
-    for j in range(J):
-        row_lits = X[j]
-        # at most
-        cnf.extend(
-            CardEnc.atmost(lits=row_lits,
-                           bound=Cardbound[j],
-                           encoding=EncType.seqcounter).clauses
-        )
-        # at least one
-        cnf.append(row_lits)
-
-    # --- 4) X ≠ Q: one entry must differ ---
+# ----------------------------------------------------------------------
+#  helper 2 :  X != Q
+# ----------------------------------------------------------------------
+def add_neq_Q(cnf, x_var, Q):
     diff_clause = []
-    for j in range(J):
-        for k in range(K):
-            lit = X[j][k] if Q[j, k] == 0 else -X[j][k]
-            diff_clause.append(lit)
+    for j, row in enumerate(Q):
+        for k, qjk in enumerate(row):
+            diff_clause.append(-x_var[j][k] if qjk else x_var[j][k])
     cnf.append(diff_clause)
 
-    # --- 5) solve ---
-    with Solver(name=solver_name, bootstrap_with=cnf.clauses) as s:
-        if not s.solve():
-            return None
 
+# ----------------------------------------------------------------------
+#  helper 3 :  1 <= row-sum <= Cardbound[j]
+# ----------------------------------------------------------------------
+def add_row_cardinality(cnf, pool, x_var, Cardbound, encoding=EncType.seqcounter):
+    J, K = len(x_var), len(x_var[0])
+    for j in range(J):
+        row_lits = x_var[j]
+        # at least one 1
+        cnf.append(row_lits)
+        # at most Cardbound[j] ones
+        b = Cardbound[j]
+        enc = CardEnc.atmost(lits=row_lits, bound=b, vpool=pool, encoding=encoding)
+        cnf.extend(enc.clauses)
+
+
+# ----------------------------------------------------------------------
+#  helper 4 :  exact U-constraint
+# ----------------------------------------------------------------------
+def add_U_constraint(cnf, pool, x_var, U):
+    """
+    U : list of lists (each list is a subset of row indices)
+    """
+    J, K = len(x_var), len(x_var[0])
+    for S_idx, S in enumerate(U):
+        S = set(S)
+        for jp in range(J):
+            if jp in S:
+                continue
+            witness = []
+            for k in range(K):
+                c = pool.id(('c', S_idx, jp, k))
+                witness.append(c)
+                # forward  c -> x[jp,k]=1   and  forall j in S: x[j,k]=0
+                cnf.append([-c, x_var[jp][k]])
+                for j in S:
+                    cnf.append([-c, -x_var[j][k]])
+                # backward (x[jp,k] & big_and_{j in S} ¬x[j,k]) -> c
+                clause = [-x_var[jp][k]] + [x_var[j][k] for j in S] + [c]
+                cnf.append(clause)
+            # need at least one witnessing column
+            cnf.append(witness)
+
+
+def solve_SAT(Q, solver_name='cadical195'):
+    J, K = Q.shape
+    Cardbound = K - distances(Q)
+    U = unique_pattern_supports(Q)
+    pool = IDPool()
+    x_var = [[pool.id(('x', j, k)) for k in range(K)] for j in range(J)]
+    cnf = CNF()
+
+    add_lex_decreasing(cnf, pool, x_var, J, K)
+    add_neq_Q(cnf, x_var, Q)
+    add_row_cardinality(cnf, pool, x_var, Cardbound)
+    add_U_constraint(cnf, pool, x_var, U)
+
+    with Solver(name=solver_name, bootstrap_with=cnf.clauses) as s:
+        found = s.solve()
+        if not found:
+            return None
         model = set(s.get_model())
         X_mat = np.zeros_like(Q)
         for j in range(J):
             for k in range(K):
-                if X[j][k] in model:
+                if x_var[j][k] in model:
+                    X_mat[j, k] = 1
+        return X_mat
+    
+    
+encoding=EncType.native and running 
+
+def solve_SAT_minicard(Q, solver_name='minicard'):
+    J, K = Q.shape
+    Cardbound = K - distances(Q)
+    U = unique_pattern_supports(Q)
+    pool = IDPool()
+    x_var = [[pool.id(('x', j, k)) for k in range(K)] for j in range(J)]
+    cnf = CNF()
+
+    add_lex_decreasing(cnf, pool, x_var, J, K)
+    add_neq_Q(cnf, x_var, Q)
+    add_row_cardinality(cnf, pool, x_var, Cardbound, EncType.native)
+    add_U_constraint(cnf, pool, x_var, U)
+
+    with Solver(name=solver_name, bootstrap_with=cnf.clauses) as s:
+        found = s.solve()
+        if not found:
+            return None
+        model = set(s.get_model())
+        X_mat = np.zeros_like(Q)
+        for j in range(J):
+            for k in range(K):
+                if x_var[j][k] in model:
                     X_mat[j, k] = 1
         return X_mat
