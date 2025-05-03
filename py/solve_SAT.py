@@ -1,0 +1,235 @@
+import numpy as np
+from functools import lru_cache
+import itertools
+from itertools import product
+from ortools.sat.python import cp_model
+from pysat.formula import CNF, IDPool
+from pysat.card import CardEnc, EncType
+from pysat.solvers import Cadical195, Solver
+import time
+
+def unique_pattern_supports(Q):
+    """
+    Returns all nontrivial supports S = {j | \aaa ⪰ q_j}, for each representative \aaa.
+    *excluding* the empty set and the full set {0,…,J-1}.
+    """
+    J, K = Q.shape
+    R = {tuple([0]*K)}
+    for j in range(J):
+        row = Q[j]
+        new = []
+        for aaa in R:
+            merged = tuple(aaa[k] | row[k] for k in range(K))
+            if merged not in R:
+                new.append(merged)
+        R.update(new)
+    # Build and filter supports
+    full = frozenset(range(J))
+    supports = []
+    for aaa in R:
+        S = frozenset(j for j in range(J) if all(aaa[k] >= Q[j][k] for k in range(K)))
+        if S and S is not full:
+            supports.append(set(S))
+    return supports
+
+
+
+def distances(Q):
+    masks, full = row_masks(Q)
+    J = len(masks)
+    
+    # lru_cache memoises the depth function, ensuring each reachable pattern is explored only once.
+    @lru_cache(maxsize=None)
+    def depth(mask):
+        if mask == full:
+            return 0
+        best = 0
+        for m in masks:
+            new = mask | m
+            if new != mask:                     # strict cover
+                best = max(best, 1 + depth(new))
+        return best
+
+    return np.array([depth(m) for m in masks])
+
+
+def generate_clause(X):
+    clause = []
+    for x in X:
+        clause.append(x)
+    return clause
+
+def generate_implication_clause(X, Y):
+    clause = []
+    for x in X:
+        clause.append(-x)
+    for y in Y:
+        clause.append(y)
+    return clause
+
+
+def generate_lex_clauses(X, Y, strict, total_vars):
+    
+    """
+    Harvey's linear encoding  (X >_lex Y   if strict else  X ≥_lex Y).
+
+    Returns (clauses, new_total_vars).
+    """
+    clauses = []
+    n = len(X)
+    # First bit: X[0] ≥ Y[0]
+    clauses.append(generate_implication_clause({Y[0]}, {X[0]}))
+    clauses.append(generate_implication_clause({Y[0]}, {total_vars+1}))
+    clauses.append(generate_clause({X[0], total_vars+1}))
+    
+    # For remaining bits: maintain the lexicographic ordering
+    for k in range(1, n-1): 
+        clauses.append(generate_implication_clause({total_vars+k}, {-Y[k], X[k]}))
+        clauses.append(generate_implication_clause({total_vars+k}, {-Y[k], total_vars+k+1}))
+        clauses.append(generate_implication_clause({total_vars+k}, {X[k], total_vars+k+1}))
+    
+    # Handle the last bit
+    if strict:
+        clauses.append(generate_implication_clause({total_vars+n-1}, {-Y[n-1]}))
+        clauses.append(generate_implication_clause({total_vars+n-1}, {X[n-1]}))
+    else:
+        clauses.append(generate_implication_clause({total_vars+n-1}, {-Y[n-1], X[n-1]}))
+    return (clauses, total_vars+n-1)
+
+def add_lex_decreasing(cnf, pool, X, J, K):
+    """
+    Append clauses forcing columns of X to be *strictly* decreasing
+    in lexicographic order:  X[:,0] >_lex X[:,1] >_lex … > X[:,K-1].
+
+    Uses the generate_lex_clauses() helper above.
+    """
+    total_vars = pool.top  # current highest variable ID
+
+    for k in range(K - 1):
+        col_k  = [X[j][k]   for j in range(J)]
+        col_k1 = [X[j][k+1] for j in range(J)]
+
+        clauses, total_vars = generate_lex_clauses(
+            col_k, col_k1, strict=True, total_vars=total_vars
+        )
+        cnf.extend(clauses)
+
+    # tell the pool about the new auxiliary variables
+    pool.top = total_vars
+
+
+# ----------------------------------------------------------------------
+#  Constraint:  X != Q
+# ----------------------------------------------------------------------
+def add_neq_Q(cnf, X, Q):
+    diff_clause = []
+    for j, row in enumerate(Q):
+        for k, qjk in enumerate(row):
+            diff_clause.append(-X[j][k] if qjk else X[j][k])
+    cnf.append(diff_clause)
+
+# ----------------------------------------------------------------------
+#  Constraint:  X <= Q
+# ----------------------------------------------------------------------
+
+def add_leq_Q(cnf, X, Q):
+    for j, row in enumerate(Q):
+        for k, qjk in enumerate(row):
+            if qjk == 0:
+                cnf.append([-X[j][k]])  # Enforce x[j][k] == 0
+
+
+# ----------------------------------------------------------------------
+#  Constraint:  1 <= row-sum <= Cardbound[j]
+# ----------------------------------------------------------------------
+def add_row_cardinality(cnf, pool, X, Cardbound, encoding=EncType.seqcounter):
+    J, K = len(X), len(X[0])
+    for j in range(J):
+        row_lits = X[j]
+        # at least one 1
+        cnf.append(row_lits)
+        # at most Cardbound[j] ones
+        b = Cardbound[j]
+        enc = CardEnc.atmost(lits=row_lits, bound=b, vpool=pool, encoding=encoding)
+        cnf.extend(enc.clauses)
+
+
+# ----------------------------------------------------------------------
+#  Constraint:  exact U-constraint
+# ----------------------------------------------------------------------
+def add_U_constraint(cnf, pool, X, U):
+    """
+    U : list of lists (each list is a subset of row indices)
+    """
+    J, K = len(X), len(X[0])
+    for S_idx, S in enumerate(U):
+        S = set(S)
+        for jp in range(J):
+            if jp in S:
+                continue
+            witness = []
+            for k in range(K):
+                c = pool.id(('c', S_idx, jp, k))
+                witness.append(c)
+                # forward  c -> x[jp,k]=1   and  forall j in S: x[j,k]=0
+                cnf.append([-c, X[jp][k]])
+                for j in S:
+                    cnf.append([-c, -X[j][k]])
+                # backward (x[jp,k] & big_and_{j in S} ¬x[j,k]) -> c
+                clause = [-X[jp][k]] + [X[j][k] for j in S] + [c]
+                cnf.append(clause)
+            # need at least one witnessing column
+            cnf.append(witness)
+
+
+def solve_SAT(Q, solver_name='cadical195'):
+    J, K = Q.shape
+    Cardbound = K - distances(Q)
+    U = unique_pattern_supports(Q)
+    pool = IDPool()
+    X = [[pool.id(('x', j, k)) for k in range(K)] for j in range(J)]
+    cnf = CNF()
+
+    add_lex_decreasing(cnf, pool, X, J, K)
+    add_neq_Q(cnf, X, Q)
+    add_row_cardinality(cnf, pool, X, Cardbound)
+    add_U_constraint(cnf, pool, X, U)
+
+    with Solver(name=solver_name, bootstrap_with=cnf.clauses) as s:
+        found = s.solve()
+        print(s.accum_stats())
+        if not found:
+            return None
+        model = set(s.get_model())
+        Q_bar = np.zeros_like(Q)
+        for j in range(J):
+            for k in range(K):
+                if X[j][k] in model:
+                    Q_bar[j, k] = 1
+        return Q_bar
+    
+    
+
+def solve_SAT_fast(Q, solver_name='cadical195'):
+    J, K = Q.shape
+    U = unique_pattern_supports(Q)
+    pool = IDPool()
+    X = [[pool.id(('x', j, k)) for k in range(K)] for j in range(J)]
+    cnf = CNF()
+
+    add_neq_Q(cnf, X, Q)
+    add_leq_Q(cnf, X, Q)
+    add_U_constraint(cnf, pool, X, U)
+
+    with Solver(name=solver_name, bootstrap_with=cnf.clauses) as s:
+        found = s.solve()
+        print(s.accum_stats())
+        if not found:
+            return None
+        model = set(s.get_model())
+        Q_bar = np.zeros_like(Q)
+        for j in range(J):
+            for k in range(K):
+                if X[j][k] in model:
+                    Q_bar[j, k] = 1
+        return Q_bar

@@ -8,7 +8,8 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import gurobipy as gp
 from gurobipy import GRB
-from solve_Q_identifiability import solve_Q_identifiability_IP, solve_Q_identifiability_IPfast
+from solve_Q_identifiability import solve_IP, solve_IP_fast
+from solve_SAT import solve_SAT, solve_SAT_fast
 
 from Qbasis import (
     get_basis, 
@@ -152,32 +153,6 @@ def generate_permutations(Q):
 
 
 
-def preserve_partial_order(Q, Q_bar, indices1, indices2):
-    for index1 in indices1:
-        for index2 in indices2:
-            q1, q2 = Q[index1], Q[index2]
-            q1_bar, q2_bar = Q_bar[index1], Q_bar[index2]
-
-            # Check if q1 is parallel to q2
-            if is_parallel(q1, q2):
-                # If q1 is parallel to q2, then q1_bar must be parallel to q2_bar
-                if not is_parallel(q1_bar, q2_bar):
-                    return False
-
-            # Check if q1 is strictly less than q2
-            if is_strictly_less_than(q1, q2):
-                # If q1 is strictly less than q2, then q1_bar must be strictly less than q2_bar or parallel to q2_bar
-                if not is_strictly_less_than(q1_bar, q2_bar) and not is_parallel(q1_bar, q2_bar):
-                    return False
-
-            # Check if q1 is strictly greater than q2
-            if is_strictly_less_than(q2, q1):
-                # If q1 is strictly greater than q2, then q1_bar must be strictly greater than q2_bar or parallel to q2_bar
-                if not is_strictly_less_than(q2_bar, q1_bar) and not is_parallel(q1_bar, q2_bar):
-                    return False
-
-    # If none of the conditions are violated for any of the indices, return True
-    return True
 
 
 def contains_identity_submatrix(Q):
