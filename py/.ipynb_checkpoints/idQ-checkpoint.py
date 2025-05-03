@@ -114,46 +114,6 @@ def representative_node_set(Q):
 
 
 
-def column_rank_T_mat(Q):
-    TT = T_mat(Q)
-    return(np.linalg.matrix_rank(TT))
-
-
-
-# This function checks whether two given rows are parallel.
-def is_parallel(row1, row2):
-    return not (np.all(row1 <= row2) or np.all(row1 >= row2))
-
-# This function checks whether row1 is strictly less than row2.
-def is_strictly_less_than(row1, row2):
-    return np.all(row1 <= row2) and np.any(row1 < row2)
-
-# This function checks whether row1 is less than or equal to row2.
-def is_less_equal_than(row1, row2):
-    return np.all(row1 <= row2)
-
-# This function generates all binary vectors of length K with a specified number of ones (num_of_ones).
-def generate_binary_vectors(K, num_of_ones):
-    binary_vectors = []
-    for combination in combinations(range(K), num_of_ones):
-        binary_vector = np.zeros(K, dtype=int)
-        binary_vector[list(combination)] = 1
-        binary_vectors.append(binary_vector)
-    return binary_vectors
-
-# This function generates all possible permutations of the columns in a 2D numpy array Q.
-def generate_permutations(Q):
-    K = Q.shape[1]  # number of columns
-    Q_perms = []
-    for perm in permutations(range(K)):  # generate all permutations of column indices
-        Q_perm = Q[:, perm]  # apply permutation to columns of Q
-        Q_perms.append(Q_perm)
-    return Q_perms
-
-
-
-
-
 
 def contains_identity_submatrix(Q):
     """
@@ -169,24 +129,21 @@ def contains_identity_submatrix(Q):
     bool
         True if Q contains a subset of rows forming the identity matrix, False otherwise.
     """
-    Q = np.unique(Q, axis = 0)
+    
     J, K = Q.shape
 
     # If J < K, it's not possible for Q to contain I_K
     if J < K:
         return False
 
-    # Get the indices of rows in Q that contain exactly one 1
-    single_one_rows = np.where(np.sum(Q, axis=1) == 1)[0]
-
-    # Extract the rows that contain exactly one 1, and sort them in lexicographic order 
-    Q_one = Q[single_one_rows]
+    # Get the indices of pure_nodes in Q
+    pure_nodes = np.where(np.sum(Q, axis=1) == 1)[0]
     
-    # Get the unique rows
-    single_one_rows_unique = np.unique(single_one_rows, axis=0)
+    # Get the unique pure_nodes
+    pure_nodes_unique = np.unique(pure_nodes, axis=0)
 
-    # Check if there are exactly K unique rows
-    if len(single_one_rows_unique) == K:
+    # Check if there are exactly K unique pure_nodes
+    if len(pure_nodes_unique) == K:
         return True
 
     return False
@@ -325,6 +282,27 @@ def valid_three_column_submatrix(S):
             return True
     return False
 
+
+def has_pure_node_K3(S):
+    """
+    Check if binary matrix S (list of lists or numpy array with shape (n,3))
+    contains at least one pure node, i.e., a row equal to [1,0,0], [0,1,0], or [0,0,1].
+    """
+    try:
+        S_arr = np.asarray(S)
+        if S_arr.ndim != 2 or S_arr.shape[1] != 3:
+            raise ValueError("Input must be a 2D array with three columns.")
+        # A pure node in binary input has row-sum == 1
+        return bool(np.any(S_arr.sum(axis=1) == 1))
+    except ImportError:
+        # Fallback to pure Python if numpy is unavailable
+        unit_vectors = {(1,0,0), (0,1,0), (0,0,1)}
+        for row in S:
+            if tuple(row) in unit_vectors:
+                return True
+        return False
+
+
 def fix_submatrix3(Q, k1, k2, k3):
     """
     Check the three-column submatrix of Q (columns k1, k2, k3).
@@ -341,7 +319,7 @@ def fix_submatrix3(Q, k1, k2, k3):
                             or None if the submatrix is already valid.
     """
     S = Q[:, [k1, k2, k3]]
-    if valid_three_column_submatrix(S):
+    if has_pure_node_K3(S):
         return None  # S is valid.
     
     # As a simple fix, enforce Condition 1: force in one missing standard basis vector.
@@ -432,44 +410,6 @@ def lex_sort_columns(Q: np.ndarray):
     return Q_sorted, inv_perm
 
 
-def generate_unique_Q_bars(subQ_bars, Q, replacement_indices):
-    
-    """
-    Generate candidate Q_bar matrices from the Cartesian product subQ_bars,
-    yielding only one representative per permutation equivalence class.
-    The canonical form of Q is added to the 'seen' set so that any candidate
-    equivalent to Q is automatically filtered out.
-    
-    Parameters:
-        subQ_bars (iterable): Cartesian product of candidate replacement rows.
-        Q (np.ndarray): The input Q-matrix.
-        replacement_indices (list): Indices of rows in Q to be replaced.
-    
-    Yields:
-        np.ndarray: A candidate Q_bar that is not permutation equivalent to Q.
-    """
-    
-    seen = set()
-    canonical_Q = canonicalize(Q)
-    seen.add(canonical_Q.tostring())
-    
-    for subQ_bar_replacements in subQ_bars:
-        # Check if the candidate for replacements is empty:
-        if len(subQ_bar_replacements) == 0:
-            continue  # skip this candidate
-        
-        Q_bar = Q.copy()
-        candidate = np.array(subQ_bar_replacements)
-        # Ensure candidate has the correct shape. If candidate.ndim == 1, reshape it.
-        if candidate.ndim == 1:
-            candidate = candidate.reshape(1, -1)
-        
-        Q_bar[replacement_indices, :] = candidate
-        can_form = canonicalize(Q_bar)
-        key = can_form.tostring()
-        if key not in seen:
-            seen.add(key)
-            yield Q_bar
 
 
 def thmCheck(Q_basis, Q_bar_gen):
@@ -520,57 +460,10 @@ def thmCheck(Q_basis, Q_bar_gen):
     return 1, None
                 
     
-def brute_check_id(Q_basis):
-    """
-    Perform candidate generation on the basis matrix Q_basis to check the identifiability.
-    
-    Q_basis is the matrix obtained after removing all-zero, duplicate, and generated rows.
-    
-    The function generates candidate Q_basis_bar matrices by modifying the replaceable rows of Q_basis.
-    It returns a tuple (status, Q_basis_bar) where:
-      - status == 0 indicates that Q_basis is not identifiable and Q_basis_bar is a candidate,
-      - status == 1 indicates that Q_basis is identifiable (and no candidate is found).
-    
-    Note: Lifting Q_basis_bar back to the full Q will be handled in the main function.
-    """
-    J_basis, K = Q_basis.shape
-    distances = distances2U(Q_basis)
-    irreplaceable_rows = np.where(np.array(distances) == K - 1)[0]
-    replaceable_rows = set(range(J_basis)) - set(irreplaceable_rows)
-    
-    replacement_indices = list(replaceable_rows)
-    subQ_bars = []
-    for i in range(len(replacement_indices)):
-        index = replacement_indices[i]
-        q_bars = []
-        # for p in range(1, K - distances[index] + 1):
-        #     q_bars.extend(generate_binary_vectors(K, p))
-        support = np.where(Q_basis[index, :] == 1)[0]
-        for r in range(1, len(support) + 1):         # r = size of the subset, from 1 up to full support
-            for combo in itertools.combinations(support, r):
-                q = np.zeros(K, dtype=int)
-                q[list(combo)] = 1
-                q_bars.append(q)
-        
-        valid_q_bars = []
-        Q_temp = Q_basis.copy()
-        for q_bar in q_bars:
-            Q_temp[index, :] = q_bar
-            if preserve_partial_order(Q_basis, Q_temp, set(irreplaceable_rows), [index]):
-                valid_q_bars.append(q_bar)
-        subQ_bars.append(valid_q_bars)
-    
-    # Generate Cartesian product of candidate replacements.
-    subQ_bars = itertools.product(*subQ_bars)
-    Q_bar_gen = generate_unique_Q_bars(subQ_bars, Q_basis, replacement_indices)
-
-    return thmCheck(Q_basis, Q_bar_gen)
-
-    
 
 
 ### This function checks if Q is identifiable, if not, it returns one possible Q_bar.
-def identifiability(Q, fast = False):
+def identifiability(Q, solver = 0):
     """
     Check if Q is identifiable. If not, return one possible candidate Q_bar.
     
