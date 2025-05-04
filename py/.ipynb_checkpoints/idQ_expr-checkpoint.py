@@ -14,13 +14,13 @@ from Qbasis import (
     get_Q_from_Qunique, 
     get_Q_from_Qbasis
 )
-from direct_check_id import direct_check_id
 from solve_Q_identifiability import solve_Q_identifiability_IP, solve_Q_identifiability_IPfast, solve_identifiability_Q_cpsat, solve_SAT, solve_SAT_fast
 
 from idQ import (
     thmCheck,
     check_two_column_submatrices,
     check_three_column_submatrices,
+    contains_identity_submatrix,
     lex_sort_columns
 )
 
@@ -70,7 +70,7 @@ def identifiability_expr(Q, solver):
         
         
     # Step 4: Determine identifiability of Q_basis.
-    if direct_check_id(Q_basis):
+    if contains_identity_submatrix(Q_basis):
         print("Q is identifiable (direct_check).")
         return 1, None, 4
     else:
