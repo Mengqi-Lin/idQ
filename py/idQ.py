@@ -164,28 +164,6 @@ def check_two_column_submatrices(Q):
 
 
 
-def valid_three_column_submatrix(S):
-    """
-    Given a three-column submatrix S (of shape (J,3)), return True if there exists 
-    a permutation of its columns so that the unique rows of S contain one of the following target sets:
-      1. The standard basis: {(1,0,0), (0,1,0), (0,0,1)}.
-      2. The set T2: {(1,1,0), (1,0,1), (0,1,1), (1,0,0)}.
-      3. The set T3: {(0,1,0), (0,0,1), (1,1,0), (1,0,1)}.
-    Otherwise, return False.
-    """
-    # Unique rows of S as tuples.
-    U = {tuple(row) for row in S}
-    T1 = {(1,0,0), (0,1,0), (0,0,1)}
-    T2 = {(1,1,0), (1,0,1), (0,1,1), (1,0,0)}
-    T3 = {(0,1,0), (0,0,1), (1,1,0), (1,0,1)}
-    
-    # Try every permutation of columns.
-    for perm in itertools.permutations(range(3)):
-        U_perm = {tuple(row[i] for i in perm) for row in S}
-        if T1.issubset(U_perm) or T2.issubset(U_perm) or T3.issubset(U_perm):
-            return True
-    return False
-
 
 def has_pure_node_K3(S):
     """
