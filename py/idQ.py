@@ -10,7 +10,6 @@ import gurobipy as gp
 from gurobipy import GRB
 from solve_Q_identifiability import solve_IP, solve_IP_fast
 from solve_SAT import solve_SAT, solve_SAT_fast
-
 from Qbasis import (
     get_basis, 
     get_Qunique_from_Qbasis, 
@@ -18,7 +17,6 @@ from Qbasis import (
     get_Q_from_Qbasis
 )
 import os
-from direct_check_id import direct_check_id
 
 # Compute T_matrix of Q
 def T_mat(Q):
@@ -357,9 +355,9 @@ def check_three_column_submatrices(Q):
     """
     J, K = Q.shape
     for (k1, k2, k3) in itertools.combinations(range(K), 3):
-        candidate = fix_submatrix3(Q, k1, k2, k3)
-        if candidate is not None:
-            return candidate
+        Q_bar = fix_submatrix3(Q, k1, k2, k3)
+        if Q_bar is not None:
+            return Q_bar
     return None
 
 
@@ -507,26 +505,27 @@ def identifiability(Q, solver = 0):
             print("Q is trivially not identifiable (all one column).")
             Q_bar = get_Q_from_Qbasis(Q_basis_bar, basis_to_original)
             return 0, Q_bar
-
-    candidate = check_two_column_submatrices(Q_basis)
-    if candidate is not None:
+    
+    Q_basis_bar = check_two_column_submatrices(Q_basis)
+    if Q_basis_bar is not None:
         print("Q is not identifiable (two-column submatrix not identifiable).")
-        Q_basis_bar = candidate
         Q_bar = get_Q_from_Qbasis(Q_basis_bar, basis_to_original)
         return 0, Q_bar
-
-    candidate = check_three_column_submatrices(Q_basis)
-    if candidate is not None:
+    elif K == 2:
+        return True, None
+    
+    Q_basis_bar = check_three_column_submatrices(Q_basis)
+    if Q_basis_bar is not None:
         print("Q is not identifiable (three-column submatrix not identifiable).")
-        Q_basis_bar = candidate
         Q_bar = get_Q_from_Qbasis(Q_basis_bar, basis_to_original)
         return 0, Q_bar
-
+    elif K == 3:
+        return True, None
     
     # Step 4: Determine identifiability of Q_basis.
-    if direct_check_id(Q_basis):
-        print("Q is identifiable (direct_check).")
-        return 1, None
+    if contains_identity_submatrix(Q_basis):
+        print("Q contains an identity submatrix, thus is identifiable.")
+        return True, None
     else:
         if fast:
             solution = solve_Q_identifiability_fast(Q_basis)
