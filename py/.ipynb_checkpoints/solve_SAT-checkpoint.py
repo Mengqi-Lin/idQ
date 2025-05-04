@@ -1,5 +1,4 @@
 import numpy as np
-from functools import lru_cache
 import itertools
 from itertools import product
 from ortools.sat.python import cp_model
@@ -7,50 +6,7 @@ from pysat.formula import CNF, IDPool
 from pysat.card import CardEnc, EncType
 from pysat.solvers import Cadical195, Solver
 import time
-
-def unique_pattern_supports(Q):
-    """
-    Returns all nontrivial supports S = {j | \aaa ⪰ q_j}, for each representative \aaa.
-    *excluding* the empty set and the full set {0,…,J-1}.
-    """
-    J, K = Q.shape
-    R = {tuple([0]*K)}
-    for j in range(J):
-        row = Q[j]
-        new = []
-        for aaa in R:
-            merged = tuple(aaa[k] | row[k] for k in range(K))
-            if merged not in R:
-                new.append(merged)
-        R.update(new)
-    # Build and filter supports
-    full = frozenset(range(J))
-    supports = []
-    for aaa in R:
-        S = frozenset(j for j in range(J) if all(aaa[k] >= Q[j][k] for k in range(K)))
-        if S and S is not full:
-            supports.append(set(S))
-    return supports
-
-
-
-def distances(Q):
-    masks, full = row_masks(Q)
-    J = len(masks)
-    
-    # lru_cache memoises the depth function, ensuring each reachable pattern is explored only once.
-    @lru_cache(maxsize=None)
-    def depth(mask):
-        if mask == full:
-            return 0
-        best = 0
-        for m in masks:
-            new = mask | m
-            if new != mask:                     # strict cover
-                best = max(best, 1 + depth(new))
-        return best
-
-    return np.array([depth(m) for m in masks])
+from utils import unique_pattern_supports, distances
 
 
 def generate_clause(X):
@@ -95,6 +51,8 @@ def generate_lex_clauses(X, Y, strict, total_vars):
     else:
         clauses.append(generate_implication_clause({total_vars+n-1}, {-Y[n-1], X[n-1]}))
     return (clauses, total_vars+n-1)
+
+
 
 def add_lex_decreasing(cnf, pool, X, J, K):
     """
