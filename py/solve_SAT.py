@@ -140,7 +140,7 @@ def add_U_constraint(cnf, pool, X, U):
             cnf.append(witness)
 
 
-def solve_SAT(Q, solver_name='cadical195'):
+def solve_SAT(Q, card = True, solver_name='cadical195'):
     J, K = Q.shape
     Cardbound = K - distances(Q)
     U = unique_pattern_supports(Q)
@@ -150,7 +150,8 @@ def solve_SAT(Q, solver_name='cadical195'):
 
     add_lex_decreasing(cnf, pool, X, J, K)
     add_neq_Q(cnf, X, Q)
-    add_row_cardinality(cnf, pool, X, Cardbound)
+    if card:
+        add_row_cardinality(cnf, pool, X, Cardbound)
     add_U_constraint(cnf, pool, X, U)
 
     with Solver(name=solver_name, bootstrap_with=cnf.clauses) as s:

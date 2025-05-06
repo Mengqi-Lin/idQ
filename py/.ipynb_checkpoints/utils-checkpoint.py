@@ -66,6 +66,38 @@ def distances(Q):
 
 
 
+def thm_check(Q: np.ndarray, Q_bar: np.ndarray) -> bool:
+    """
+    Return True  iff  Cols[Φ(Q)] ⊆ Cols[Φ(Q̄)],
+    i.e. the non-domination test of your theorem is satisfied.
+    """
+    J, K = Q.shape
+    assert Q_bar.shape == (J, K), "Q and Q_bar must have the same dimensions"
+
+    Phi = unique_response_columns(Q)          # list of 0/1 length-J vectors
+
+    # Pre-compute rows of Q̄ for convenience
+    bq = Q_bar.astype(np.uint8)
+
+    # For every φ_a ∈ Φ(Q) ───────────────────────────────────────────────
+    for phi_a in Phi:
+        S_a      = np.where(phi_a == 1)[0]    # indices with φ_a[j] = 1
+        not_S_a  = np.where(phi_a == 0)[0]    # the complement
+
+        # h_a  =  bitwise OR of rows bq_j for j ∈ S_a
+        if len(S_a) == 1:
+            h_a = bq[S_a[0]].copy()
+        else:
+            h_a = np.bitwise_or.reduce(bq[S_a], axis=0)
+
+        # Check non-domination for every j ∉ S_a
+        # h_a ⪰ bq_j  ⇔  (h_a ≥ bq_j) componentwise
+        for j in not_S_a:
+            if np.all(h_a >= bq[j]):          # domination ⇒ theorem violated
+                return False
+
+    return True
+
 
 
 

@@ -290,56 +290,6 @@ def lex_sort_columns(Q: np.ndarray):
         inv_perm[p] = i
 
     return Q_sorted, inv_perm
-
-
-
-
-def thmCheck(Q_basis, Q_bar_gen):
-    """
-    For a given Q_basis and a candidate generator Q_bar_gen, verify for each candidate Q_basis_bar
-    whether every unique response column S from Phi(Q_basis) is "matched" in Q_basis_bar.
-    
-    The check is as follows:
-      For each S in unique_response_columns(Q_basis):
-        - Let idx_active be the indices where S is 1.
-        - Compute h_a as the logical OR of the rows Q_basis_bar[idx_active].
-        - For each row j not in idx_active, check that Q_basis_bar[j] is not covered by h_a.
-    
-    Returns:
-        (status, candidate)
-          - status == 0 and candidate == Q_basis_bar if a candidate is found,
-          - (1, None) if no candidate passes the check.
-    """
-    J_basis, K = Q_basis.shape
-    cols_phiQ = unique_response_columns(Q_basis)
-    
-    for Q_basis_bar in Q_bar_gen:
-        candidate_valid = True
-        for S in cols_phiQ:
-            S_arr = np.array(S, dtype=int)
-            idx_active = [j for j in range(J_basis) if S_arr[j] == 1]
-            
-            # Compute h_a as the logical OR of rows Q_basis_bar for indices in idx_active.
-            if idx_active:
-                h_a = Q_basis_bar[idx_active[0]].copy()
-                for j in idx_active[1:]:
-                    h_a = np.logical_or(h_a, Q_basis_bar[j]).astype(int)
-            else:
-                h_a = np.zeros(K, dtype=int)
-            
-            # For any row j not in idx_active, check if Q_basis_bar[j] is "covered" by h_a.
-            for j in range(J_basis):
-                if j in idx_active:
-                    continue
-                if np.all(Q_basis_bar[j] <= h_a):
-                    candidate_valid = False
-                    break  # No need to check further S for this candidate.
-            if not candidate_valid:
-                break  # Move to next candidate Q_basis_bar.
-        
-        if candidate_valid:
-            return 0, Q_basis_bar
-    return 1, None
                 
     
 

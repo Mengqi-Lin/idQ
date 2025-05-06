@@ -14,7 +14,8 @@ from Qbasis import (
     get_Q_from_Qunique, 
     get_Q_from_Qbasis
 )
-from solve_Q_identifiability import solve_Q_identifiability_IP, solve_Q_identifiability_IPfast, solve_identifiability_Q_cpsat, solve_SAT, solve_SAT_fast
+from solve_IP import solve_IP, solve_IP_fast
+from solve_SAT import solve_SAT, solve_SAT_fast
 
 from idQ import (
     thmCheck,
@@ -94,7 +95,7 @@ def identifiability_expr(Q, solver):
                 return True, None, 6  # No solution exists
         elif solver == 2:
             Q_sorted, sorted_to_original = lex_sort_columns(Q_basis)
-            solution = solve_SAT_fast(Q_sorted)
+            solution = solve_SAT(Q_sorted, card = False)
             if solution is not None:
                 Q_basis_bar = solution[:, sorted_to_original]
                 Q_bar = get_Q_from_Qbasis(Q_basis_bar, basis_to_original)
