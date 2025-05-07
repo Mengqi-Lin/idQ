@@ -17,7 +17,7 @@ K=$2
 p=$3
 NSEEDS=$4
 solver=$5
-N=1  # fixed number of simulations per job
+N=10  # fixed number of simulations per job
 
 for (( seed=0; seed<NSEEDS; seed++ ))
 do
