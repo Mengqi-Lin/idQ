@@ -141,7 +141,7 @@ def add_U_constraint(cnf, pool, X, U):
             cnf.append(witness)
 
 
-def solve_SAT(Q, lazy = True, solver_name='cadical195'):
+def solve_SAT(Q, solver_name='cadical195'):
     J, K = Q.shape
     Cardbound = K - distances(Q)
     U = unique_pattern_supports(Q)
@@ -155,18 +155,7 @@ def solve_SAT(Q, lazy = True, solver_name='cadical195'):
     add_U_constraint(cnf, pool, X, U)
 
     with Solver(name=solver_name, bootstrap_with=cnf.clauses) as s:
-        if lazy:
-            # 2) Create a lazy-clause engine 
-            engine = BooleanEngine(adaptive=True)
-
-            # 3) Attach it to the solver
-            solver.connect_propagator(engine)
-
-            # 4) Tell the engine which variables to watch
-            for v in range(1, cnf.nv+1):
-                solver.observe(v)
-
-        is_sat = solver.solve()
+        is_sat = s.solve()
         print(s.accum_stats())
         if not is_sat:
             return None

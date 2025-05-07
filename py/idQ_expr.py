@@ -85,10 +85,10 @@ def identifiability_expr(Q, solver):
                 return True, None, 6  # No solution exists
         elif solver == 0:
             Q_sorted, sorted_to_original = lex_sort_columns(Q_basis)
-            solution = solve_SAT(Q_sorted, lazy = False, solver_name='cadical195')
+            solution = solve_SAT(Q_sorted, solver_name='cadical195')
         elif solver == 1:
             Q_sorted, sorted_to_original = lex_sort_columns(Q_basis)
-            solution = solve_SAT(Q_sorted, lazy = True, solver_name='cadical195')
+            solution = solve_SAT(Q_sorted, solver_name='Glucose42')
         elif solver == 2:
             Q_sorted, sorted_to_original = lex_sort_columns(Q_basis)
             solution = solve_SAT(Q_sorted, solver_name='Glucose42')            
@@ -114,17 +114,6 @@ def runtime_expr(J, K, N, p, seed, solver = -1, output_csv=None):
     
     The results are appended to a CSV file, and a dictionary with summarized results is returned.
     """
-    total_time = 0.0
-    count_identifiable = 0
-    
-    branch_minus1 = 0
-    branch0 = 0
-    branch1 = 0
-    branch2 = 0
-    branch3 = 0
-    branch4 = 0
-    branch5 = 0
-    branch6 = 0
     
     np.random.seed(seed)
     for i in range(N):
@@ -141,63 +130,34 @@ def runtime_expr(J, K, N, p, seed, solver = -1, output_csv=None):
         
         print(f"branch at {branch}")
         runtime = time.perf_counter() - start_time
-        total_time += runtime
         
-        print(f"runtime for solving id of Q is {total_time}")
-        # Update branch counts.
-        if branch == -1:
-            branch_minus1 += 1
-        elif branch == 0:
-            branch0 += 1
-        elif branch == 1:
-            branch1 += 1
-        elif branch == 2:
-            branch2 += 1
-        elif branch == 3:
-            branch3 += 1
-        elif branch == 4:
-            branch4 += 1
-        elif branch == 5:
-            branch5 += 1
-        elif branch == 6:
-            branch6 += 1
+        print(f"runtime for solving id of Q is {runtime}")
 
-        if status == 1:
-            count_identifiable += 1
+        results = {
+            'J': J,
+            'K': K,
+            'N': N,
+            'p': p,
+            'seed': seed,
+            'sim': i,
+            'runtime': runtime,
+            'identifiable': status,
+            'branch': branch
+        }
 
-    avg_runtime = total_time / N
-    prop_identifiable = count_identifiable / N
+        if output_csv is None:
+            output_csv = f"../data/solver{solver}_J{J}_K{K}_p{p}.csv"
 
-    results = {
-        'J': J,
-        'K': K,
-        'N': N,
-        'p': p,
-        'seed': seed,
-        'avg_runtime': avg_runtime,
-        'prop_identifiable': prop_identifiable,
-        'branch_-1': branch_minus1,
-        'branch_0': branch0,
-        'branch_1': branch1,
-        'branch_2': branch2,
-        'branch_3': branch3,
-        'branch_4': branch4,
-        'branch_5': branch5,
-        'branch_6': branch6
-    }
+        os.makedirs(os.path.dirname(output_csv), exist_ok=True)
+        file_exists = os.path.exists(output_csv)
+        with open(output_csv, mode='a', newline='') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=results.keys())
+            if not file_exists:
+                writer.writeheader()
+            writer.writerow(results)
 
-    if output_csv is None:
-        output_csv = f"../data/solver{solver}_J{J}_K{K}_p{p}.csv"
-    
-    os.makedirs(os.path.dirname(output_csv), exist_ok=True)
-    file_exists = os.path.exists(output_csv)
-    with open(output_csv, mode='a', newline='') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=results.keys())
-        if not file_exists:
-            writer.writeheader()
-        writer.writerow(results)
-    
-    return results
+        print("Simulation results:")
+        print(results)
 
 
 if __name__ == '__main__':
@@ -212,6 +172,5 @@ if __name__ == '__main__':
     seed = int(sys.argv[5])
     solver = int(sys.argv[6])
     
-    results = runtime_expr(J, K, N, p, seed, solver)
-    print("Simulation results:")
-    print(results)
+    runtime_expr(J, K, N, p, seed, solver)
+
