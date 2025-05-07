@@ -5,6 +5,7 @@ from ortools.sat.python import cp_model
 from pysat.formula import CNF, IDPool
 from pysat.card import CardEnc, EncType
 from pysat.solvers import Cadical195, Solver
+from pysat.engines  import BooleanEngine
 import time
 from utils import unique_pattern_supports, distances
 
@@ -140,7 +141,7 @@ def add_U_constraint(cnf, pool, X, U):
             cnf.append(witness)
 
 
-def solve_SAT(Q, card = True, solver_name='cadical195'):
+def solve_SAT(Q, lazy = True, solver_name='cadical195'):
     J, K = Q.shape
     Cardbound = K - distances(Q)
     U = unique_pattern_supports(Q)
@@ -150,14 +151,24 @@ def solve_SAT(Q, card = True, solver_name='cadical195'):
 
     add_lex_decreasing(cnf, pool, X, J, K)
     add_neq_Q(cnf, X, Q)
-    if card:
-        add_row_cardinality(cnf, pool, X, Cardbound)
+    add_row_cardinality(cnf, pool, X, Cardbound)
     add_U_constraint(cnf, pool, X, U)
 
     with Solver(name=solver_name, bootstrap_with=cnf.clauses) as s:
-        found = s.solve()
+        if lazy:
+            # 2) Create a lazy-clause engine 
+            engine = BooleanEngine(adaptive=True)
+
+            # 3) Attach it to the solver
+            solver.connect_propagator(engine)
+
+            # 4) Tell the engine which variables to watch
+            for v in range(1, cnf.nv+1):
+                solver.observe(v)
+
+        is_sat = solver.solve()
         print(s.accum_stats())
-        if not found:
+        if not is_sat:
             return None
         model = set(s.get_model())
         Q_bar = np.zeros_like(Q)

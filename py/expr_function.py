@@ -3,7 +3,7 @@ import itertools
 from itertools import combinations, product, permutations
 import warnings
 import time
-from idQ import is_parallel, is_strictly_less_than, is_less_equal_than, generate_binary_vectors, generate_permutations, preserve_partial_order, identifiability
+from idQ import identifiability
 import networkx as nx
 import gurobipy as gp
 from gurobipy import GRB

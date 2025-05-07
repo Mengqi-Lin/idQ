@@ -18,7 +18,6 @@ from solve_IP import solve_IP, solve_IP_fast
 from solve_SAT import solve_SAT, solve_SAT_fast
 
 from idQ import (
-    thmCheck,
     check_two_column_submatrices,
     check_three_column_submatrices,
     contains_identity_submatrix,
@@ -86,32 +85,21 @@ def identifiability_expr(Q, solver):
                 return True, None, 6  # No solution exists
         elif solver == 0:
             Q_sorted, sorted_to_original = lex_sort_columns(Q_basis)
-            solution = solve_SAT(Q_sorted)
-            if solution is not None:
-                Q_basis_bar = solution[:, sorted_to_original]
-                Q_bar = get_Q_from_Qbasis(Q_basis_bar, basis_to_original)
-                return 0, Q_bar, 5
-            else:
-                return True, None, 6  # No solution exists
-        elif solver == 2:
-            Q_sorted, sorted_to_original = lex_sort_columns(Q_basis)
-            solution = solve_SAT(Q_sorted, card = False)
-            if solution is not None:
-                Q_basis_bar = solution[:, sorted_to_original]
-                Q_bar = get_Q_from_Qbasis(Q_basis_bar, basis_to_original)
-                return 0, Q_bar, 5
-            else:
-                return True, None, 6  # No solution exists
+            solution = solve_SAT(Q_sorted, lazy = False, solver_name='cadical195')
         elif solver == 1:
             Q_sorted, sorted_to_original = lex_sort_columns(Q_basis)
-            solution = solve_identifiability_Q_cpsat(Q_sorted)
-            if solution is not None:
-                Q_basis_bar = solution[:, sorted_to_original]
-                Q_bar = get_Q_from_Qbasis(Q_basis_bar, basis_to_original)
-                return 0, Q_bar, 5
-            else:
-                return True, None, 6  # No solution exists
-            
+            solution = solve_SAT(Q_sorted, lazy = True, solver_name='cadical195')
+        elif solver == 2:
+            Q_sorted, sorted_to_original = lex_sort_columns(Q_basis)
+            solution = solve_SAT(Q_sorted, solver_name='Glucose42')            
+
+
+        if solution is not None:
+            Q_basis_bar = solution[:, sorted_to_original]
+            Q_bar = get_Q_from_Qbasis(Q_basis_bar, basis_to_original)
+            return 0, Q_bar, 5
+        else:
+            return True, None, 6  # No solution exists
             
             
 def runtime_expr(J, K, N, p, seed, solver = -1, output_csv=None):

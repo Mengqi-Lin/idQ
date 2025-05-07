@@ -2,7 +2,6 @@ import numpy as np
 import itertools
 import networkx as nx
 import matplotlib.pyplot as plt
-from idQ import representative_node_set  
 
 def draw_G_K4(Q):
     """
