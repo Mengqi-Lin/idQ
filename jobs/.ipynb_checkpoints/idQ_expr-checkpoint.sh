@@ -6,7 +6,7 @@
 #SBATCH --cpus-per-task=8       # match your 8-thread MacBook default
 #SBATCH --mem-per-cpu=7G        # 56 GB total
 #SBATCH -p largemem,standard     # try largemem first, then standard
-#SBATCH --licenses=gurobi@slurmdb:1
+# #SBATCH --licenses=gurobi@slurmdb:1
 
 
 

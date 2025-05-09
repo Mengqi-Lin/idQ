@@ -114,7 +114,7 @@ def runtime_expr(J, K, N, p, seed, solver = -1, output_csv=None):
     
     The results are appended to a CSV file, and a dictionary with summarized results is returned.
     """
-    
+    RR = []
     np.random.seed(seed)
     for i in range(N):
         print(i)
@@ -155,10 +155,10 @@ def runtime_expr(J, K, N, p, seed, solver = -1, output_csv=None):
             if not file_exists:
                 writer.writeheader()
             writer.writerow(results)
-
+        RR.append(results)
         print("Simulation results:")
         print(results)
-
+    return RR
 
 if __name__ == '__main__':
     if len(sys.argv) != 7:
@@ -172,5 +172,7 @@ if __name__ == '__main__':
     seed = int(sys.argv[5])
     solver = int(sys.argv[6])
     
-    runtime_expr(J, K, N, p, seed, solver)
+    RR = runtime_expr(J, K, N, p, seed, solver)
 
+    print("Simulation results:")
+    print(RR)
