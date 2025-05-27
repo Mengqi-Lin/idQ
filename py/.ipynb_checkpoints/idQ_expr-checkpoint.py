@@ -82,7 +82,7 @@ def identifiability_expr(Q, solver):
                 Q_bar = get_Q_from_Qbasis(Q_basis_bar, basis_to_original)
                 return 0, Q_bar, 5
             else:
-                return True, None, 6  # No solution exists
+                return 1, None, 6  # No solution exists
         elif solver == 0:
             Q_sorted, sorted_to_original = lex_sort_columns(Q_basis)
             solution = solve_SAT(Q_sorted, solver_name='cadical195')
@@ -99,7 +99,7 @@ def identifiability_expr(Q, solver):
             Q_bar = get_Q_from_Qbasis(Q_basis_bar, basis_to_original)
             return 0, Q_bar, 5
         else:
-            return True, None, 6  # No solution exists
+            return 1, None, 6  # No solution exists
             
             
 def runtime_expr(J, K, N, p, seed, solver = -1, output_csv=None):
@@ -146,7 +146,7 @@ def runtime_expr(J, K, N, p, seed, solver = -1, output_csv=None):
         }
 
         if output_csv is None:
-            output_csv = f"../data/solver{solver}_J{J}_K{K}_p{p}.csv"
+            output_csv = f"../data/parent_solver{solver}_J{J}_K{K}_p{p}.csv"
 
         os.makedirs(os.path.dirname(output_csv), exist_ok=True)
         file_exists = os.path.exists(output_csv)

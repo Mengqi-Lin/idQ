@@ -23,8 +23,8 @@ def unique_pattern_supports(Q):
     supports = []
     for aaa in R:
         S = frozenset(j for j in range(J) if all(aaa[k] >= Q[j][k] for k in range(K)))
-        # if S and S is not full:
-        supports.append(set(S))
+        if S:
+            supports.append(set(S))
     return supports
 
 

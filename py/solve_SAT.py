@@ -116,31 +116,8 @@ def add_row_cardinality(cnf, pool, X, Cardbound, encoding=EncType.seqcounter):
 # ----------------------------------------------------------------------
 #  Constraint:  exact U-constraint
 # ----------------------------------------------------------------------
-def add_U_constraint(cnf, pool, X, U):
-    """
-    U : list of lists (each list is a subset of row indices)
-    """
-    J, K = len(X), len(X[0])
-    for S_idx, S in enumerate(U):
-        S = set(S)
-        for jp in range(J):
-            if jp in S:
-                continue
-            witness = []
-            for k in range(K):
-                c = pool.id(('c', S_idx, jp, k))
-                witness.append(c)
-                # forward  c -> x[jp,k]=1   and  forall j in S: x[j,k]=0
-                cnf.append([-c, X[jp][k]])
-                for j in S:
-                    cnf.append([-c, -X[j][k]])
-                # backward (x[jp,k] & big_and_{j in S} ¬x[j,k]) -> c
-                clause = [-X[jp][k]] + [X[j][k] for j in S] + [c]
-                cnf.append(clause)
-            # need at least one witnessing column
-            cnf.append(witness)
 
-def add_U_constraint_pa(cnf, pool, X, U, parent):
+def add_U_constraint(cnf, pool, X, U, parent):
     """
     Add only the necessary C2–witness clauses, skipping maximal supports.
 
@@ -149,7 +126,7 @@ def add_U_constraint_pa(cnf, pool, X, U, parent):
     cnf    : list[list[int]]
     pool   : IDPool
     X      : list[list[int]]       # X[j][k] is literal for x_{j,k}
-    U      : list[list[int]]       # supports S
+    U      : list[list[int]]       # Supports S_Q(\aaa) for all \aaa\in R.
     parent : list[int | None]      # one parent index per support or None
     """
     J, K = len(X), len(X[0])
@@ -161,11 +138,11 @@ def add_U_constraint_pa(cnf, pool, X, U, parent):
             # S is maximal → no C2 clause needed here
             continue
 
-        # only rows that "drop out" when going from P to S
-        P = Usets[p_idx]
-        rows = (j for j in P if j not in S)
+        # only items that "drop out" when going from P to S
+        Pa = Usets[p_idx]
+        S_jp = (j for j in Pa if j not in S)
 
-        for jp in rows:
+        for jp in S_jp:
             witness = []
             for k in range(K):
                 c = pool.id(('c', s_idx, jp, k))
@@ -181,35 +158,9 @@ def add_U_constraint_pa(cnf, pool, X, U, parent):
 
             # at least one witnessing column
             cnf.append(witness)
-
+    
+    
 def solve_SAT(Q, solver_name='cadical195'):
-    J, K = Q.shape
-    Cardbound = K - distances(Q)
-    U = unique_pattern_supports(Q)
-    pool = IDPool()
-    X = [[pool.id(('x', j, k)) for k in range(K)] for j in range(J)]
-    cnf = CNF()
-
-    add_lex_decreasing(cnf, pool, X, J, K)
-    add_neq_Q(cnf, X, Q)
-    add_row_cardinality(cnf, pool, X, Cardbound)
-    add_U_constraint(cnf, pool, X, U)
-
-    with Solver(name=solver_name, bootstrap_with=cnf.clauses) as s:
-        is_sat = s.solve()
-        print(s.accum_stats())
-        if not is_sat:
-            return None
-        model = set(s.get_model())
-        Q_bar = np.zeros_like(Q)
-        for j in range(J):
-            for k in range(K):
-                if X[j][k] in model:
-                    Q_bar[j, k] = 1
-        return Q_bar
-    
-    
-def solve_SAT_pa(Q, solver_name='cadical195'):
     J, K = Q.shape
     Cardbound = K - distances(Q)
     U = unique_pattern_supports(Q)
@@ -221,7 +172,7 @@ def solve_SAT_pa(Q, solver_name='cadical195'):
     add_lex_decreasing(cnf, pool, X, J, K)
     add_neq_Q(cnf, X, Q)
     add_row_cardinality(cnf, pool, X, Cardbound)
-    add_U_constraint_pa(cnf, pool, X, U, parent)
+    add_U_constraint(cnf, pool, X, U, parent)
 
     with Solver(name=solver_name, bootstrap_with=cnf.clauses) as s:
         is_sat = s.solve()
