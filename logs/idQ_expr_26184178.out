@@ -1,0 +1,272 @@
+
+The Gurobi software has a limited number of licenses. To request a license or
+licenses, add this line
+
+    #SBATCH --licenses=gurobi@slurmdb:1
+
+to your SBATCH script, replacing N with the number of licenses you need. Gurobi
+will need one license per process.
+
+
+0
+Q: [[1 0 0 0 0]
+ [1 0 0 1 0]
+ [0 0 1 0 0]
+ [0 1 0 0 1]
+ [0 0 0 0 0]
+ [0 0 0 1 1]
+ [0 1 0 0 1]
+ [0 0 0 0 0]
+ [0 0 0 0 0]
+ [0 0 0 0 0]]
+Q is not identifiable (two-column submatrix not identifiable).
+Q is not identifiable, and Q_bar is [[1 0 0 0 0]
+ [1 0 0 1 0]
+ [0 0 1 0 0]
+ [0 1 0 0 0]
+ [0 0 0 0 0]
+ [0 0 0 1 1]
+ [0 1 0 0 0]
+ [0 0 0 0 0]
+ [0 0 0 0 0]
+ [0 0 0 0 0]]
+branch at 2
+runtime for solving id of Q is 0.00042735226452350616
+Simulation results:
+{'J': 10, 'K': 5, 'N': 10, 'p': 0.2, 'seed': 56, 'sim': 0, 'runtime': 0.00042735226452350616, 'identifiable': 0, 'branch': 2}
+1
+Q: [[1 0 1 0 0]
+ [0 0 0 0 0]
+ [0 0 0 0 1]
+ [0 1 0 1 1]
+ [0 0 0 0 0]
+ [0 0 0 0 0]
+ [0 0 1 1 0]
+ [0 0 0 0 0]
+ [1 0 0 0 1]
+ [0 0 0 0 0]]
+Q is not identifiable (two-column submatrix not identifiable).
+Q is not identifiable, and Q_bar is [[1 0 1 0 0]
+ [0 0 0 0 0]
+ [0 0 0 0 1]
+ [0 1 0 0 1]
+ [0 0 0 0 0]
+ [0 0 0 0 0]
+ [0 0 1 1 0]
+ [0 0 0 0 0]
+ [1 0 0 0 1]
+ [0 0 0 0 0]]
+branch at 2
+runtime for solving id of Q is 0.0003636963665485382
+Simulation results:
+{'J': 10, 'K': 5, 'N': 10, 'p': 0.2, 'seed': 56, 'sim': 1, 'runtime': 0.0003636963665485382, 'identifiable': 0, 'branch': 2}
+2
+Q: [[0 1 1 0 0]
+ [0 0 0 0 0]
+ [0 0 0 0 0]
+ [0 0 1 0 0]
+ [0 0 0 0 1]
+ [0 0 0 0 0]
+ [0 1 1 0 0]
+ [0 0 0 1 1]
+ [0 1 1 0 0]
+ [1 0 0 0 0]]
+Q is not identifiable (two-column submatrix not identifiable).
+Q is not identifiable, and Q_bar is [[0 1 0 0 0]
+ [0 0 0 0 0]
+ [0 0 0 0 0]
+ [0 0 1 0 0]
+ [0 0 0 0 1]
+ [0 0 0 0 0]
+ [0 1 0 0 0]
+ [0 0 0 1 1]
+ [0 1 0 0 0]
+ [1 0 0 0 0]]
+branch at 2
+runtime for solving id of Q is 0.0003468245267868042
+Simulation results:
+{'J': 10, 'K': 5, 'N': 10, 'p': 0.2, 'seed': 56, 'sim': 2, 'runtime': 0.0003468245267868042, 'identifiable': 0, 'branch': 2}
+3
+Q: [[0 1 0 1 0]
+ [0 0 0 1 0]
+ [0 0 0 0 0]
+ [1 0 0 0 0]
+ [0 0 0 0 0]
+ [0 0 0 0 0]
+ [0 0 0 0 0]
+ [0 0 0 0 1]
+ [0 0 0 0 1]
+ [1 0 0 1 0]]
+Q_basis with dimensions J < K, thus not identifiable.
+Q is not identifiable, and Q_bar is [[0 0 1 0 0]
+ [0 1 0 0 0]
+ [0 0 0 0 0]
+ [0 0 0 1 0]
+ [0 0 0 0 0]
+ [0 0 0 0 0]
+ [0 0 0 0 0]
+ [1 0 0 0 0]
+ [1 0 0 0 0]
+ [0 1 0 1 0]]
+branch at -1
+runtime for solving id of Q is 0.00021214038133621216
+Simulation results:
+{'J': 10, 'K': 5, 'N': 10, 'p': 0.2, 'seed': 56, 'sim': 3, 'runtime': 0.00021214038133621216, 'identifiable': 0, 'branch': -1}
+4
+Q: [[0 0 0 0 1]
+ [0 0 0 1 0]
+ [0 0 0 0 0]
+ [0 0 0 0 1]
+ [1 0 0 0 0]
+ [1 0 0 0 0]
+ [0 0 1 0 0]
+ [0 0 0 0 1]
+ [0 0 0 0 0]
+ [0 0 0 0 1]]
+Q_basis with dimensions J < K, thus not identifiable.
+Q is not identifiable, and Q_bar is [[1 0 0 0 0]
+ [0 1 0 0 0]
+ [0 0 0 0 0]
+ [1 0 0 0 0]
+ [0 0 0 1 0]
+ [0 0 0 1 0]
+ [0 0 1 0 0]
+ [1 0 0 0 0]
+ [0 0 0 0 0]
+ [1 0 0 0 0]]
+branch at -1
+runtime for solving id of Q is 0.00020257942378520966
+Simulation results:
+{'J': 10, 'K': 5, 'N': 10, 'p': 0.2, 'seed': 56, 'sim': 4, 'runtime': 0.00020257942378520966, 'identifiable': 0, 'branch': -1}
+5
+Q: [[0 0 0 0 0]
+ [0 1 0 0 0]
+ [0 0 0 0 0]
+ [0 0 0 0 0]
+ [0 0 0 1 1]
+ [0 1 0 0 1]
+ [0 0 1 0 0]
+ [1 1 0 1 0]
+ [0 1 0 0 0]
+ [0 0 0 1 0]]
+Q is not identifiable (two-column submatrix not identifiable).
+Q is not identifiable, and Q_bar is [[0 0 0 0 0]
+ [0 1 0 0 0]
+ [0 0 0 0 0]
+ [0 0 0 0 0]
+ [0 0 0 1 1]
+ [0 1 0 0 1]
+ [0 0 1 0 0]
+ [1 0 0 1 0]
+ [0 1 0 0 0]
+ [0 0 0 1 0]]
+branch at 2
+runtime for solving id of Q is 0.0003848932683467865
+Simulation results:
+{'J': 10, 'K': 5, 'N': 10, 'p': 0.2, 'seed': 56, 'sim': 5, 'runtime': 0.0003848932683467865, 'identifiable': 0, 'branch': 2}
+6
+Q: [[0 1 0 0 0]
+ [0 0 0 1 0]
+ [0 1 1 1 0]
+ [0 0 0 0 0]
+ [0 0 0 0 1]
+ [0 0 0 0 0]
+ [0 0 0 0 0]
+ [1 0 1 0 1]
+ [0 1 0 0 0]
+ [0 0 0 0 0]]
+Q is not identifiable (two-column submatrix not identifiable).
+Q is not identifiable, and Q_bar is [[0 1 0 0 0]
+ [0 0 0 1 0]
+ [0 1 1 1 0]
+ [0 0 0 0 0]
+ [0 0 0 0 1]
+ [0 0 0 0 0]
+ [0 0 0 0 0]
+ [1 0 0 0 1]
+ [0 1 0 0 0]
+ [0 0 0 0 0]]
+branch at 2
+runtime for solving id of Q is 0.0003042928874492645
+Simulation results:
+{'J': 10, 'K': 5, 'N': 10, 'p': 0.2, 'seed': 56, 'sim': 6, 'runtime': 0.0003042928874492645, 'identifiable': 0, 'branch': 2}
+7
+Q: [[0 0 0 0 1]
+ [0 0 0 0 0]
+ [1 0 0 0 0]
+ [0 0 0 0 1]
+ [0 0 0 1 0]
+ [0 0 0 0 0]
+ [0 0 0 0 0]
+ [1 0 1 0 1]
+ [0 0 0 0 0]
+ [1 0 0 0 0]]
+Q_basis with dimensions J < K, thus not identifiable.
+Q is not identifiable, and Q_bar is [[1 0 0 0 0]
+ [0 0 0 0 0]
+ [0 0 1 0 0]
+ [1 0 0 0 0]
+ [0 1 0 0 0]
+ [0 0 0 0 0]
+ [0 0 0 0 0]
+ [0 0 0 1 0]
+ [0 0 0 0 0]
+ [0 0 1 0 0]]
+branch at -1
+runtime for solving id of Q is 0.0002061314880847931
+Simulation results:
+{'J': 10, 'K': 5, 'N': 10, 'p': 0.2, 'seed': 56, 'sim': 7, 'runtime': 0.0002061314880847931, 'identifiable': 0, 'branch': -1}
+8
+Q: [[1 0 1 0 0]
+ [0 0 1 0 0]
+ [0 0 0 0 0]
+ [0 1 0 0 1]
+ [0 0 0 0 0]
+ [0 0 0 0 0]
+ [0 0 0 0 0]
+ [0 0 0 1 0]
+ [1 0 0 1 0]
+ [1 1 0 1 1]]
+Q is not identifiable (two-column submatrix not identifiable).
+Q is not identifiable, and Q_bar is [[1 0 1 0 0]
+ [0 0 1 0 0]
+ [0 0 0 0 0]
+ [0 1 0 0 0]
+ [0 0 0 0 0]
+ [0 0 0 0 0]
+ [0 0 0 0 0]
+ [0 0 0 1 0]
+ [1 0 0 1 0]
+ [1 1 0 1 0]]
+branch at 2
+runtime for solving id of Q is 0.0003661997616291046
+Simulation results:
+{'J': 10, 'K': 5, 'N': 10, 'p': 0.2, 'seed': 56, 'sim': 8, 'runtime': 0.0003661997616291046, 'identifiable': 0, 'branch': 2}
+9
+Q: [[0 0 0 0 0]
+ [0 1 0 0 0]
+ [0 0 0 0 0]
+ [0 0 0 0 0]
+ [0 0 0 0 0]
+ [0 0 0 0 0]
+ [0 0 0 0 0]
+ [0 0 0 0 1]
+ [1 0 0 0 1]
+ [0 1 0 0 0]]
+Q_basis with dimensions J < K, thus not identifiable.
+Q is not identifiable, and Q_bar is [[0 0 0 0 0]
+ [0 1 0 0 0]
+ [0 0 0 0 0]
+ [0 0 0 0 0]
+ [0 0 0 0 0]
+ [0 0 0 0 0]
+ [0 0 0 0 0]
+ [1 0 0 0 0]
+ [0 0 1 0 0]
+ [0 1 0 0 0]]
+branch at -1
+runtime for solving id of Q is 0.00018402189016342163
+Simulation results:
+{'J': 10, 'K': 5, 'N': 10, 'p': 0.2, 'seed': 56, 'sim': 9, 'runtime': 0.00018402189016342163, 'identifiable': 0, 'branch': -1}
+Simulation results:
+[{'J': 10, 'K': 5, 'N': 10, 'p': 0.2, 'seed': 56, 'sim': 0, 'runtime': 0.00042735226452350616, 'identifiable': 0, 'branch': 2}, {'J': 10, 'K': 5, 'N': 10, 'p': 0.2, 'seed': 56, 'sim': 1, 'runtime': 0.0003636963665485382, 'identifiable': 0, 'branch': 2}, {'J': 10, 'K': 5, 'N': 10, 'p': 0.2, 'seed': 56, 'sim': 2, 'runtime': 0.0003468245267868042, 'identifiable': 0, 'branch': 2}, {'J': 10, 'K': 5, 'N': 10, 'p': 0.2, 'seed': 56, 'sim': 3, 'runtime': 0.00021214038133621216, 'identifiable': 0, 'branch': -1}, {'J': 10, 'K': 5, 'N': 10, 'p': 0.2, 'seed': 56, 'sim': 4, 'runtime': 0.00020257942378520966, 'identifiable': 0, 'branch': -1}, {'J': 10, 'K': 5, 'N': 10, 'p': 0.2, 'seed': 56, 'sim': 5, 'runtime': 0.0003848932683467865, 'identifiable': 0, 'branch': 2}, {'J': 10, 'K': 5, 'N': 10, 'p': 0.2, 'seed': 56, 'sim': 6, 'runtime': 0.0003042928874492645, 'identifiable': 0, 'branch': 2}, {'J': 10, 'K': 5, 'N': 10, 'p': 0.2, 'seed': 56, 'sim': 7, 'runtime': 0.0002061314880847931, 'identifiable': 0, 'branch': -1}, {'J': 10, 'K': 5, 'N': 10, 'p': 0.2, 'seed': 56, 'sim': 8, 'runtime': 0.0003661997616291046, 'identifiable': 0, 'branch': 2}, {'J': 10, 'K': 5, 'N': 10, 'p': 0.2, 'seed': 56, 'sim': 9, 'runtime': 0.00018402189016342163, 'identifiable': 0, 'branch': -1}]

@@ -23,8 +23,8 @@ def unique_pattern_supports(Q):
     supports = []
     for aaa in R:
         S = frozenset(j for j in range(J) if all(aaa[k] >= Q[j][k] for k in range(K)))
-        if S and S is not full:
-            supports.append(set(S))
+        # if S and S is not full:
+        supports.append(set(S))
     return supports
 
 
@@ -43,6 +43,32 @@ def row_masks(Q):
     return masks, (1 << K) - 1  # list, full‑ones mask
 
 
+
+
+def minimal_size_parent(supports):
+    n      = len(supports)
+    sizes  = [len(S) for S in supports]
+    masks  = [sum(1 << j for j in S) for S in supports]
+
+    # bucket by size for quick lookup
+    by_size = {}
+    for idx, (m, s) in enumerate(zip(masks, sizes)):
+        by_size.setdefault(s, []).append((m, idx))
+
+    parent = [None] * n
+    J = max(max(S) for S in supports) + 1
+
+    for i, (m, sz) in enumerate(zip(masks, sizes)):
+        best = None
+        for s in range(sz + 1, J + 1):
+            for cand, idx_c in by_size.get(s, []):
+                if m & ~cand == 0:              # m ⊆ cand
+                    best = idx_c
+                    break
+            if best is not None:
+                parent[i] = best
+                break
+    return parent
 
 
 def distances(Q):
