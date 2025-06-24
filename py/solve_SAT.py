@@ -165,6 +165,7 @@ def solve_SAT(Q, solver_name='cadical195'):
     Cardbound = K - distances(Q)
     U = unique_pattern_supports(Q)
     parent = minimal_size_parent(U)
+    
     pool = IDPool()
     X = [[pool.id(('x', j, k)) for k in range(K)] for j in range(J)]
     cnf = CNF()
@@ -192,13 +193,15 @@ def solve_SAT(Q, solver_name='cadical195'):
 def solve_SAT_fast(Q, solver_name='cadical195'):
     J, K = Q.shape
     U = unique_pattern_supports(Q)
+    parent = minimal_size_parent(U)
+    
     pool = IDPool()
     X = [[pool.id(('x', j, k)) for k in range(K)] for j in range(J)]
     cnf = CNF()
 
     add_neq_Q(cnf, X, Q)
     add_leq_Q(cnf, X, Q)
-    add_U_constraint(cnf, pool, X, U)
+    add_U_constraint(cnf, pool, X, U, parent)
 
     with Solver(name=solver_name, bootstrap_with=cnf.clauses) as s:
         found = s.solve()

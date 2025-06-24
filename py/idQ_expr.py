@@ -146,7 +146,7 @@ def runtime_expr(J, K, N, p, seed, solver = -1, output_csv=None):
         }
 
         if output_csv is None:
-            output_csv = f"../data/parent_solver{solver}_J{J}_K{K}_p{p}.csv"
+            output_csv = f"../data/solver{solver}_J{J}_K{K}_p{p}.csv"
 
         os.makedirs(os.path.dirname(output_csv), exist_ok=True)
         file_exists = os.path.exists(output_csv)
