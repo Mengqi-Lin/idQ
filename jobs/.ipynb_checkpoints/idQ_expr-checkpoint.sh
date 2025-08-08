@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=idQ_expr
 #SBATCH --output=../logs/idQ_expr_%j.out
-#SBATCH --time=48:00:00
+#SBATCH --time=68:00:00
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8       # match your 8-thread MacBook default
 #SBATCH --mem-per-cpu=7G        # 56 GB total
