@@ -104,7 +104,7 @@ def get_basis(Q):
         basis_to_unique.append(or_dict[r])
 
     # Convert Q_basis_list and Q_unique_list to NumPy arrays.
-    Q_basis = np.array(Q_basis_list, dtype=int)
+    Q_basis = Q_basis = np.atleast_2d(np.array(Q_basis_list, dtype=int))
     Q_unique = np.array(Q_unique_list, dtype=int)
 
     return (

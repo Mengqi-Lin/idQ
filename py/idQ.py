@@ -317,6 +317,8 @@ def identifiability(Q, solver = 0):
     (Q_basis, basis_to_original, orig_indices_for_basis,
          Q_unique, unique_to_original, basis_to_unique) = get_basis(Q)
     
+    
+    
     J_basis, K = Q_basis.shape
     
     if J_basis < K:
