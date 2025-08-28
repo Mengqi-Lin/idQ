@@ -1,0 +1,69 @@
+
+The Gurobi software has a limited number of licenses. To request a license or
+licenses, add this line
+
+    #SBATCH --licenses=gurobi@slurmdb:1
+
+to your SBATCH script, replacing N with the number of licenses you need. Gurobi
+will need one license per process.
+
+
+0
+Q: [[1 1 1 1 1 1 1 1 1 1]
+ [1 0 1 0 1 1 1 1 1 1]
+ [1 1 1 0 1 0 1 0 1 1]
+ [0 1 0 1 1 1 1 1 1 0]
+ [1 0 0 1 1 1 0 1 1 1]
+ [1 0 0 0 0 1 1 1 1 1]
+ [1 0 0 1 1 0 1 1 1 1]
+ [0 1 1 0 1 1 1 1 1 0]
+ [1 1 1 1 1 0 1 1 1 0]
+ [1 1 1 0 1 0 1 1 1 1]
+ [1 1 1 1 1 1 1 1 1 0]
+ [1 1 1 0 1 1 0 0 1 0]
+ [1 1 0 1 1 1 0 1 1 0]
+ [1 1 0 0 1 1 0 1 1 1]
+ [1 0 1 1 1 0 0 1 1 1]
+ [1 1 1 0 1 1 1 1 1 1]
+ [1 1 0 1 1 1 1 1 1 0]
+ [1 1 1 1 0 0 0 1 1 1]
+ [1 1 0 1 0 1 0 1 1 1]
+ [1 1 1 1 0 1 1 0 1 1]
+ [1 1 1 1 0 1 1 1 1 1]
+ [1 1 0 1 1 1 0 1 1 1]
+ [1 0 1 0 0 1 1 0 0 1]
+ [1 1 1 1 1 1 1 0 1 1]
+ [1 1 0 1 1 1 1 1 1 1]
+ [1 1 1 0 0 1 0 1 1 1]
+ [0 1 1 0 0 1 1 1 0 1]
+ [0 0 1 1 1 1 1 1 1 0]
+ [1 0 0 1 1 1 1 1 1 1]
+ [1 0 1 1 1 1 1 1 0 0]
+ [1 0 0 1 0 0 0 1 1 0]
+ [0 1 0 0 0 0 0 1 1 1]
+ [1 1 1 1 1 1 1 1 1 0]
+ [1 1 0 1 1 1 1 1 1 0]
+ [1 0 1 1 1 0 1 1 1 1]
+ [1 1 0 1 1 1 1 1 1 1]
+ [1 1 0 1 1 1 1 0 1 1]
+ [1 1 1 1 1 1 0 1 1 1]
+ [1 1 1 1 0 1 1 1 1 1]
+ [1 0 0 1 0 0 1 0 0 1]
+ [0 1 1 1 0 1 0 1 1 1]
+ [1 1 1 0 0 1 0 1 1 1]
+ [1 1 1 0 0 0 0 0 1 1]
+ [1 1 1 1 1 0 1 1 1 1]
+ [0 1 0 1 1 0 1 1 1 1]
+ [1 1 0 0 1 1 0 1 0 1]
+ [1 1 1 1 1 1 0 1 1 1]
+ [0 1 1 1 0 1 1 1 1 0]
+ [0 0 0 0 1 1 1 1 1 1]
+ [1 1 0 1 1 0 1 0 1 0]]
+Traceback (most recent call last):
+  File "/home/lemonkey/idQ/py/idQ_expr.py", line 175, in <module>
+    RR = runtime_expr(J, K, N, p, seed, solver)
+  File "/home/lemonkey/idQ/py/idQ_expr.py", line 125, in runtime_expr
+    status, Q_bar, branch = identifiability_expr(Q, solver)
+  File "/home/lemonkey/idQ/py/idQ_expr.py", line 97, in identifiability_expr
+    if solution is not None:
+UnboundLocalError: local variable 'solution' referenced before assignment

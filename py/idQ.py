@@ -363,22 +363,22 @@ def identifiability(Q, solver = 0):
         print("Q contains an identity submatrix, thus is identifiable.")
         return True, None
     else:
-        if fast:
-            solution = solve_Q_identifiability_fast(Q_basis)
-            if solution is not None:
-                Q_basis_bar = solution
-                Q_bar = get_Q_from_Qbasis(Q_basis_bar, basis_to_original)
-                return 0, Q_bar
-            else:
-                return True, None  # No solution exists
+        # if fast:
+        #     solution = solve_Q_identifiability_fast(Q_basis)
+        #     if solution is not None:
+        #         Q_basis_bar = solution
+        #         Q_bar = get_Q_from_Qbasis(Q_basis_bar, basis_to_original)
+        #         return 0, Q_bar
+        #     else:
+        #         return True, None  # No solution exists
+        # else:
+        Q_sorted, sorted_to_original = lex_sort_columns(Q_basis)
+        solution = solve_SAT(Q_sorted)
+        if solution is not None:
+            Q_basis_bar = solution[:, sorted_to_original]
+            Q_bar = get_Q_from_Qbasis(Q_basis_bar, basis_to_original)
+            return 0, Q_bar
         else:
-            Q_sorted, sorted_to_original = lex_sort_columns(Q_basis)
-            solution = solve_Q_identifiability(Q_sorted)
-            if solution is not None:
-                Q_basis_bar = solution[:, sorted_to_original]
-                Q_bar = get_Q_from_Qbasis(Q_basis_bar, basis_to_original)
-                return 0, Q_bar
-            else:
-                return True, None  # No solution exists
+            return True, None  # No solution exists
         
         
