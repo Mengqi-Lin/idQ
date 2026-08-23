@@ -1,0 +1,7 @@
+solver,J,K,m,min_row_size,row_size_distribution,n,id_prop,two_col_violation_basis_prop,sat_called_prop,mean_J_basis,mean_M_basis,mean_algorithm_time,mean_sat_time_given_SAT,id_and_not_complete_prop,not_complete_given_id,id_and_no_pure_prop,no_pure_given_id
+1,25,10,3.0,1.0,uniform,1000.0,64.1,35.9,63.9,16.038,583.009,0.112,0.169,63.9,99.7,0.0,0.0
+1,25,10,4.0,1.0,uniform,1000.0,78.6,21.4,78.6,18.545,477.437,0.134,0.165,78.6,100.0,0.1,0.1
+1,50,10,3.0,1.0,uniform,1000.0,99.2,0.8,87.5,16.621,930.862,0.228,0.253,87.5,88.2,0.0,0.0
+1,50,10,4.0,1.0,uniform,1000.0,99.9,0.1,97.8,20.975,850.803,0.300,0.298,97.8,97.9,0.0,0.0
+1,100,10,3.0,1.0,uniform,1000.0,100.0,0.0,29.7,11.964,1019.021,0.087,0.278,29.7,29.7,0.0,0.0
+1,100,10,4.0,1.0,uniform,1000.0,100.0,0.0,57.8,14.689,1004.208,0.173,0.289,57.8,57.8,0.0,0.0

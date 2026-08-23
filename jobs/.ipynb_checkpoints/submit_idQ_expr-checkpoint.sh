@@ -3,7 +3,7 @@
 #SBATCH --output=logs/submit_idQ_%j.out
 #SBATCH --time=68:00:00
 #SBATCH --mem=7G
-# submit_multiple.sh
+# usage: sbatch submit_idQ_expr.sh 100 5 0.1 100 1
 # This script submits multiple jobs using idQ_expr.sh.
 # This will submit 100 jobs with N fixed to 10 and seeds from 0 to 99.
 

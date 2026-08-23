@@ -20,37 +20,22 @@ import os
 
 
 def contains_identity_submatrix(Q):
-    """
-    Checks if the binary matrix Q (shape JxK) has a subset of rows forming the identity matrix (size KxK).
+    """Return whether Q contains all K unit rows."""
+    Q = np.asarray(Q, dtype=int)
 
-    Parameters
-    ----------
-    Q : numpy.ndarray
-        Binary matrix of size JxK to check for the presence of the identity matrix.
+    if Q.ndim != 2:
+        raise ValueError("Q must be two-dimensional.")
 
-    Returns
-    -------
-    bool
-        True if Q contains a subset of rows forming the identity matrix, False otherwise.
-    """
-    
-    J, K = Q.shape
-
-    # If J < K, it's not possible for Q to contain I_K
-    if J < K:
+    _, K = Q.shape
+    if K == 0:
         return False
 
-    # Get the indices of pure_nodes in Q
-    pure_nodes = np.where(np.sum(Q, axis=1) == 1)[0]
-    
-    # Get the unique pure_nodes
-    pure_nodes_unique = np.unique(pure_nodes, axis=0)
+    rows = {tuple(row) for row in Q.tolist()}
+    identity_rows = {
+        tuple(row) for row in np.eye(K, dtype=int).tolist()
+    }
 
-    # Check if there are exactly K unique pure_nodes
-    if len(pure_nodes_unique) == K:
-        return True
-
-    return False
+    return identity_rows.issubset(rows)
                 
 
 

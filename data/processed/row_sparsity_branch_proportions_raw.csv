@@ -1,0 +1,7 @@
+solver,row_size_distribution,min_row_size,J,K,m,SAT_unsat_identifiable,all_zero_column,identity_submatrix_direct_id,two_column_check_failed
+1,uniform,1.0,25,10,3.0,0.639,0.044,0.002,0.315
+1,uniform,1.0,25,10,4.0,0.786,0.007,0.0,0.207
+1,uniform,1.0,50,10,3.0,0.875,0.0,0.117,0.008
+1,uniform,1.0,50,10,4.0,0.978,0.0,0.021,0.001
+1,uniform,1.0,100,10,3.0,0.297,0.0,0.703,0.0
+1,uniform,1.0,100,10,4.0,0.578,0.0,0.422,0.0

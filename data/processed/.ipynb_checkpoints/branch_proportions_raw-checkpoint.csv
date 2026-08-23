@@ -1,0 +1,2 @@
+solver,J,K,p,basis_J_less_than_K,all_zero_column,two_column_check_failed,identity_submatrix_direct_id,SAT_unsat_identifiable
+1,25,5,0.1,0.3108108108108108,0.010810810810810811,0.25405405405405407,0.3324324324324324,0.0918918918918919
