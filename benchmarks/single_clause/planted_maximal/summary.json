@@ -1,0 +1,125 @@
+{
+  "cases": 16,
+  "original_sat_stage_inputs": 16,
+  "runs": 144,
+  "case_statuses": {
+    "SAT": 16
+  },
+  "validated_sat_runs": 144,
+  "encodings": {
+    "prefix": {
+      "complete_cases": 16,
+      "timeout_cases": 0,
+      "timeout_runs": 0,
+      "median_solve_ms": 6.831837000390806,
+      "median_stage_ms": 11.311871500765847,
+      "total_stage_seconds": 0.17863198399936664,
+      "total_solve_seconds": 0.1134134370022366,
+      "max_solve_seconds": 0.01223709899932146,
+      "paired_complete_cases": 16,
+      "paired_geomean_stage_speedup": 1.0,
+      "paired_aggregate_stage_speedup": 1.0,
+      "faster_stage_cases": 0,
+      "median_build_ms": 2.3376770004688296,
+      "median_load_ms": 1.6761460001362138,
+      "median_variables": 1670.0,
+      "median_clauses": 5537.5,
+      "common_complete_stage_seconds": 0.17863198399936664,
+      "common_complete_solve_seconds": 0.1134134370022366,
+      "par2_solve_score": 0.1134134370022366
+    },
+    "exclude_h": {
+      "complete_cases": 16,
+      "timeout_cases": 0,
+      "timeout_runs": 0,
+      "median_solve_ms": 4.957126499903097,
+      "median_stage_ms": 8.82280550104042,
+      "total_stage_seconds": 0.14975126600074873,
+      "total_solve_seconds": 0.08732400600638357,
+      "max_solve_seconds": 0.011203661999388714,
+      "paired_complete_cases": 16,
+      "paired_geomean_stage_speedup": 1.1714996141168357,
+      "paired_aggregate_stage_speedup": 1.1928579221391926,
+      "faster_stage_cases": 13,
+      "median_build_ms": 2.33611449948512,
+      "median_load_ms": 1.3937220001025707,
+      "median_variables": 1500.0,
+      "median_clauses": 5117.5,
+      "common_complete_stage_seconds": 0.14975126600074873,
+      "common_complete_solve_seconds": 0.08732400600638357,
+      "par2_solve_score": 0.08732400600638357
+    },
+    "exclude_x": {
+      "complete_cases": 16,
+      "timeout_cases": 0,
+      "timeout_runs": 0,
+      "median_solve_ms": 4.539558000033139,
+      "median_stage_ms": 9.0762520003409,
+      "total_stage_seconds": 0.14860123899961764,
+      "total_solve_seconds": 0.08626418399944669,
+      "max_solve_seconds": 0.011375201000191737,
+      "paired_complete_cases": 16,
+      "paired_geomean_stage_speedup": 1.1778472876023451,
+      "paired_aggregate_stage_speedup": 1.2020894657535546,
+      "faster_stage_cases": 12,
+      "median_build_ms": 2.36752650107519,
+      "median_load_ms": 1.5313355006583151,
+      "median_variables": 1500.0,
+      "median_clauses": 5117.5,
+      "common_complete_stage_seconds": 0.14860123899961764,
+      "common_complete_solve_seconds": 0.08626418399944669,
+      "par2_solve_score": 0.08626418399944669
+    }
+  },
+  "common_complete_cases": 16,
+  "breakdown": [
+    {
+      "group": "SAT",
+      "encoding": "prefix",
+      "cases": 16,
+      "total_solve_seconds": 0.1134134370022366,
+      "total_stage_seconds": 0.17863198399936664,
+      "median_solve_ms": 6.831837000390806
+    },
+    {
+      "group": "SAT",
+      "encoding": "exclude_h",
+      "cases": 16,
+      "total_solve_seconds": 0.08732400600638357,
+      "total_stage_seconds": 0.14975126600074873,
+      "median_solve_ms": 4.957126499903097
+    },
+    {
+      "group": "SAT",
+      "encoding": "exclude_x",
+      "cases": 16,
+      "total_solve_seconds": 0.08626418399944669,
+      "total_stage_seconds": 0.14860123899961764,
+      "median_solve_ms": 4.539558000033139
+    },
+    {
+      "group": "planted_sat",
+      "encoding": "prefix",
+      "cases": 16,
+      "total_solve_seconds": 0.1134134370022366,
+      "total_stage_seconds": 0.17863198399936664,
+      "median_solve_ms": 6.831837000390806
+    },
+    {
+      "group": "planted_sat",
+      "encoding": "exclude_h",
+      "cases": 16,
+      "total_solve_seconds": 0.08732400600638357,
+      "total_stage_seconds": 0.14975126600074873,
+      "median_solve_ms": 4.957126499903097
+    },
+    {
+      "group": "planted_sat",
+      "encoding": "exclude_x",
+      "cases": 16,
+      "total_solve_seconds": 0.08626418399944669,
+      "total_stage_seconds": 0.14860123899961764,
+      "median_solve_ms": 4.539558000033139
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "idQ"
+version = "0.1.3"
+description = "Exact conjunctive Q-matrix identifiability via Boolean factorization and SAT"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["numpy>=1.24,<3", "python-sat==1.9.dev15", "pandas>=2.0,<3"]
+
+[project.optional-dependencies]
+notebook = ["jupyterlab>=4,<5", "ipykernel>=6", "nbformat>=5", "nbclient>=0.10"]
+
+[project.scripts]
+idq-bernoulli = "idQ.experiments.bernoulli:main"
+idq-row-sparsity = "idQ.experiments.row_sparsity:main"
+idq-summarize = "idQ.experiments.summary:main"
+idq-paper-study = "idQ.experiments.paper_study:main"
+idq-paper-summary = "idQ.experiments.paper_summary:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

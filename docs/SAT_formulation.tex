@@ -1,0 +1,142 @@
+\subsection{SAT formulation and implementation}
+\label{app:sat-primer}
+
+Boolean satisfiability (SAT) asks whether binary variables can be
+assigned values that make a logical formula true. The values 1 and 0
+represent true and false. The operations $\wedge$, $\vee$, and $\neg$
+denote AND, OR, and NOT, respectively. Thus, $x\wedge y$ is true when
+both variables are true, $x\vee y$ is true when at least one is true,
+and $\neg x$ is true when $x$ is false. A variable or its negation is
+called a \emph{literal}. A \emph{clause} is a disjunction of literals,
+and a formula in \emph{conjunctive normal form} (CNF) is a conjunction
+of clauses. Such a formula is true precisely when every clause is true.
+For example, $(x_1\vee x_2)\wedge\neg x_1$ is satisfied by $x_1=0$
+and $x_2=1$. A formula is \emph{satisfiable} if at least one satisfying
+assignment exists and \emph{unsatisfiable} otherwise. See
+\citet{biere2021handbook} for further background.
+
+In our problem, $\QQ$ is fixed, and the unknowns are the entries of
+$\bar{\QQ}$ and $\HH$. Under the assumptions of
+Proposition~\ref{prop:sat-nonequivalence}, the algebraic condition
+fails precisely when these matrices satisfy~\eqref{eq:sat_cond}.
+The binary variables $x_{j\ell}$ and $h_{\ell k}$ represent
+$\bar q_{j\ell}$ and the entries of $\HH$, respectively. We give an
+explicit CNF encoding of~\eqref{eq:sat-factorization} below. Here $J$
+denotes the number of rows of the matrix supplied to the encoding;
+for Algorithm~\ref{alg:id}, this is the number of rows after basis
+reduction.
+
+First consider the Boolean factorization. If $q_{jk}=0$, every term
+$x_{j\ell}\wedge h_{\ell k}$ must be zero. This is enforced by the
+$K$ clauses
+\begin{equation}\label{eq:supp-sat-zero}
+\neg x_{j\ell}\vee\neg h_{\ell k},
+\qquad \ell\in[K].
+\end{equation}
+If $q_{jk}=1$, at least one of these terms must be one. For this entry,
+introduce auxiliary binary variables $z_{j\ell k}$, $\ell\in[K]$,
+that select a term whose two factors are one. We impose
+$z_{j\ell k}\Rightarrow(x_{j\ell}\wedge h_{\ell k})$ using
+\begin{equation}\label{eq:supp-sat-and}
+\neg z_{j\ell k}\vee x_{j\ell},
+\qquad
+\neg z_{j\ell k}\vee h_{\ell k},
+\end{equation}
+and add the clause
+\begin{equation}\label{eq:supp-sat-positive}
+\bigvee_{\ell=1}^K z_{j\ell k}.
+\end{equation}
+The reverse implication is unnecessary: the $z$-variables need only
+witness one valid term. For any assignment satisfying the Boolean
+factorization, such a term can be selected for every positive entry.
+Conversely, a satisfying assignment of these clauses supplies such a
+term and forbids every positive term at a zero entry. Thus, applying
+these constraints to every entry of $\QQ$ gives exactly the Boolean
+factorization in~\eqref{eq:sat-factorization}, after existentially
+quantifying the auxiliary variables.
+
+The implementation places the columns of $\bar{\QQ}$ in weakly
+non-increasing lexicographic order. This does not affect the existence
+of a factorization: columns of $\bar{\QQ}$ can be sorted by simultaneously
+permuting the corresponding rows of $\HH$. Weak ordering allows equal
+columns. Let $\QQ^\downarrow$ denote $\QQ$ with its columns sorted in the
+same order. Among sorted candidates, equivalence up to column permutation
+is exactly equality to $\QQ^\downarrow$. Non-equivalence therefore requires
+only the single clause
+\begin{equation}\label{eq:supp-sat-exclude-x}
+\left(\bigvee_{(j,\ell):q^\downarrow_{j\ell}=0}x_{j\ell}\right)
+\vee
+\left(\bigvee_{(j,\ell):q^\downarrow_{j\ell}=1}\neg x_{j\ell}\right).
+\end{equation}
+This clause uses no auxiliary variables and has $JK$ literal occurrences.
+The code factorizes $\QQ$ in its supplied column order and uses the sorted
+copy only in~\eqref{eq:supp-sat-exclude-x}. This is equivalent to sorting
+$\QQ$ before the construction, as in the main text, while retaining the
+original column coordinates in the returned factorization.
+
+The two-column condition ensures that every column of $\QQ$ is nonzero.
+Consequently, every column of $\HH$ in a valid factorization is nonzero.
+We retain these implied constraints explicitly:
+\begin{equation}\label{eq:supp-sat-h-nonempty}
+\bigvee_{\ell=1}^K h_{\ell k},\qquad k\in[K].
+\end{equation}
+The implementation also requires every row of $\bar{\QQ}$ to be nonzero,
+which is implied by the factorization when the rows of $\QQ$ are nonzero.
+Any optional restriction on the comparison class, such as nonzero columns
+of $\bar{\QQ}$, is imposed separately.
+
+Every nonequivalent factorization extends to a satisfying assignment of
+the CNF formula after sorting the candidate columns and permuting the
+corresponding rows of $\HH$: select a valid factor term for each positive
+entry of $\QQ$ and assign the lexicographic auxiliary variables accordingly.
+Conversely, every satisfying assignment supplies a factorization and a
+sorted candidate different from $\QQ^\downarrow$, and therefore not
+equivalent to $\QQ$. Under Proposition~\ref{prop:sat-nonequivalence},
+satisfiability demonstrates failure of the algebraic condition, whereas
+unsatisfiability establishes the condition.
+
+The exclusion clause and the explicit nonempty-column constraints on
+$\HH$ together use no auxiliary variables, $K+1$ clauses, and $JK+K^2$
+literal occurrences. The Boolean-factorization clauses use
+$K\|\QQ\|_0$ auxiliary variables, $JK^2+(K+1)\|\QQ\|_0$ clauses, and
+$2JK^2+3K\|\QQ\|_0$ literal occurrences, where $\|\QQ\|_0$ is the
+number of positive entries of $\QQ$. In particular, each positive entry
+uses $2K+1$ clauses. Together with the $JK+K^2$ matrix variables and the
+$O(JK)$ lexicographic encoding, the complete formulation has $O(JK^2)$
+variables, clauses, and literal occurrences. These bounds describe the
+encoding size, not the time required to solve the SAT instance.
+
+The finalized default is \texttt{exclude\_x}. The earlier cardinality
+encodings remain available through explicit options for reproducible
+comparisons. The optional maximal-candidate restriction is off by default.
+
+An exhaustive-search comparison can be obtained by enumerating only
+$\HH$. For fixed $\HH$, define $\bar q^{\max}_{j\ell}=1$ precisely when
+$h_{\ell k}=0$ for every $k$ such that $q_{jk}=0$.
+Every feasible $\bar{\QQ}$ is entrywise bounded by
+$\bar{\QQ}^{\max}$, and
+\[
+\QQ=\bar{\QQ}\odot\HH
+\quad\Longrightarrow\quad
+\QQ=\bar{\QQ}^{\max}\odot\HH.
+\]
+Indeed, increasing $\bar{\QQ}$ to $\bar{\QQ}^{\max}$ retains all
+required positive entries in the product, and its definition prevents
+any positive term at a zero entry of $\QQ$. This enlargement preserves
+nonzero rows and nonzero columns when these are required; under
+Proposition~\ref{prop:sat-nonequivalence}, the unchanged cardinality
+of $\HH$ also preserves non-equivalence. Thus, for the comparison
+class consisting of binary matrices with these nonzero requirements,
+each of the $2^{K^2}$ assignments to $\HH$ can be checked in
+$O(JK^2)$ time by constructing $\bar{\QQ}^{\max}$ and checking the
+constraints. This gives the bound $O(2^{K^2}JK^2)$ for an elementary
+exhaustive search. It is not a running-time prediction for the SAT
+solver, and additional restrictions on the comparison class would
+require a separate justification of this enlargement.
+
+We implement the formulation using PySAT \citep{ignatiev2018pysat},
+with \texttt{Glucose42} as the default solver. A satisfiable result
+provides values for the entries of $\bar{\QQ}$ and $\HH$, and the
+implementation independently verifies the returned factorization
+and non-equivalence. An unsatisfiable result establishes that no such
+assignment exists.

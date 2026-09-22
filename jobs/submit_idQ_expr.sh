@@ -1,25 +1,35 @@
-#!/bin/bash
-#SBATCH --job-name=submit_idQ_expr
-#SBATCH --output=logs/submit_idQ_%j.out
-#SBATCH --time=68:00:00
-#SBATCH --mem=7G
-# usage: sbatch submit_idQ_expr.sh 100 5 0.1 100 1
-# This script submits multiple jobs using idQ_expr.sh.
-# This will submit 100 jobs with N fixed to 10 and seeds from 0 to 99.
+#!/usr/bin/env bash
+# Run with bash on a login node; this submits one Slurm array.
+set -euo pipefail
 
-if [ "$#" -ne 5 ]; then
-    echo "Usage: $0 <J> <K> <p> <nseeds> <solver>"
-    exit 1
-fi
+usage() {
+    cat <<'EOF'
+Usage: bash jobs/submit_idQ_expr.sh [--dry-run] J K p nseeds [solver]
 
-J=$1
-K=$2
-p=$3
-NSEEDS=$4
-solver=$5
-N=10  # fixed number of simulations per job
+Each seed runs IDQ_N simulations (default 10). Solver defaults to glucose42.
+Set IDQ_MAX_CONCURRENT to limit the number of running array tasks.
+Example: IDQ_MAX_CONCURRENT=20 bash jobs/submit_idQ_expr.sh 50 10 0.3 100
+EOF
+}
 
-for (( seed=0; seed<NSEEDS; seed++ ))
-do
-    sbatch idQ_expr.sh "$J" "$K" "$N" "$p" "$seed" "$solver"
+idq_dry_run=false
+args=()
+for arg in "$@"; do
+    case "$arg" in
+        --dry-run) idq_dry_run=true ;;
+        -h|--help) usage; exit 0 ;;
+        *) args+=("$arg") ;;
+    esac
 done
+set -- "${args[@]}"
+if (( $# < 4 || $# > 5 )); then usage >&2; exit 2; fi
+
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
+source "$script_dir/_common.sh"
+idq_setup_paths
+J=$1 K=$2 p=$3 nseeds=$4 solver=${5:-glucose42}
+N=${IDQ_N:-10}
+idq_positive_integer J "$J"
+idq_positive_integer K "$K"
+idq_positive_integer IDQ_N "$N"
+idq_submit idQ_expr.sh bernoulli "$nseeds" "$J" "$K" "$N" "$p" array "$solver"

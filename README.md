@@ -1,14 +1,158 @@
-# Characterizing Identifiability in Boolean Graphical Models
+# idQ
 
-This repository provides code for the paper  
-**"Characterizing Identifiability in Boolean Graphical Models"**
+`idQ` checks the manuscript's algebraic identifiability condition for binary
+Q-matrices under the conjunctive operator, with a fixed number of columns and
+identification up to column permutations. Glucose 4.2 is the default SAT solver.
+Version 0.1.3 uses the finalized single-clause exclusion of the sorted input
+matrix (`exclude_x`), together with weak lexicographic ordering of the candidate.
 
-The package `idQ` implements algorithms to verify the **identifiability of Q-matrices** under conjunctive operator.  
+For the revised paper's complete 36-setting simulation, use
+[docs/PAPER_SIMULATION.md](docs/PAPER_SIMULATION.md). One array runs both
+designs, and one analysis command validates the data and generates all four tables.
 
----
+## Install and run the demo
 
-## Installation
-Requires Python ≥ 3.9.
+Use Python 3.10 or later. From this directory:
 
 ```bash
-pip install git+https://github.com/Mengqi-Lin/idQ.git
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e '.[notebook]'
+python -m jupyter lab notebooks/idQ_demo.ipynb
+```
+
+For cluster use without Jupyter, install with `python -m pip install -e .`.
+PySAT supplies the solver; no separate Glucose executable or Gurobi license is
+required. The dependency version is pinned in `pyproject.toml`.
+
+The notebook includes identifiable and non-identifiable matrices, an explicit
+Boolean-factorization certificate, preprocessing decisions, basis reduction,
+CSV input, and a small reproducible experiment. Its saved outputs are examples;
+solver timings will differ on your machine.
+
+## Python API
+
+```python
+import numpy as np
+from idQ import identify
+
+Q = np.array([
+    [1, 1, 0, 0],
+    [1, 0, 1, 0],
+    [0, 1, 0, 1],
+    [1, 0, 1, 1],
+    [0, 1, 1, 1],
+])
+result = identify(Q)  # Glucose 4.2 when SAT is needed
+print(result.identifiable)
+print(result.branch_label)
+print(result.counterexample)
+print(result.factorization)
+```
+
+`identify` returns an `IdentificationResult`. Useful fields are `identifiable`,
+`branch_label`, `basis`, `timings` (seconds), `solver_name`, `sat_variables`,
+`sat_clauses`, `sat_cardinality_encoding`, `counterexample`, and `factorization`.
+
+When SAT finds an alternative, the returned arrays satisfy
+`Q == boolean_product(result.counterexample, result.factorization)` and the
+alternative is not a column permutation of Q. Import `boolean_product` from
+`idQ.utils`. The witness is independently validated. Some preprocessing checks
+certify non-identifiability without constructing a matrix; then the certificate
+fields are `None`. If preprocessing finishes, `solver_name` is also `None`.
+An unavailable solver or an unresolved solve raises an exception, rather than
+being reported as identifiable.
+
+The public basis utilities are `reduce_to_basis` and `reconstruct_from_basis`.
+The compatibility function `identifiability(Q)` returns `(status, Q_bar)`.
+Explicit solver overrides remain available through `solver_name`, but ordinary
+calls need no solver argument. `maximal_candidate=True` enables the optional
+exact candidate restriction; its default is `False`.
+
+The cardinality encoding is independently selectable, for example
+`identify(Q, cardinality_encoding="seqcounter")` uses PySAT's Sinz counter.
+The default is `exclude_x`; see [docs/SAT_ENCODING.md](docs/SAT_ENCODING.md) for
+the alternatives and measured tradeoffs. Glucose remains the solver.
+
+## Organization
+
+| Location | Contents |
+| --- | --- |
+| `src/idQ/` | Importable algorithm, basis reduction, SAT encoding, utilities |
+| `src/idQ/experiments/` | Bernoulli and row-sparsity drivers; CSV summary |
+| `notebooks/` | Executed introductory notebook |
+| `jobs/` | Great Lakes Slurm workers, array submission helpers, instructions |
+| `data/examples/` | Small example input matrices |
+| `data/raw/` | Per-seed experiment CSVs |
+| `data/processed/` | Derived summary tables |
+| `logs/` | Cluster standard-output and error logs |
+| `tests/` | Existing correctness and regression checks |
+| `tools/` | Exhaustive factorization validation program |
+| `docs/` | API migration and verification notes |
+
+Historical solver comparisons are delivered separately in `solver_comparison.zip`.
+They include the recorded results, input matrices, report, and the source
+snapshot used to reproduce them. They are not part of the production package.
+
+## Experiments and output
+
+Run these from the activated environment, using small dimensions first:
+
+```bash
+# Arguments: J K N p seed [solver]
+python -m idQ.experiments.bernoulli 12 4 5 0.3 0
+
+# Arguments: J K N m seed [solver]
+python -m idQ.experiments.row_sparsity 12 4 5 2 0
+
+# Validate and summarize all row-sparsity files, including job subfolders.
+python -m idQ.experiments.summary
+```
+
+Installed command equivalents are `idq-bernoulli`, `idq-row-sparsity`, and
+`idq-summarize`. Use `--help` for all arguments. `N` counts matrices within a
+seed; `m` is the maximum row support size. The row-sparsity design defaults to
+uniform row sizes from 1 to `m`. The generic Bernoulli command conditions every
+row to be nonzero unless `--allow-zero-rows` is supplied. The dedicated paper
+study explicitly uses unrestricted iid Bernoulli entries, matching the revised
+simulation design; basis reduction subsequently removes zero rows.
+
+With an editable installation, default output paths are under this project's
+`data/raw/bernoulli/` or `data/raw/row_sparsity/`. A regular wheel installation
+uses `./data/` instead. Set `IDQ_DATA_DIR` to a data-root directory to redirect
+both raw and processed files, or use `--output-csv` for one explicit path.
+Prefer an absolute `IDQ_DATA_DIR` on a cluster. Existing completed files are
+protected unless `--overwrite` is explicitly requested. Incomplete `.part`
+files are not treated as completed results.
+
+Simulation CSVs retain the historical `M_basis` diagnostic. Computing this
+number enumerates representative classes and can be expensive for larger K,
+even if `identify(Q)` itself is quick. That diagnostic is outside the recorded
+`algorithm_time`; use the core API for individual large-matrix checks. There is
+no universal maximum practical K: basis size and matrix structure matter.
+
+See [jobs/README.md](jobs/README.md) for environment setup, array submissions,
+custom row-size distributions, and output paths. A submission preview is:
+
+```bash
+bash jobs/submit_idQ_expr.sh --dry-run 50 10 0.3 100
+```
+
+## Verification
+
+```bash
+python -m unittest discover -s tests -v
+# Optional, slower exhaustive three-way encoding/oracle check:
+python tools/validate_factorization_sat.py
+```
+
+The reorganization was checked with the regression suite, a real Glucose
+SAT/UNSAT run, the demo notebook, small experiment and summary commands, and
+mocked Slurm submission paths. No cluster jobs were submitted during preparation.
+
+## Single-clause benchmark (K=10)
+
+The historical benchmark compared `prefix`, `exclude_x`, and `exclude_h` under
+Glucose42. Its recorded results and report are preserved in
+[benchmarks/single_clause/](benchmarks/single_clause/REPORT.md). The current
+default is `exclude_x`; the paper study keeps `maximal_candidate=False`.

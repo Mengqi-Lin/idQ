@@ -1,0 +1,14 @@
+{
+  "source_archive_name": "idQ (1).zip",
+  "source_archive_sha256": "6fb01ea1625167ad0afc936a1a18dfd29ab7a5344109f479e7d3d4f77ad57ad8",
+  "harness_sha256": "aa7c1ebbf712ae8b75d2629049f9066d6cc7514a0e923906d2c4840de09a6701",
+  "analysis_sha256": "2434f1465f3203a632fba35ffa33f287f56ce0f320754df822393fe7b00a4287",
+  "corpus_sha256": {
+    "cases.json": "19961e5a59061431c55be9b13acca92cf405e14b88ae7e05a7b9002e8e6fad07",
+    "planted_cases.json": "48c8cc471d53681935646596203f60be777ba1276bef4d63bc1f825c0b181888"
+  },
+  "package_default": "glucose42 / prefix / maximal_candidate=False",
+  "timed_runs_excluding_pilot": 3222,
+  "disagreements": 0,
+  "timeouts": 0
+}

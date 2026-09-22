@@ -1,0 +1,105 @@
+--- a/src/idQ/sat.py
++++ b/src/idQ/sat.py
+@@ -48,14 +48,18 @@
+ CARDINALITY_ENCODINGS = (
+     "prefix", "prefix_oneway", "seqcounter", "cardnetwrk", "totalizer", "legacy",
+ )
++# These alternatives depend on Q and the complete lexicographic ordering of X;
++# unlike the entries above, they are not standalone cardinality encoders.
++SINGLE_CLAUSE_ENCODINGS = ("exclude_x", "exclude_h")
++NON_EQUIVALENCE_ENCODINGS = CARDINALITY_ENCODINGS + SINGLE_CLAUSE_ENCODINGS
+ 
+ 
+ def normalize_cardinality_encoding(encoding: str) -> str:
+     """Validate an encoding choice even when preprocessing avoids SAT."""
+-    if not isinstance(encoding, str) or encoding not in CARDINALITY_ENCODINGS:
++    if not isinstance(encoding, str) or encoding not in NON_EQUIVALENCE_ENCODINGS:
+         raise ValueError(
+             f"Unknown cardinality encoding {encoding!r}; choose one of "
+-            f"{CARDINALITY_ENCODINGS}."
++            f"{NON_EQUIVALENCE_ENCODINGS}."
+         )
+     return encoding
+ 
+@@ -262,6 +266,11 @@
+     General PySAT encodings are selectable for controlled comparisons.
+     """
+     encoding = normalize_cardinality_encoding(encoding)
++    if encoding in SINGLE_CLAUSE_ENCODINGS:
++        raise ValueError(
++            "Single-clause exclusions require Q and sorted X; use "
++            "build_factorization_sat_instance instead."
++        )
+     K = len(H)
+     if encoding == "legacy":
+         # Retain the former clause order for reproducible comparisons. This
+@@ -337,8 +346,19 @@
+     nonzero rows/columns stay nonzero; the antichain condition and unchanged H
+     preserve non-equivalence. Columns of this X and corresponding rows of H
+     can be jointly permuted to retain weak lexicographic symmetry breaking.
++
++    ``exclude_x`` replaces the cardinality construction with one clause
++    excluding the sorted copy of Q from X. ``exclude_h`` instead requires an
++    entry outside the unique permutation P satisfying Q = sorted(Q) odot P.
++    Both retain the implied nonempty-column clauses on H and require
++    ``symmetry_breaking=True``; neither changes the default prefix encoding.
+     """
+     cardinality_encoding = normalize_cardinality_encoding(cardinality_encoding)
++    if cardinality_encoding in SINGLE_CLAUSE_ENCODINGS and not symmetry_breaking:
++        raise ValueError(
++            f"{cardinality_encoding!r} requires symmetry_breaking=True, "
++            "because its exclusion assumes all columns of X are lexicographically sorted."
++        )
+     Q_array = validate_binary_matrix(Q)
+     if not has_nonempty_antichain_columns(Q_array):
+         raise ValueError(
+@@ -369,7 +389,28 @@
+             zeros = np.flatnonzero(Q_array[j] == 0)
+             for ell in range(K):
+                 clauses.append([X[j][ell]] + [H[ell][k] for k in zeros])
+-    _add_nonpermutation_factor(clauses, pool, H, encoding=cardinality_encoding)
++    if cardinality_encoding in SINGLE_CLAUSE_ENCODINGS:
++        # Keep these clauses and their order identical to the prefix baseline.
++        clauses.extend([[H[ell][k] for ell in range(K)] for k in range(K)])
++        Q_sorted, restore_order = lex_sort_columns(Q_array)
++        if cardinality_encoding == "exclude_x":
++            _add_not_equal(clauses, X, Q_sorted)
++        elif K == 1:
++            # The off-permutation disjunction is empty. Contradict the
++            # nonempty-column unit without passing an empty clause to PySAT.
++            clauses.append([-H[0][0]])
++        else:
++            # P[restore_order[k], k] = 1, since Q_sorted[:, restore_order] = Q.
++            # Under the antichain condition, X equivalent to Q forces H=P.
++            # Conversely, nonempty H columns with no off-P entry force H=P.
++            clauses.append([
++                H[ell][k]
++                for ell in range(K)
++                for k in range(K)
++                if ell != restore_order[k]
++            ])
++    else:
++        _add_nonpermutation_factor(clauses, pool, H, encoding=cardinality_encoding)
+ 
+     return SATEncoding(
+         clauses=tuple(tuple(clause) for clause in clauses),
+@@ -754,6 +795,8 @@
+ 
+ __all__ = [
+     "CARDINALITY_ENCODINGS",
++    "SINGLE_CLAUSE_ENCODINGS",
++    "NON_EQUIVALENCE_ENCODINGS",
+     "LEGACY_SOLVER_CODES",
+     "SATEncoding",
+     "SATOutcome",
+--- a/src/idQ/core.py
++++ b/src/idQ/core.py
+@@ -166,6 +166,8 @@
+     ``cardinality_encoding`` selects the specialized quadratic prefix CNF
+     (default), a smaller ``prefix_oneway`` variant, PySAT's ``seqcounter``,
+     ``cardnetwrk`` or ``totalizer``, or the previous ``legacy`` encoding.
++    The experimental ``exclude_x`` and ``exclude_h`` choices replace the
++    cardinality construction with one clause, using the lexicographic ordering.
+     The solver remains Glucose 4.2 for every encoding unless overridden.
+     """
+     array = validate_binary_matrix(Q)
