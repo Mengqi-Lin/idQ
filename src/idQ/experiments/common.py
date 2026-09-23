@@ -352,6 +352,7 @@ def identifiability_expr(
     verbose: bool = False,
     cardinality_encoding: str = "exclude_x",
     maximal_candidate: bool = False,
+    compute_class_count: bool = True,
 ) -> tuple[int, np.ndarray | None, int, dict[str, Any]]:
     """Run the one canonical core algorithm and add experiment diagnostics."""
     array = validate_binary_matrix(Q)
@@ -383,7 +384,8 @@ def identifiability_expr(
             )
         ),
         "J_basis": int(basis.shape[0]),
-        "M_basis": count_representative_classes(basis),
+        "M_basis": count_representative_classes(basis) if compute_class_count else None,
+        "M_basis_computed": int(bool(compute_class_count)),
         "identifiable": result.status,
         "branch": int(result.branch),
         "branch_label": result.branch_label,
@@ -433,6 +435,7 @@ def run_design_expr(
     checkpoint_every: int = 10,
     cardinality_encoding: str = "exclude_x",
     maximal_candidate: bool = False,
+    compute_class_count: bool = True,
 ) -> list[dict[str, Any]]:
     """Run one seed/job and atomically publish its CSV after successful completion."""
     _validate_dimensions(J, K, N)
@@ -468,6 +471,7 @@ def run_design_expr(
         "rng_engine": rng_label(rng_engine),
         "cardinality_encoding_requested": requested_encoding,
         "maximal_candidate_requested": bool(maximal_candidate),
+        "compute_class_count": bool(compute_class_count),
         "checkpoint_every": int(checkpoint_every),
         "output_csv": str(output_path),
         "started_at_utc": datetime.now(timezone.utc).isoformat(),
@@ -500,6 +504,7 @@ def run_design_expr(
                     verbose=verbose,
                     cardinality_encoding=requested_encoding,
                     maximal_candidate=maximal_candidate,
+                    compute_class_count=compute_class_count,
                 )
                 bitstring = "".join(str(int(bit)) for bit in Q.ravel())
                 q_hash = hashlib.sha256(f"{int(J)},{int(K)}:{bitstring}".encode("ascii")).hexdigest()

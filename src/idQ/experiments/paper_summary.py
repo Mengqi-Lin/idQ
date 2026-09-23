@@ -19,6 +19,7 @@ from typing import Any
 import numpy as np
 
 from ..core import BRANCH_LABELS
+from .paper_study import settings as study_settings
 
 
 JS = (25, 50, 100)
@@ -60,9 +61,8 @@ def _cell_key(config: dict) -> tuple:
     raise ValueError(f"Unexpected design {design!r}")
 
 
-def expected_grid() -> set[tuple]:
-    return ({("bernoulli", J, K, p) for J in JS for K in KS for p in PS}
-            | {("row_sparsity", J, 10, m) for J in JS for m in MS})
+def expected_grid(profile="paper") -> set[tuple]:
+    return {_cell_key(cell) for cell in study_settings(profile)}
 
 
 def _relative(root: Path, name: str) -> Path:
@@ -83,9 +83,9 @@ def _settings(config: dict, context: str, *, manifest: bool = False) -> None:
             raise ValueError(f"{context}: {key} must be {expected!r}, found {value!r}")
 
 
-def _design(config: dict, context: str) -> None:
+def _design(config: dict, context: str, profile="paper") -> None:
     key = _cell_key(config)
-    if key not in expected_grid():
+    if key not in expected_grid(profile):
         raise ValueError(f"{context}: design is outside the declared paper grid: {key}")
     if key[0] == "bernoulli":
         if config.get("zero_row_policy") != "allow_iid":
@@ -102,6 +102,8 @@ def validate_manifest(manifest: dict, root: Path) -> list[dict]:
     if manifest.get("manifest_version") != 1:
         raise ValueError("Expected manifest_version=1")
     _settings(manifest, "manifest", manifest=True)
+    profile = manifest.get("study_profile", "paper")
+    grid = expected_grid(profile)
     expected = _integer(manifest.get("expected_replicates_per_cell"), "expected_replicates_per_cell")
     if expected <= 0:
         raise ValueError("expected_replicates_per_cell must be positive")
@@ -113,7 +115,7 @@ def validate_manifest(manifest: dict, root: Path) -> list[dict]:
         raise ValueError("Manifest has no tasks")
     ids, paths, seeds, by_cell, cell_ids = set(), set(), set(), {}, {}
     for task in tasks:
-        _design(task, "manifest task")
+        _design(task, "manifest task", profile)
         key = _cell_key(task)
         task_id = str(task["task_id"])
         if task_id in ids:
@@ -134,8 +136,10 @@ def validate_manifest(manifest: dict, root: Path) -> list[dict]:
                 raise ValueError(f"Duplicate manifest output path: {path}")
             paths.add(path)
         by_cell[key] = by_cell.get(key, 0) + N
-    if set(by_cell) != expected_grid():
-        raise ValueError("Manifest must contain exactly the 30 Bernoulli and 6 sparsity cells")
+    if set(by_cell) != grid:
+        if profile == "paper":
+            raise ValueError("Manifest must contain exactly the 30 Bernoulli and 6 sparsity cells")
+        raise ValueError("Manifest must contain exactly the 30 K=20,30 Bernoulli cells")
     if any(count != expected for count in by_cell.values()):
         raise ValueError("Manifest task counts do not match expected_replicates_per_cell")
     return tasks
@@ -149,7 +153,10 @@ def _sequence(value: Any, cast=float) -> list:
 
 def _validate_row(row: dict, task: dict, manifest: dict, context: str) -> dict:
     _settings(row, context)
-    _design(row, context)
+    _design(row, context, manifest.get("study_profile", "paper"))
+    if manifest.get("study_profile") == "bernoulli_large":
+        if _binary(row.get("M_basis_computed"), "M_basis_computed") or row.get("M_basis") not in (None, ""):
+            raise ValueError(f"{context}: the large-K profile must skip class counting")
     if _cell_key(row) != _cell_key(task):
         raise ValueError(f"{context}: wrong design cell")
     if row.get("operator") != "conj" or _integer(row.get("schema_version"), "schema_version") != 4:
@@ -260,7 +267,9 @@ def read_study(study_dir: Path, *, allow_partial: bool = False) -> tuple[dict, l
             issues.append(f"Uncompleted metadata for task {task['task_id']}")
             continue
         _settings(metadata, str(metadata_path))
-        _design(metadata, str(metadata_path))
+        _design(metadata, str(metadata_path), manifest.get("study_profile", "paper"))
+        if manifest.get("study_profile") == "bernoulli_large" and metadata.get("compute_class_count") is not False:
+            raise ValueError(f"{metadata_path}: the large-K profile must skip class counting")
         if _cell_key(metadata) != _cell_key(task):
             raise ValueError(f"{metadata_path}: wrong cell")
         for key in ("J", "K", "N", "seed"):
@@ -319,7 +328,7 @@ def read_study(study_dir: Path, *, allow_partial: bool = False) -> tuple[dict, l
 
 
 def summarize_cells(manifest: dict, data: list[dict]) -> list[dict]:
-    grouped: dict[tuple, list[dict]] = {key: [] for key in expected_grid()}
+    grouped: dict[tuple, list[dict]] = {key: [] for key in expected_grid(manifest.get("study_profile", "paper"))}
     for row in data:
         grouped[_cell_key(row)].append(row)
     result = []
@@ -358,9 +367,11 @@ def _fmt(value: float | None, *, runtime=False) -> str:
     return f"{value:.1f}"
 
 
-def latex_tables(cells: list[dict], status: str) -> str:
+def latex_tables(cells: list[dict], status: str, profile="paper") -> str:
+    ks = (5, 10) if profile == "paper" else (20, 30)
+    label_suffix = "" if profile == "paper" else "-large"
     lookup = {(r["design"], r["J"], r["K"], r["p"] if r["design"] == "bernoulli" else r["m"]): r for r in cells}
-    warning = "" if status == "paper_complete" else (r"\textbf{PARTIAL RESULTS.} " if status == "partial" else r"\textbf{SMOKE STUDY; NOT PAPER RESULTS.} ")
+    warning = "" if status in ("paper_complete", "extension_complete") else (r"\textbf{PARTIAL RESULTS.} " if status == "partial" else r"\textbf{SMOKE STUDY; NOT PAPER RESULTS.} ")
     captions = {
         "pct_identifiable": r"\(\widehat{\P}(I_{\mathrm{id}}=1)\).",
         "pct_complete": r"\(\widehat{\P}(I_{\mathrm{comp}}=1)\).",
@@ -379,9 +390,9 @@ def latex_tables(cells: list[dict], status: str) -> str:
             lines += [r"\resizebox{\linewidth}{!}{%", r"\begin{tabular}{c cc cc cc}", r"\toprule",
                       r"& \multicolumn{2}{c}{\(J=25\)} & \multicolumn{2}{c}{\(J=50\)} & \multicolumn{2}{c}{\(J=100\)}\\",
                       r"\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}",
-                      r"\(p\) & \(K=5\) & \(K=10\) & \(K=5\) & \(K=10\) & \(K=5\) & \(K=10\)\\", r"\midrule"]
+                      r"\(p\) & " + " & ".join(r"\(K=" + str(K) + r"\)" for J in JS for K in ks) + r"\\", r"\midrule"]
             for p in PS:
-                lines.append(f"{p:.1f} & " + " & ".join(_fmt(lookup['bernoulli', J, K, p][metric]) for J in JS for K in KS) + r"\\")
+                lines.append(f"{p:.1f} & " + " & ".join(_fmt(lookup['bernoulli', J, K, p][metric]) for J in JS for K in ks) + r"\\")
         lines += [r"\bottomrule", r"\end{tabular}"]
         if not sparse:
             lines += ["}"]
@@ -389,7 +400,7 @@ def latex_tables(cells: list[dict], status: str) -> str:
         sublabels = {"pct_identifiable": "tab:bern-id", "pct_two_column": "tab:bern-2c",
                      "pct_both_necessary": "tab:bern-3c", "pct_no_pure_given_identifiable": "tab:bern-np-given-id"}
         if not sparse and metric in sublabels:
-            lines.append(r"\label{" + sublabels[metric] + "}")
+            lines.append(r"\label{" + sublabels[metric] + label_suffix + "}")
         lines.append(r"\end{subtable}")
         return "\n".join(lines)
 
@@ -401,25 +412,29 @@ def latex_tables(cells: list[dict], status: str) -> str:
              ("tab:sparse", ["pct_identifiable", "pct_incomplete_given_identifiable", "pct_two_column", "pct_both_necessary"], True,
               "Empirical proportions under the sparsity design, expressed as percentages.")]
     for label, metrics, sparse, caption in specs:
+        if sparse and profile != "paper":
+            continue
         lines = [r"\begin{table}[htbp]", r"\centering"]
         for i, metric in enumerate(metrics):
             if i:
                 lines.append(r"\hfill" if i % 2 else "\n" + r"\vspace{0.8em}" + "\n")
             lines.append(panel(metric, sparse))
-        lines += [r"\caption{" + warning + caption + "}", r"\label{" + label + "}", r"\end{table}"]
+        lines += [r"\caption{" + warning + caption + "}", r"\label{" + label + label_suffix + "}", r"\end{table}"]
         tables.append("\n".join(lines))
-    lines = [r"\begin{table}[htbp]", r"\centering\small", r"\begin{tabular}{ccrrrr}", r"\toprule",
-             r"\(J\) & \(p\) & Mean \(J_b\) & SAT invoked (\%) & Steps~0--1 runtime & Total runtime\\", r"\midrule"]
-    for j, J in enumerate(JS):
-        if j:
-            lines.append(r"\addlinespace")
-        for p in PS:
-            r = lookup['bernoulli', J, 10, p]
-            values = [_fmt(r['mean_J_basis']), _fmt(r['pct_sat_called']),
-                      _fmt(r['mean_preprocess_time'], runtime=True), _fmt(r['mean_algorithm_time'], runtime=True)]
-            lines.append(f"{J} & {p:.1f} & " + " & ".join(values) + r"\\")
-    lines += [r"\bottomrule", r"\end{tabular}", r"\caption{" + warning + r"Computational performance under the Bernoulli design for \(K=10\). Runtimes are mean seconds per generated matrix, including every preprocessing outcome.}", r"\label{tab:bern-computation}", r"\end{table}"]
-    tables.append("\n".join(lines))
+    for K in ((10,) if profile == "paper" else ks):
+        lines = [r"\begin{table}[htbp]", r"\centering\small", r"\begin{tabular}{ccrrrr}", r"\toprule",
+                 r"\(J\) & \(p\) & Mean \(J_b\) & SAT invoked (\%) & Steps~0--1 runtime & Total runtime\\", r"\midrule"]
+        for j, J in enumerate(JS):
+            if j:
+                lines.append(r"\addlinespace")
+            for p in PS:
+                r = lookup['bernoulli', J, K, p]
+                values = [_fmt(r['mean_J_basis']), _fmt(r['pct_sat_called']),
+                          _fmt(r['mean_preprocess_time'], runtime=True), _fmt(r['mean_algorithm_time'], runtime=True)]
+                lines.append(f"{J} & {p:.1f} & " + " & ".join(values) + r"\\")
+        label = "tab:bern-computation" + ("" if profile == "paper" else f"-K{K}")
+        lines += [r"\bottomrule", r"\end{tabular}", r"\caption{" + warning + r"Computational performance under the Bernoulli design for \(K=" + str(K) + r"\). Runtimes are mean seconds per generated matrix, including every preprocessing outcome.}", r"\label{" + label + "}", r"\end{table}"]
+        tables.append("\n".join(lines))
     return "\n\n".join(tables) + "\n"
 
 
@@ -427,12 +442,15 @@ def analyze_study(study_dir: Path, *, allow_partial=False, output_dir: Path | No
     root = Path(study_dir).resolve()
     manifest, data, issues = read_study(root, allow_partial=allow_partial)
     cells = summarize_cells(manifest, data)
+    profile = manifest.get("study_profile", "paper")
     complete = not issues and all(r["n"] == r["expected_n"] for r in cells)
-    status = "partial" if not complete else ("paper_complete" if manifest["expected_replicates_per_cell"] == 1000 else "smoke_complete")
-    suffix = "" if status == "paper_complete" else ("_PARTIAL" if status == "partial" else "_SMOKE")
+    full_status = "paper_complete" if profile == "paper" else "extension_complete"
+    status = "partial" if not complete else (full_status if manifest["expected_replicates_per_cell"] == 1000 else "smoke_complete")
+    suffix = "" if status in ("paper_complete", "extension_complete") else ("_PARTIAL" if status == "partial" else "_SMOKE")
     out = Path(output_dir) if output_dir else root / ("analysis" + suffix.lower())
     out.mkdir(parents=True, exist_ok=True)
-    summary = dict(study_id=manifest.get("study_id"), status=status, paper_final=status == "paper_complete",
+    summary = dict(study_id=manifest.get("study_id"), study_profile=profile, status=status,
+                   paper_final=status == "paper_complete", study_complete=complete,
                    expected_replicates_per_cell=manifest["expected_replicates_per_cell"],
                    expected_total=sum(int(t["N"]) for t in manifest["tasks"]), actual_total=len(data),
                    source_tree_sha256=manifest["source_tree_sha256"],
@@ -447,12 +465,13 @@ def analyze_study(study_dir: Path, *, allow_partial=False, output_dir: Path | No
     with (out / "cell_summary.csv").open("w", newline="") as fp:
         writer = csv.DictWriter(fp, fieldnames=list(csv_records[0]))
         writer.writeheader(); writer.writerows(csv_records)
-    (out / f"paper_tables{suffix}.tex").write_text(latex_tables(cells, status))
+    table_name = "paper_tables" if profile == "paper" else "bernoulli_large_tables"
+    (out / f"{table_name}{suffix}.tex").write_text(latex_tables(cells, status, profile))
     (out / "README.md").write_text(f"Study status: **{status}**.\n\nValidated {len(data)} of {summary['expected_total']} expected records.\n\n"
         "Percentages use the actual cell denominator; conditional percentages use the identifiable denominator. "
         "All runtime means include matrices resolved during preprocessing. Exact counts and unrounded values are in summary.json and cell_summary.csv.\n\n"
         "Software versions, timing definitions, CPU/hostname job counts, execution modes, allocated CPUs, affinity sizes, and thread settings are in runtime_environment.json. Different CPU models are explicitly flagged as mixed hardware.\n\n"
-        + ("These are complete 1,000-replicate paper tables.\n" if summary['paper_final'] else "These outputs are not final paper results.\n"))
+        + ("These are complete 1,000-replicate tables for the declared study profile.\n" if status in ("paper_complete", "extension_complete") else "These outputs are not final paper results.\n"))
     return summary
 
 

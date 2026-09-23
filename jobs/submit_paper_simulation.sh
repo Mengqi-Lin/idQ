@@ -8,9 +8,13 @@ Usage: bash jobs/submit_paper_simulation.sh [--dry-run] [--missing] STUDY_DIR
 Defaults: 36 settings, 1000 matrices per setting, 100 matrices per task,
           360 array tasks, at most 20 running tasks, one CPU, 4G, 4 hours.
 Settings: IDQ_REPLICATES, IDQ_PER_TASK, IDQ_BASE_SEED, IDQ_MAX_CONCURRENT,
+          IDQ_PROFILE (paper, or bernoulli_large for K=20,30 only),
           IDQ_ACCOUNT (optional), IDQ_PARTITION, IDQ_MEM, IDQ_TIME,
           IDQ_CONSTRAINT (optional), IDQ_PYTHON, IDQ_AUTO_ANALYZE (default 1).
 An analysis job is queued after successful completion of the array.
+Every submission prints the manifest's profile, K values and replicate counts.
+Explicit IDQ_PROFILE/REPLICATES/PER_TASK/BASE_SEED values must match an existing
+manifest. Use a new study directory to change these settings.
 --missing submits only missing/incomplete tasks. Ensure old jobs have stopped;
 partial files are then archived before those tasks are rerun with the same seed.
 EOF
@@ -37,8 +41,38 @@ study_dir=$("$idq_python" -c 'import pathlib,sys; print(pathlib.Path(sys.argv[1]
 if [[ ! -f "$study_dir/manifest.json" ]]; then
     "$idq_python" -m idQ.experiments.paper_study prepare --study-dir "$study_dir" \
         --replicates "${IDQ_REPLICATES:-1000}" --per-task "${IDQ_PER_TASK:-100}" \
-        --base-seed "${IDQ_BASE_SEED:-20260922}"
+        --base-seed "${IDQ_BASE_SEED:-20260922}" --profile "${IDQ_PROFILE:-paper}"
 fi
+"$idq_python" - "$study_dir" <<'PY'
+import os
+import sys
+from idQ.experiments.paper_study import load_manifest
+from idQ.experiments.paper_summary import validate_manifest
+
+root, manifest = load_manifest(sys.argv[1])
+tasks = validate_manifest(manifest, root)
+profile = manifest.get("study_profile", "paper")
+requested_profile = os.environ.get("IDQ_PROFILE")
+if requested_profile is not None and requested_profile != profile:
+    sys.exit(f"Error: IDQ_PROFILE={requested_profile!r}, but {root / 'manifest.json'} "
+             f"contains profile={profile!r}. Use a new study directory; no jobs submitted.")
+for env_name, field in (("IDQ_REPLICATES", "expected_replicates_per_cell"),
+                        ("IDQ_PER_TASK", "replicates_per_task"),
+                        ("IDQ_BASE_SEED", "base_seed")):
+    if env_name in os.environ:
+        try:
+            requested = int(os.environ[env_name])
+        except ValueError:
+            sys.exit(f"Error: {env_name} must be an integer; no jobs submitted.")
+        if requested != manifest[field]:
+            sys.exit(f"Error: {env_name}={requested}, but the existing manifest has "
+                     f"{field}={manifest[field]}. Use a new study directory; no jobs submitted.")
+print(f"Study: {root}")
+print(f"Profile: {profile}; K values: {sorted({task['K'] for task in tasks})}")
+print(f"Settings: {len({task['cell_id'] for task in tasks})}; "
+      f"replicates per setting: {manifest['expected_replicates_per_cell']}; "
+      f"matrices: {sum(task['N'] for task in tasks)}; tasks: {len(tasks)}")
+PY
 index_args=(--study-dir "$study_dir")
 if [[ "$missing" == true ]]; then index_args+=(--missing); fi
 indices=$("$idq_python" -m idQ.experiments.paper_study task-indices "${index_args[@]}")

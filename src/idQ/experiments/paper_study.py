@@ -1,4 +1,4 @@
-"""Prepare and run the 36 settings in the revised idQ simulation study."""
+"""Prepare and run the paper study or its K=20,30 Bernoulli extension."""
 from __future__ import annotations
 
 import argparse
@@ -10,14 +10,21 @@ import shutil
 import numpy as np
 
 
-def settings():
+PROFILES = ("paper", "bernoulli_large")
+
+
+def settings(profile="paper"):
+    if profile not in PROFILES:
+        raise ValueError(f"Unknown study profile: {profile!r}")
     cells = []
     for J in (25, 50, 100):
-        for K in (5, 10):
+        for K in ((5, 10) if profile == "paper" else (20, 30)):
             for p in (0.1, 0.3, 0.5, 0.7, 0.9):
                 cells.append(dict(cell_id=f"bern_J{J}_K{K}_p{p:.1f}",
                                   design="bernoulli", J=J, K=K, p=p,
                                   zero_row_policy="allow_iid"))
+    if profile == "bernoulli_large":
+        return cells
     for J in (25, 50, 100):
         for m in (3, 4):
             cells.append(dict(cell_id=f"sparse_J{J}_K10_m{m}",
@@ -34,14 +41,16 @@ def load_manifest(study_dir):
         return root, json.load(handle)
 
 
-def prepare(study_dir, *, replicates=1000, per_task=100, base_seed=20260922):
+def prepare(study_dir, *, replicates=1000, per_task=100, base_seed=20260922,
+            profile="paper"):
     from .common import source_provenance
     if replicates <= 0 or per_task <= 0 or base_seed < 0:
         raise ValueError("replicates/per-task must be positive and base-seed nonnegative")
+    cells = settings(profile)
     root = Path(study_dir).expanduser().resolve()
     root.mkdir(parents=True, exist_ok=True)
     tasks = []
-    for cell_index, cell in enumerate(settings()):
+    for cell_index, cell in enumerate(cells):
         for batch, start in enumerate(range(0, replicates, per_task)):
             seed = int(np.random.SeedSequence([base_seed, cell_index, batch])
                        .generate_state(1)[0])
@@ -50,7 +59,7 @@ def prepare(study_dir, *, replicates=1000, per_task=100, base_seed=20260922):
                               N=min(per_task, replicates-start), seed=seed,
                               csv_path=relative, metadata_path=relative+".metadata.json"))
     source = source_provenance()
-    manifest = dict(manifest_version=1, study_id=root.name,
+    manifest = dict(manifest_version=1, study_id=root.name, study_profile=profile,
                     created_utc=datetime.now(timezone.utc).isoformat(),
                     expected_replicates_per_cell=replicates,
                     replicates_per_task=per_task, base_seed=base_seed,
@@ -63,8 +72,8 @@ def prepare(study_dir, *, replicates=1000, per_task=100, base_seed=20260922):
         json.dump(manifest, handle, indent=2, sort_keys=True)
         handle.write("\n")
     (root / "logs").mkdir(exist_ok=True)
-    print(f"Prepared {len(tasks)} tasks, {len(tasks) and len(settings())} settings, "
-          f"{replicates * len(settings()):,} matrices: {root}")
+    print(f"Prepared {len(tasks)} tasks, {len(cells)} settings, "
+          f"{replicates * len(cells):,} matrices ({profile}): {root}")
     return manifest
 
 
@@ -139,7 +148,8 @@ def run_task(study_dir, task_id, *, retry_incomplete=False):
     print(f"Task {task_id}: {task['cell_id']}, N={task['N']}, seed={task['seed']}",
           flush=True)
     if task["design"] == "bernoulli":
-        run_bernoulli(**common, p=task["p"], condition_nonzero_rows=False)
+        run_bernoulli(**common, p=task["p"], condition_nonzero_rows=False,
+                      compute_class_count=manifest.get("study_profile", "paper") == "paper")
     else:
         run_sparse(**common, m=task["m_requested"], min_row_size=1,
                    row_size_distribution="uniform")
@@ -154,6 +164,7 @@ def main():
     prep.add_argument("--replicates", type=int, default=1000)
     prep.add_argument("--per-task", type=int, default=100)
     prep.add_argument("--base-seed", type=int, default=20260922)
+    prep.add_argument("--profile", choices=PROFILES, default="paper")
     run = sub.add_parser("run-task")
     run.add_argument("--study-dir", type=Path, required=True)
     run.add_argument("--task-id", type=int, required=True)
@@ -166,7 +177,7 @@ def main():
     args = parser.parse_args()
     if args.command == "prepare":
         prepare(args.study_dir, replicates=args.replicates, per_task=args.per_task,
-                base_seed=args.base_seed)
+                base_seed=args.base_seed, profile=args.profile)
     elif args.command == "run-task":
         run_task(args.study_dir, args.task_id, retry_incomplete=args.retry_incomplete)
     else:

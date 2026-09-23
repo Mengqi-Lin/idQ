@@ -68,6 +68,7 @@ def run_expr(
     cardinality_encoding: str = "exclude_x",
     maximal_candidate: bool = False,
     checkpoint_every: int = 10,
+    compute_class_count: bool = True,
 ) -> list[dict[str, Any]]:
     """Run one Bernoulli simulation job."""
     if output_csv is None:
@@ -118,6 +119,7 @@ def run_expr(
         cardinality_encoding=cardinality_encoding,
         maximal_candidate=maximal_candidate,
         checkpoint_every=checkpoint_every,
+        compute_class_count=compute_class_count,
     )
 
 

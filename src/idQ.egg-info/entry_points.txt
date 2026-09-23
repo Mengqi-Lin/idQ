@@ -1,0 +1,6 @@
+[console_scripts]
+idq-bernoulli = idQ.experiments.bernoulli:main
+idq-paper-study = idQ.experiments.paper_study:main
+idq-paper-summary = idQ.experiments.paper_summary:main
+idq-row-sparsity = idQ.experiments.row_sparsity:main
+idq-summarize = idQ.experiments.summary:main
